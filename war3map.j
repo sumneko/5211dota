@@ -2488,6 +2488,7 @@ boolexpr M2I=null
 	boolexpr mu_sync_dummy_messenger = null
 	string mu_lua_string = null
 	trigger mu_trigger_disable_move = null
+	boolean mu_mode_up = false
 endglobals
 
 function MUCall takes string script, string void returns nothing
@@ -33601,6 +33602,7 @@ local boolean ZM
 local boolean UB
 local boolean TT
 local boolean mode_js
+local boolean mode_up
 set WA2[1]="allpick"
 set WB2[1]="ap"
 set WA2[2]="allrandom"
@@ -33689,7 +33691,9 @@ set WA2[43]="tagteam"
 set WB2[43]="tt"
 set WA2[44] = "js"
 set WB2[44] = "js"
-set WD2=44
+set WA2[45] = "up"
+set WB2[45] = "up"
+set WD2=45
 set x=-1
 loop
 exitwhen x==FQ1-1
@@ -33782,6 +33786,7 @@ set CP=WC2[41]
 set UB=WC2[42]
 set TT=WC2[43]
 set mode_js = WC2[44]
+set mode_up = WC2[45]
 if DC2!=""or W02(W92)then
 return
 endif
@@ -33931,6 +33936,9 @@ endif
 if mode_js then
 call W12("竞赛模式|r(|cffff0303JS|r)")
 endif
+if mode_up then
+call W12("魔改|r(|cffff0303UP|r)")
+endif
 if CD then
 call W12("随机队长模式|r(|cffff0303CD|r)")
 endif
@@ -34075,6 +34083,7 @@ call PMI("WQ2",XL)
 call PMI("WU2",CM)
 call PMI("X02",RD)
 call PMI("MUModeJS",mode_js)
+call PMI("MUModeUP",mode_up)
 call PMI("XI2",SD)
 call PMI("X12",MR)
 call PMI("XO2",ID)
@@ -36248,7 +36257,7 @@ set YC2=null
 set p=null
 return false
 endif
-if p!=QM0 and p!=QN0 then
+if LoadBoolean(LY, StringHash("全局"), StringHash("竞赛模式选人阶段")) == false and p!=QM0 and p!=QN0 then
 call PZI(p,"没有轮到你选择")
 set YC2=null
 set p=null
@@ -36519,6 +36528,95 @@ set t=null
 set p=null
 endfunction
 
+function MUModeJS_AllPickCountDown takes nothing returns nothing
+	local integer handle_id = GetHandleId(GetExpiredTimer())
+	local integer count = LoadInteger(LY, handle_id, 6)
+	local real x = QV0 + 40
+	local real y = QW0 - 70
+	local integer i
+	if count < 60 then
+		call DestroyImage(LoadImageHandle(LY, handle_id, 158))
+		call DestroyImage(LoadImageHandle(LY, handle_id, 159))
+	endif
+	if count <= 0 then
+		call DestroyTimer(GetExpiredTimer())
+		call SaveBoolean(LY, StringHash("全局"), StringHash("竞赛模式选人阶段"), false)
+
+		call DestroyImage(LoadImageHandle(LY, handle_id, 1))
+		call DestroyImage(LoadImageHandle(LY, handle_id, 2))
+		call DestroyImage(LoadImageHandle(LY, handle_id, 3))
+		call DestroyImage(LoadImageHandle(LY, handle_id, 4))
+		call DestroyTrigger(LoadTriggerHandle(LY, handle_id, 5))
+
+		call FlushChildHashtable(LY, handle_id)
+
+        set i = 0
+		loop
+    		exitwhen i > 9
+    		if QP0[i] == false then
+        		call JR2(Player(i), JP2(), true)
+    		endif
+    		set i = i + 1
+		endloop
+		return
+	endif
+	if count > 10 then
+		call JE2(count, 255, 255, 255, 255, x, y, handle_id)
+	elseif count > 5 then
+		call JE2(count, 255, 255, 50, 255, x, y, handle_id)
+	else
+		call JE2(count, 255, 50, 50, 255, x, y, handle_id)
+	endif
+	call SaveInteger(LY, handle_id, 6, count - 1)
+endfunction
+
+function MUModeJS_AllPick takes nothing returns nothing
+    local trigger trg
+    local image array temp_image
+    local timer t
+	local real x = QV0 + 40
+	local real y = QW0 + 70
+	local integer i
+
+    call DestroyTimer(GetExpiredTimer())
+    call PEI(GetLocalPlayer(),"Sound\\Interface\\Rescue.wav")
+	call SaveBoolean(LY, StringHash("全局"), StringHash("竞赛模式选人阶段"), true)
+	set temp_image[1] = XM2("Fonts\\P.blp", 90, 90, x - 60, y, 0, true, 255, 0, 0)
+	set temp_image[2] = XM2("Fonts\\I.blp", 90, 90, x - 20 , y, 0, true, 255, 0, 0)
+	set temp_image[3] = XM2("Fonts\\C.blp", 90, 90, x, y, 0, true, 255, 0, 0)
+	set temp_image[4] = XM2("Fonts\\K.blp", 90, 90, x + 45, y, 0, true, 255, 0, 0)
+
+	set trg = CreateTrigger()
+	call TriggerAddCondition(trg, Condition(function K52))
+	set i = 1
+	loop
+		exitwhen i > 40
+		call TriggerRegisterUnitEvent(trg, QA0[i], EVENT_UNIT_SELL)
+		set i = i + 1
+	endloop
+
+	set t = CreateTimer()
+	call SaveImageHandle(LY, GetHandleId(t), 1, temp_image[1])
+	call SaveImageHandle(LY, GetHandleId(t), 2, temp_image[2])
+	call SaveImageHandle(LY, GetHandleId(t), 3, temp_image[3])
+	call SaveImageHandle(LY, GetHandleId(t), 4, temp_image[4])
+	call SaveTriggerHandle(LY, GetHandleId(t), 5, trg)
+	call SaveInteger(LY, GetHandleId(t), 6, 60)
+	call TimerStart(t, 1, true, function MUModeJS_AllPickCountDown)
+	set t = null
+
+	set trg = null
+	set temp_image[1] = null
+	set temp_image[2] = null
+	set temp_image[3] = null
+	set temp_image[4] = null
+endfunction
+
+function MUModeJS_AllPickReady takes nothing returns nothing
+    call QRI(bj_FORCE_ALL_PLAYERS,15.00, "每个玩家都将有60秒的时间选择一个英雄")
+    call TimerStart(CreateTimer(), 5, false, function MUModeJS_AllPick)
+endfunction
+
 function MUModeJS_BanCountDown takes nothing returns nothing
 	local integer handle_id = GetHandleId(GetExpiredTimer())
 	local integer count = LoadInteger(LY, handle_id, 5)
@@ -36538,7 +36636,11 @@ function MUModeJS_BanCountDown takes nothing returns nothing
 		call DestroyTrigger(LoadTriggerHandle(LY, handle_id, 4))
 
 		call FlushChildHashtable(LY, handle_id)
-		call K72()
+		if mu_mode_up then
+    		call MUModeJS_AllPickReady()
+    	else
+		    call K72()
+		endif
 		return
 	endif
 	if count > 10 then
@@ -36831,6 +36933,10 @@ endloop
 call TZI()
 call TimerStart(CreateTimer(), 15 - TimerGetElapsed(M), false, function MUModeJS_StepBan)
 set p=null
+endfunction
+
+function MUModeUP takes nothing returns nothing
+    set mu_mode_up = true
 endfunction
 
 function KV2 takes nothing returns boolean
