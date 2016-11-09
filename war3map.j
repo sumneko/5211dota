@@ -7323,7 +7323,7 @@ endfunction
 function F61 takes item AO1 returns boolean
 return GetItemType(AO1)==ITEM_TYPE_POWERUP or GetItemType(AO1)==ITEM_TYPE_PURCHASABLE or GetItemType(AO1)==ITEM_TYPE_MISCELLANEOUS
 endfunction
-// 让单位获得一次物品(单位, 物品ID)(为了共享CD?)
+// 让单位获得林肯buff(单位, 物品ID)
 function F71 takes unit SWI,integer U9I returns boolean
 	local item BA1
 	local boolean F81=false
@@ -19505,7 +19505,7 @@ function VYO takes nothing returns nothing
 	local integer handle_id=GetHandleId(t)
 	local unit hero=GetTriggerUnit()
 	local unit target=GetSpellTargetUnit()
-	// 让队友获得一次林肯(用于共CD?)
+	// 让队友获得林肯buff
 	call F71(target,'I0HM')
 	// 每0.1秒或队友死亡
 	call TriggerRegisterTimerEvent(t,0.1,true)
@@ -65481,9 +65481,12 @@ local integer N24=0
 local integer N34=0
 call DisableTrigger(GetTriggeringTrigger())
 if GetUnitTypeId(W91)==('H00J')then
-call UnitRemoveItemFromSlot(W91,0)
-call EnableTrigger(GetTriggeringTrigger())
-return
+	// 修正给米波分身上林肯导致分身鞋子掉落的BUG
+	if UnitItemInSlot(W91, 0) == GetManipulatedItem() then
+		call UnitRemoveItemFromSlot(W91,0)
+	endif
+	call EnableTrigger(GetTriggeringTrigger())
+	return
 endif
 if not(GetItemTypeId(GetManipulatedItem())==(FR0[G40])or GetItemTypeId(GetManipulatedItem())==(FR0[ZK0])or GetItemTypeId(GetManipulatedItem())==(FR0[ZN0])or GetItemTypeId(GetManipulatedItem())==(FR0[ZM0])or GetItemTypeId(GetManipulatedItem())==(FR0[ZL0])or GetItemTypeId(GetManipulatedItem())==(FR0[XI0])or GetItemTypeId(GetManipulatedItem())==(FR0[X90])or GetItemTypeId(GetManipulatedItem())==(FR0[Z00])or GetItemTypeId(GetManipulatedItem())==(FR0[ZI0]))then
 call EnableTrigger(GetTriggeringTrigger())
