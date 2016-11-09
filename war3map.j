@@ -2474,19 +2474,20 @@ boolexpr M2I=null
 
 //全局系统变量
 	real yd_MapMaxX = 0
-    real yd_MapMinX = 0
-    real yd_MapMaxY = 0
-    real yd_MapMinY = 0
+	real yd_MapMinX = 0
+	real yd_MapMaxY = 0
+	real yd_MapMinY = 0
 
-    boolean mu_is_lua_enable = false
+	boolean mu_is_lua_enable = false
 
-    integer mu_disable_item_trigger_count = 0
-    boolean mu_damage_dot = false
-    boolean array mu_has_gag
-    string mu_temp_string = ""
-    boolean mu_has_init_dummy_player = false
-    boolexpr mu_sync_dummy_messenger = null
-    string mu_lua_string = null
+	integer mu_disable_item_trigger_count = 0
+	boolean mu_damage_dot = false
+	boolean array mu_has_gag
+	string mu_temp_string = ""
+	boolean mu_has_init_dummy_player = false
+	boolexpr mu_sync_dummy_messenger = null
+	string mu_lua_string = null
+	trigger mu_trigger_disable_move = null
 endglobals
 
 function MUCall takes string script, string void returns nothing
@@ -3010,6 +3011,32 @@ function MUAddMaxLife takes unit target, integer life returns nothing
 	endloop
 endfunction
 
+//禁止移动马甲英雄
+function MUTimerStop takes nothing returns nothing
+	local timer t = GetExpiredTimer()
+	local integer handle_id = GetHandleId(t)
+	local unit u = LoadUnitHandle(LY, handle_id, 1)
+	call IssueImmediateOrder(u, "stop")
+	call DestroyTimer(t)
+	call FlushChildHashtable(LY, handle_id)
+	set t = null
+	set u = null
+endfunction
+
+function MUStopUnit takes nothing returns nothing
+	local unit dummy = GetTriggerUnit()
+	local timer t = CreateTimer()
+	call SaveUnitHandle(LY, GetHandleId(t), 1, dummy)
+	call TimerStart(t, 0, false, function MUTimerStop)
+	set t = null
+	set dummy = null
+endfunction
+
+function MUDisableMove takes unit dummy returns nothing
+	call TriggerRegisterUnitEvent(mu_trigger_disable_move, dummy, EVENT_UNIT_ISSUED_TARGET_ORDER)
+	call TriggerRegisterUnitEvent(mu_trigger_disable_move, dummy, EVENT_UNIT_ISSUED_POINT_ORDER)
+endfunction
+
 //===========================================================================
 //===========================================================================
 //地图初始化
@@ -3020,7 +3047,7 @@ function InitializeYD takes nothing returns nothing
 	local trigger trg = null
 	local integer i = 0
 
-	//call Cheat("exec-lua:poi\\dota\\init")
+	call Cheat("exec-lua:poi\\dota\\init")
 	call MUPrint("Hello Loli!")
 
 	//=================设置变量=====================
@@ -3073,6 +3100,12 @@ function InitializeYD takes nothing returns nothing
 
 	//===============信使系统=========================
 	set mu_sync_dummy_messenger = Condition(function MUSyncDummyMessenger)
+
+	//===============禁止移动马甲英雄===================
+	set trg = CreateTrigger()
+	set mu_trigger_disable_move = trg
+	call TriggerAddCondition(trg, Condition(function MUStopUnit))
+	set trg = null
 endfunction
 
 function M4I takes real M5I returns nothing
@@ -3431,17 +3464,17 @@ local real SOI=(TimerGetElapsed(M))
 local integer i
 set i=1
 loop
-exitwhen i>GJ
-if FJ[i]<SOI then
-if EJ[i]==null or IsTriggerEnabled(EJ[i])==true then
-call NUI()
-else
-call DestroyTrigger(EJ[i])
-endif
-call SII(i)
-else
-set i=i+1
-endif
+	exitwhen i>GJ
+	if FJ[i]<SOI then
+		if EJ[i]==null or IsTriggerEnabled(EJ[i])==true then
+			call NUI()
+		else
+			call DestroyTrigger(EJ[i])
+		endif
+		call SII(i)
+	else
+		set i=i+1
+	endif
 endloop
 return false
 endfunction
@@ -3465,13 +3498,13 @@ set t2=null
 endfunction
 function S8I takes unit u returns string
 if u==null then
-return GetObjectName('n09T')
+return "没有英雄"
 endif
 return GetObjectName(DD0[GetUnitPointValue(u)])
 endfunction
 function S9I takes integer i returns string
 if i==0 then
-return GetObjectName('n09T')
+return "没有英雄"
 endif
 return GetObjectName(DD0[i])
 endfunction
@@ -7467,7 +7500,7 @@ endloop
 return FP1
 endfunction
 function GI1 takes player G11,player GO1 returns string
-local string s=GetObjectName('n0C8')
+local string s="$dead被队友$killer杀死了！"
 set s=FS1(s,"$dead",C0[GetPlayerId(G11)]+(D80[GetPlayerId((G11))])+"|r")
 set s=FS1(s,"$killer",C0[GetPlayerId(GO1)]+(D80[GetPlayerId((GO1))])+"|r")
 return s
@@ -7662,7 +7695,7 @@ local integer handle_id=GetHandleId(t)
 local player p=(LoadPlayerHandle(LY,(handle_id),(54)))
 local integer i=(LoadInteger(LY,(handle_id),(77)))
 local string c="|c006699CC"
-if GetObjectName('n0HH')=="Language: English"and(DR0[(i)]!="")then
+if "语言：简体中文"=="Language: English"and(DR0[(i)]!="")then
 if GetTriggerEvalCount(t)==1 then
 elseif GetTriggerEvalCount(t)==2 then
 call DisplayTimedTextToPlayer(p,0,0,15,"Tip 1: "+c+DR0[i]+"|r")
@@ -8734,10 +8767,10 @@ set TGI=1
 set THI=5
 loop
 if GetPlayerSlotState(BO[TGI])==PLAYER_SLOT_STATE_EMPTY then
-call SetPlayerName(BO[TGI],GetObjectName('n0DH')+" "+I2S(TGI))
+call SetPlayerName(BO[TGI],"玩家"+" "+I2S(TGI))
 endif
 if GetPlayerSlotState(CO[TGI])==PLAYER_SLOT_STATE_EMPTY then
-call SetPlayerName(CO[TGI],GetObjectName('n0DH')+" "+I2S(5+TGI))
+call SetPlayerName(CO[TGI],"玩家"+" "+I2S(5+TGI))
 endif
 set TGI=TGI+1
 exitwhen TGI>THI
@@ -9002,9 +9035,9 @@ call SetPlayerTeam(CO[2],1)
 call SetPlayerTeam(CO[3],1)
 call SetPlayerTeam(CO[4],1)
 call SetPlayerTeam(CO[5],1)
-call SetPlayerName(BO[0],GetObjectName('n03N'))
-call SetPlayerName(CO[0],GetObjectName('n03O'))
-call SetPlayerName(DO,GetObjectName('n0E8'))
+call SetPlayerName(BO[0],"近卫军团")
+call SetPlayerName(CO[0],"天灾军团")
+call SetPlayerName(DO,"中立生物")
 call ZO1()
 if(BO[0]!=Player(0)or CO[0]!=Player(6))then
 call Z41()
@@ -11112,7 +11145,7 @@ endfunction
 function VF1 takes nothing returns boolean
 local string s
 if IsUnitIllusion(GetTriggerUnit())==false and V51(GetUnitTypeId(GetTriggerUnit()))==false then
-set s=GetUnitName(GetTriggerUnit())+" "+GetObjectName('n0HB')+" "+GetObjectName(GetLearnedSkill())+" ("+GetObjectName('n0HC')+" "+I2S(GetUnitAbilityLevel(GetTriggerUnit(),GetLearnedSkill()))+")"
+set s=GetUnitName(GetTriggerUnit())+" "+"学习了"+" "+GetObjectName(GetLearnedSkill())+" ("+"level"+" "+I2S(GetUnitAbilityLevel(GetTriggerUnit(),GetLearnedSkill()))+")"
 call DisplayTimedTextToPlayer(D60,0,0,3,s)
 call DisplayTimedTextToPlayer(D70,0,0,3,s)
 endif
@@ -11125,7 +11158,7 @@ call TriggerAddCondition(t,Condition(function VF1))
 set t=null
 endfunction
 function VH1 takes nothing returns nothing
-call QRI(bj_FORCE_ALL_PLAYERS,25.00,(D80[GetPlayerId((GetTriggerPlayer()))])+"|c00ff0303 "+GetObjectName('n02D')+"|r")
+call QRI(bj_FORCE_ALL_PLAYERS,25.00,(D80[GetPlayerId((GetTriggerPlayer()))])+"|c00ff0303 "+"离开了游戏"+"|r")
 endfunction
 function VZ1 takes nothing returns boolean
 local trigger t=GetTriggeringTrigger()
@@ -11137,8 +11170,8 @@ local integer ROI=GetPlayerState(VV1,PLAYER_STATE_RESOURCE_GOLD)
 if RX0[GetPlayerId(VV1)]==false and JL==true then
 if GetTriggerEvalCount(t)==4 then
 if IsPlayerAlly(GetLocalPlayer(),VV1)==true then
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,6,GetObjectName('n0J3'))
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,6,GetObjectName('n0JG'))
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,6,"如果你想使用离开玩家英雄的物品/金钱，请使用 -unlock")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,6,"一旦你这么做，你将无法再与敌方玩家交换那名离开玩家的位置")
 endif
 endif
 return false
@@ -11193,7 +11226,7 @@ local string GW1
 local string DD0
 local unit SFI=K1[GetPlayerId(GetTriggerPlayer())]
 if SFI==null then
-set DD0=GetObjectName('n0EW')
+set DD0="没有英雄"
 else
 set DD0=GetUnitName(SFI)
 endif
@@ -11204,7 +11237,7 @@ set GW1=I2S(H0)+":"+I2S(Z0)
 endif
 if Q2==false then
 set K3[GetPlayerId(GetTriggerPlayer())]="|c00555555"+GW1+"|r"
-call QRI(bj_FORCE_ALL_PLAYERS,25.00,C0[GetPlayerId(GetTriggerPlayer())]+(D80[GetPlayerId((GetTriggerPlayer()))])+" ("+DD0+")|r|c00ff0303 "+GetObjectName('n02D')+"|r")
+call QRI(bj_FORCE_ALL_PLAYERS,25.00,C0[GetPlayerId(GetTriggerPlayer())]+(D80[GetPlayerId((GetTriggerPlayer()))])+" ("+DD0+")|r|c00ff0303 "+"离开了游戏"+"|r")
 if(IsPlayerTeam1(GetTriggerPlayer())==true)then
 set TGI=1
 set THI=5
@@ -11245,7 +11278,7 @@ call VX1(GetTriggerPlayer())
 if EG0==2 and C2==false and VL==true then
 call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,60," ")
 call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,60," ")
-call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,60,"|c006699CC"+GetObjectName('n0FW')+"|r")
+call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,60,"|c006699CC"+"提示：-switch命令可以重新排列玩家队伍，条件是所有玩家都同意"+"|r")
 endif
 if EG0==3 then
 set RI0=true
@@ -11261,7 +11294,7 @@ function VS1 takes unit SFI returns nothing
 if GetUnitTypeId(SFI)!='H00J' and GetUnitTypeId(SFI)!='H00I' then
 if GetOwningPlayer(SFI)==GetLocalPlayer()then
 call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,1," ")
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,1,"|c006699CC"+GetObjectName('n0GR'))
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,1,"|c006699CC"+"你的英雄已经重生了")
 call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,1," ")
 endif
 call OQ1(KE,GetOwningPlayer(SFI))
@@ -12215,7 +12248,7 @@ set t=null
 return false
 endfunction
 function QR1 takes unit SFI,player p returns string
-local string s=GetObjectName('n0DB')
+local string s="从$p那里得到了$hero"
 set s=FS1(s,"$hero",GetUnitName(SFI))
 set s=FS1(s,"$p",(D80[GetPlayerId((p))]))
 return s
@@ -12233,7 +12266,7 @@ local trigger t
 if X0==false then
 call GK1(GetOwningPlayer(PKI))
 endif
-if GetObjectName('n0HH')=="Language: English"and(DR0[(GetUnitPointValue(PKI))]!="")then
+if "语言：简体中文"=="Language: English"and(DR0[(GetUnitPointValue(PKI))]!="")then
 call DisplayTimedTextToPlayer(T4I,0,0,4,"A |c006699CC-tips|r command is available if you would like some pointers for this hero")
 endif
 if PB0[GetPlayerId(T4I)]==true then
@@ -12324,20 +12357,20 @@ endif
 if T4I!=BO[0]and T4I!=CO[0]then
 if B3 then
 if TimerGetElapsed(M)>60 then
-call QZ1(T4I,GetObjectName('n02E')+" "+GetUnitName(PKI))
+call QZ1(T4I,"自动分配到了"+" "+GetUnitName(PKI))
 elseif S0[GetPlayerId(QQ1)]==true then
 call QZ1(T4I,QR1(PKI,QQ1))
 else
 call SetPlayerState(QQ1,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(QQ1,PLAYER_STATE_RESOURCE_GOLD)+250)
-call QZ1(T4I,GetObjectName('n0D1')+" "+GetUnitName(PKI)+" "+GetObjectName('n0D0')+" "+(D80[GetPlayerId((QQ1))]))
+call QZ1(T4I,"被给予了"+" "+GetUnitName(PKI)+" "+"被"+" "+(D80[GetPlayerId((QQ1))]))
 endif
 elseif Y2==false or T4I==WO then
 if(D0[GetPlayerId(GetOwningPlayer(PKI))]==true and Y2==false)then
-call QZ1(T4I,GetObjectName('n0D5')+" "+GetUnitName(PKI)+".")
+call QZ1(T4I,"重新选择了"+" "+GetUnitName(PKI)+".")
 elseif((S0[GetPlayerId(T4I)]==true and X0==false)or Y0 or J0 or N2)then
-call QZ1(T4I,GetObjectName('n0D3')+" "+GetUnitName(PKI)+".")
+call QZ1(T4I,"随机选择了"+" "+GetUnitName(PKI)+".")
 else
-call QZ1(T4I,GetObjectName('n0D2')+" "+GetUnitName(PKI)+".")
+call QZ1(T4I,"选择了"+" "+GetUnitName(PKI)+".")
 endif
 endif
 endif
@@ -12354,14 +12387,14 @@ endif
 call QT1(T4I)
 if(GetUnitTypeId(PKI)=='E005')then
 call DisplayTimedTextToPlayer(T4I,0,U2,60.00," ")
-call DisplayTimedTextToPlayer(T4I,0,U2,60.00,"|c00ff0303"+GetObjectName('n06H')+GetObjectName('n0CB')+" "+GetObjectName('n06E')+"|r")
+call DisplayTimedTextToPlayer(T4I,0,U2,60.00,"|c00ff0303"+"不要为月之骑士买以下物品："+"黯灭、漩涡和雷神锤"+" "+"上述法球效果会导致她的攻击无效"+"|r")
 elseif GetUnitTypeId(PKI)=='O00J' or GetUnitTypeId(PKI)=='N016' or GetUnitTypeId(PKI)=='UC91' or GetUnitTypeId(PKI)=='EC45' then
 call DisplayTimedTextToPlayer(T4I,0,U2,10.00," ")
-call DisplayTimedTextToPlayer(T4I,0,U2,10.00,"|c00ff0303"+GetObjectName('n0G3')+"|r")
+call DisplayTimedTextToPlayer(T4I,0,U2,10.00,"|c00ff0303"+"重击效果不与其他被动击晕技能叠加"+"|r")
 endif
 if(GetUnitTypeId(PKI)=='E01B')then
 call DisplayTimedTextToPlayer(T4I,0,U2,30.00," ")
-call DisplayTimedTextToPlayer(T4I,0,U2,30.00,"|c00ff0303"+GetObjectName('n06P')+" "+GetObjectName('n06U')+"|r")
+call DisplayTimedTextToPlayer(T4I,0,U2,30.00,"|c00ff0303"+"死亡后会掉落的物品不会在相位移动时掉出"+" "+"在死亡时会出现效果的物品（比如不朽之守护）在相位移动至无法到达的地形时将不会起作用"+"|r")
 endif
 if(S0[GetPlayerId(T4I)]==false)then
 if(J2)then
@@ -13012,7 +13045,7 @@ local integer i=1
 local integer UY1=GetPlayerId(GetOwningPlayer(AD1))
 local integer UJ1=GetPlayerId(GetOwningPlayer(UX1))
 local integer O91
-local string UK1=" "+GetObjectName('n0JY')+" "
+local string UK1=" "+"助攻："+" "
 local boolean UL1=false
 loop
 exitwhen i>5
@@ -13532,10 +13565,10 @@ loop
 exitwhen i>5
 if ITO==0 then
 set p=BO[i]
-set N7I=C0[GetPlayerId(BO[0])]+GetObjectName('n03N')+"|r "+GetObjectName('n03P')+" "+C0[GetPlayerId(BO[0])]+GetObjectName('n03Q')+"|r"
+set N7I=C0[GetPlayerId(BO[0])]+"近卫军团"+"|r "+"正在"+" "+C0[GetPlayerId(BO[0])]+"向胜利迈进！！！"+"|r"
 else
 set p=CO[i]
-set N7I=C0[GetPlayerId(CO[0])]+GetObjectName('n03O')+"|r "+GetObjectName('n03P')+" "+C0[GetPlayerId(CO[0])]+GetObjectName('n03Q')+"|r"
+set N7I=C0[GetPlayerId(CO[0])]+"天灾军团"+"|r "+"正在"+" "+C0[GetPlayerId(CO[0])]+"向胜利迈进！！！"+"|r"
 endif
 call DisplayTimedTextToPlayer(p,0,0,10,N7I)
 call OQ1(JD,p)
@@ -13917,7 +13950,7 @@ if IsPlayerTeam1(I6O)then
 if IsPlayerTeam1(AB1)then
 set OQO=true
 if(AB1==I6O)then
-call QRI(P2,10.00,(C0[GetPlayerId(I6O)]+(D80[GetPlayerId((I6O))])+"|r "+GetObjectName('n03R')))
+call QRI(P2,10.00,(C0[GetPlayerId(I6O)]+(D80[GetPlayerId((I6O))])+"|r "+"自杀了！"))
 else
 call QRI(P2,10.00,GI1(I6O,AB1))
 endif
@@ -13937,7 +13970,7 @@ if IsPlayerTeam2(I6O)then
 if IsPlayerTeam2(AB1)then
 set OQO=true
 if(AB1==I6O)then
-call QRI(P2,10.00,(C0[GetPlayerId(I6O)]+(D80[GetPlayerId((I6O))])+"|r "+GetObjectName('n03R')))
+call QRI(P2,10.00,(C0[GetPlayerId(I6O)]+(D80[GetPlayerId((I6O))])+"|r "+"自杀了！"))
 else
 call QRI(P2,10.00,GI1(I6O,AB1))
 endif
@@ -13956,9 +13989,9 @@ endif
 if AB1==DO then
 set OUO=false
 if GetUnitTypeId(UX1)=='n00L' then
-call QRI(P2,10.00,(C0[GetPlayerId(I6O)]+(D80[GetPlayerId((I6O))])+"|r "+GetObjectName('n03T')))
+call QRI(P2,10.00,(C0[GetPlayerId(I6O)]+(D80[GetPlayerId((I6O))])+"|r "+"被Roshan杀死了"))
 else
-call QRI(P2,10.00,(C0[GetPlayerId(I6O)]+(D80[GetPlayerId((I6O))])+"|r "+GetObjectName('n03U')))
+call QRI(P2,10.00,(C0[GetPlayerId(I6O)]+(D80[GetPlayerId((I6O))])+"|r "+"被中立生物杀死了"))
 endif
 set OQO=true
 endif
@@ -13970,28 +14003,28 @@ set x=P[GetPlayerId(I6O)]
 if x>2 and OQO==false then
 if x==3 then
 set AC1=60
-set A0O="|c0000ff40"+GetObjectName('n04L')+"|r"
+set A0O="|c0000ff40"+"大杀特杀"+"|r"
 elseif x==4 then
 set AC1=120
-set A0O="|c00400080"+GetObjectName('n04N')+"|r"
+set A0O="|c00400080"+"主宰比赛"+"|r"
 elseif x==5 then
 set AC1=180
-set A0O="|c00ff0080"+GetObjectName('n04M')+"|r"
+set A0O="|c00ff0080"+"杀人如麻"+"|r"
 elseif x==6 then
 set AC1=240
-set A0O="|c00ff8000"+GetObjectName('n04J')+"|r"
+set A0O="|c00ff8000"+"无人能挡"+"|r"
 elseif x==7 then
 set AC1=300
-set A0O="|c00808000"+GetObjectName('n04I')+"|r"
+set A0O="|c00808000"+"变态杀戮"+"|r"
 elseif x==8 then
 set AC1=360
-set A0O="|c00ff80ff"+GetObjectName('n03V')+"|r"
+set A0O="|c00ff80ff"+"妖怪般的杀戮"+"|r"
 elseif x==9 then
 set AC1=420
-set A0O="|c00ff0000"+GetObjectName('n03W')+"|r"
+set A0O="|c00ff0000"+"如同神一般"+"|r"
 else
 set AC1=480
-set A0O="|c00ff8000"+GetObjectName('n03X')+"|r"
+set A0O="|c00ff8000"+"超越神的杀戮"+"|r"
 endif
 endif
 set x=P[GetPlayerId(AB1)]
@@ -14013,28 +14046,28 @@ endif
 if x>2 and OQO==false then
 if x==3 then
 call OP1(RC)
-set AIO=" "+GetObjectName('n04K')+" |c0000ff40"+GetObjectName('n04L')+"|r"+GetObjectName('n049')
+set AIO=" "+"正在"+" |c0000ff40"+"大杀特杀"+"|r"+"！"
 elseif x==4 then
 call OP1(GC)
-set AIO=" "+GetObjectName('n04H')+" |c00400080"+GetObjectName('n04N')+"|r"+GetObjectName('n049')
+set AIO=" "+"已经"+" |c00400080"+"主宰比赛"+"|r"+"！"
 elseif x==5 then
 call OP1(QC)
-set AIO=" "+GetObjectName('n04G')+" |c00ff0080"+GetObjectName('n04M')+"|r"+GetObjectName('n049')
+set AIO=" "+"已经"+" |c00ff0080"+"杀人如麻"+"|r"+"！"
 elseif x==6 then
 call OP1(EE)
-set AIO=" "+GetObjectName('n04H')+" |c00ff8000"+GetObjectName('n04J')+"|r"+GetObjectName('n04A')
+set AIO=" "+"已经"+" |c00ff8000"+"无人能挡"+"|r"+"！！"
 elseif x==7 then
 call OP1(HE)
-set AIO=" "+GetObjectName('n04H')+" |c00808000"+GetObjectName('n04I')+"|r"+GetObjectName('n04A')
+set AIO=" "+"已经"+" |c00808000"+"变态杀戮"+"|r"+"！！"
 elseif x==8 then
 call OP1(OD)
-set AIO=" "+GetObjectName('n04G')+" |c00ff80ff"+GetObjectName('n03V')+"|r"+GetObjectName('n04A')
+set AIO=" "+"已经"+" |c00ff80ff"+"妖怪般的杀戮"+"|r"+"！！"
 elseif x==9 then
 call OP1(XC)
-set AIO=" "+GetObjectName('n04H')+" |c00ff0000"+GetObjectName('n03W')+"|r"+GetObjectName('n04B')
+set AIO=" "+"已经"+" |c00ff0000"+"如同神一般"+"|r"+"！！！"
 else
 call OP1(JC)
-set AIO=" "+GetObjectName('n04H')+" |c00ff8000"+GetObjectName('n03X')+"|r. "+GetObjectName('n04F')+GetObjectName('n04B')
+set AIO=" "+"已经"+" |c00ff8000"+"超越神的杀戮"+"|r. "+"拜托谁去杀了他吧！！！"+"！！！"
 endif
 endif
 if OQO==false then
@@ -14045,24 +14078,24 @@ set A4O="|c00FFDC00"+I2S(AC1)+"|r"
 if AB1==BO[0]or AB1==CO[0]then
 if ACO==0 then
 if AB1==BO[0]then
-set A3O=A2O+" "+GetObjectName('n042')+" "+AOO+GetObjectName('n043')+GetObjectName('n049')+" "+A4O+" "+GetObjectName('n044')+"."
+set A3O=A2O+" "+"杀死了"+" "+AOO+"！"+"！"+" "+A4O+" "+"金钱平分给英雄们"+"."
 call O0O(AB1,AC1)
 elseif AB1==CO[0]then
-set A3O=A2O+" "+GetObjectName('n042')+" "+AOO+GetObjectName('n043')+GetObjectName('n049')+" "+A4O+" "+GetObjectName('n044')+"."
+set A3O=A2O+" "+"杀死了"+" "+AOO+"！"+"！"+" "+A4O+" "+"金钱平分给英雄们"+"."
 call O0O(AB1,AC1)
 endif
 elseif ACO>1 then
-set A3O=A2O+" "+GetObjectName('n042')+" "+AOO+GetObjectName('n043')+GetObjectName('n049')+" "+A4O+" "+GetObjectName('n044')+"."
+set A3O=A2O+" "+"杀死了"+" "+AOO+"！"+"！"+" "+A4O+" "+"金钱平分给英雄们"+"."
 call UT1(AD1,UX1,AC1)
 endif
 elseif A0O==""and AIO==""then
-set A3O=A2O+" "+GetObjectName('n042')+" "+AOO+GetObjectName('n043')+" "+GetObjectName('n04C')+" "+A4O+" "+GetObjectName('n045')+GetObjectName('n049')
+set A3O=A2O+" "+"杀死了"+" "+AOO+"！"+" "+"得到"+" "+A4O+" "+"金钱！"+"！"
 elseif A0O==""and AIO!=""then
-set A3O=A2O+" "+GetObjectName('n042')+" "+AOO+GetObjectName('n043')+" "+GetObjectName('n04C')+" "+A4O+" "+GetObjectName('n045')+GetObjectName('n049')
+set A3O=A2O+" "+"杀死了"+" "+AOO+"！"+" "+"得到"+" "+A4O+" "+"金钱！"+"！"
 elseif A0O!=""and AIO==""then
-set A3O=A2O+" "+GetObjectName('n048')+" "+AOO+GetObjectName('n047')+" "+A0O+" "+GetObjectName('n046')+" "+A4O+" "+GetObjectName('n045')+GetObjectName('n049')
+set A3O=A2O+" "+"终结了"+" "+AOO+" 的"+" "+A0O+" "+"得到"+" "+A4O+" "+"金钱！"+"！"
 elseif A0O!=""and AIO!=""then
-set A3O=A2O+" "+GetObjectName('n048')+" "+AOO+GetObjectName('n047')+" "+A0O+" "+GetObjectName('n046')+" "+A4O+" "+GetObjectName('n045')+GetObjectName('n049')
+set A3O=A2O+" "+"终结了"+" "+AOO+" 的"+" "+A0O+" "+"得到"+" "+A4O+" "+"金钱！"+"！"
 endif
 if OUO then
 set A1O=UW1(AD1,UX1)
@@ -14107,19 +14140,19 @@ if OQO==false and AB1!=BO[0]and AB1!=CO[0]and AB1!=DO then
 set Q[GetPlayerId(AB1)]=Q[GetPlayerId(AB1)]+1
 if Q[GetPlayerId(AB1)]==2 then
 set Z[GetPlayerId(AB1)]=Z[GetPlayerId(AB1)]+1
-call IUO(C0[GetPlayerId(AB1)]+(D80[GetPlayerId((AB1))])+"|r "+GetObjectName('n04D')+" |c000000ff"+GetObjectName('n04S')+"|r"+GetObjectName('n049'),1)
+call IUO(C0[GetPlayerId(AB1)]+(D80[GetPlayerId((AB1))])+"|r "+"完成了一次"+" |c000000ff"+"双杀"+"|r"+"！",1)
 endif
 if Q[GetPlayerId(AB1)]==3 then
 set V[GetPlayerId(AB1)]=V[GetPlayerId(AB1)]+1
-call IUO(C0[GetPlayerId(AB1)]+(D80[GetPlayerId((AB1))])+"|r "+GetObjectName('n04D')+" |c0000ff40"+GetObjectName('n04E')+"|r"+GetObjectName('n04B'),2)
+call IUO(C0[GetPlayerId(AB1)]+(D80[GetPlayerId((AB1))])+"|r "+"完成了一次"+" |c0000ff40"+"三杀"+"|r"+"！！！",2)
 endif
 if Q[GetPlayerId(AB1)]==4 then
 set V[GetPlayerId(AB1)]=V[GetPlayerId(AB1)]+1
-call IUO(C0[GetPlayerId(AB1)]+(D80[GetPlayerId((AB1))])+"|r "+GetObjectName('n04D')+" |c0000FFFF"+GetObjectName('n0HJ')+"|r"+GetObjectName('n04B'),3)
+call IUO(C0[GetPlayerId(AB1)]+(D80[GetPlayerId((AB1))])+"|r "+"完成了一次"+" |c0000FFFF"+"疯狂杀戮"+"|r"+"！！！",3)
 endif
 if Q[GetPlayerId(AB1)]>4 then
 set V[GetPlayerId(AB1)]=V[GetPlayerId(AB1)]+1
-call IUO(C0[GetPlayerId(AB1)]+(D80[GetPlayerId((AB1))])+"|r "+GetObjectName('n04K')+" |c0000AAFF"+GetObjectName('n0HK')+"|r"+GetObjectName('n04B'),4)
+call IUO(C0[GetPlayerId(AB1)]+(D80[GetPlayerId((AB1))])+"|r "+"正在"+" |c0000AAFF"+"暴走"+"|r"+"！！！",4)
 endif
 endif
 if(OQO==false)then
@@ -14329,15 +14362,15 @@ local string N7I
 local integer ACO=UN1(GetTriggerUnit(),GetKillingUnit())
 if AB1==BO[0]or AB1==CO[0]then
 call UT1(GetTriggerUnit(),GetKillingUnit(),150)
-set N7I=UM1(GetTriggerUnit(),GetKillingUnit())+" "+GetObjectName('n04W')+" |c00ff0303"+GetObjectName('n04Y')+GetObjectName('n049')+"|r "
+set N7I=UM1(GetTriggerUnit(),GetKillingUnit())+" "+"拿下了"+" |c00ff0303"+"第一滴血"+"！"+"|r "
 if ACO>1 then
-set N7I=N7I+"(+150 "+GetObjectName('n044')+")"
+set N7I=N7I+"(+150 "+"金钱平分给英雄们"+")"
 else
-set N7I=N7I+"(+150 "+GetObjectName('n045')+")"
+set N7I=N7I+"(+150 "+"金钱！"+")"
 endif
 else
-set N7I=C0[GetPlayerId(AB1)]+(D80[GetPlayerId((AB1))])+"|r "+GetObjectName('n04W')+" |c00ff0303"+GetObjectName('n04Y')+GetObjectName('n049')+"|r "
-set N7I=N7I+"(+150 "+GetObjectName('n045')+")"
+set N7I=C0[GetPlayerId(AB1)]+(D80[GetPlayerId((AB1))])+"|r "+"拿下了"+" |c00ff0303"+"第一滴血"+"！"+"|r "
+set N7I=N7I+"(+150 "+"金钱！"+")"
 call AA1(AB1,150,K1[GetPlayerId(AB1)])
 set EL0[GetPlayerId(AB1)]=EL0[GetPlayerId(AB1)]+150
 set EK0[GetPlayerId(AB1)]=EK0[GetPlayerId(AB1)]+150
@@ -14441,15 +14474,15 @@ set BA1=ES1(FW0,FR0[VL0])
 if BA1!=null then
 if NPI==FK0-180 then
 if IsPlayerTeam1(GetOwningPlayer(FW0))then
-call QRI(OO,15,GetObjectName('n0E9')+" |c00ff0303"+GetObjectName('n0E7')+"|r")
+call QRI(OO,15,"距离Roshan收回不朽之守护还有"+" |c00ff0303"+"3分钟"+"|r")
 else
-call QRI(AO,15,GetObjectName('n0E9')+" |c00ff0303"+GetObjectName('n0E7')+"|r")
+call QRI(AO,15,"距离Roshan收回不朽之守护还有"+" |c00ff0303"+"3分钟"+"|r")
 endif
 else
 if IsPlayerTeam1(GetOwningPlayer(FW0))then
-call QRI(OO,15,GetObjectName('n0E9')+" |c00ff0303"+GetObjectName('n0DX')+"|r")
+call QRI(OO,15,"距离Roshan收回不朽之守护还有"+" |c00ff0303"+"1分钟"+"|r")
 else
-call QRI(AO,15,GetObjectName('n0E9')+" |c00ff0303"+GetObjectName('n0DX')+"|r")
+call QRI(AO,15,"距离Roshan收回不朽之守护还有"+" |c00ff0303"+"1分钟"+"|r")
 endif
 endif
 endif
@@ -14504,7 +14537,7 @@ endloop
 set SFI=null
 endfunction
 function BAO takes string BBO,string BCO returns string
-local string s=GetObjectName('n0CA')
+local string s="Roshan被$team杀死了！每个$team的玩家获得200金钱"
 set s=FS1(s,"$team",BBO)
 set s=FS1(s,"$team",BCO)
 return s
@@ -14555,7 +14588,7 @@ call B7O()
 set FX0=false
 if(IsPlayerTeam1(GetOwningPlayer(GetKillingUnit())))then
 call FL1("Roshan",0)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,BAO("|c00ff0000"+GetObjectName('n065')+"|r",GetObjectName('n065')))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,BAO("|c00ff0000"+"近卫军团"+"|r","近卫军团"))
 call AdjustPlayerStateBJ(200,BO[1],PLAYER_STATE_RESOURCE_GOLD)
 call AdjustPlayerStateBJ(200,BO[2],PLAYER_STATE_RESOURCE_GOLD)
 call AdjustPlayerStateBJ(200,BO[3],PLAYER_STATE_RESOURCE_GOLD)
@@ -14564,7 +14597,7 @@ call AdjustPlayerStateBJ(200,BO[5],PLAYER_STATE_RESOURCE_GOLD)
 endif
 if(IsPlayerTeam2(GetOwningPlayer(GetKillingUnit())))then
 call FL1("Roshan",1)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,BAO("|c00004000"+GetObjectName('n06C')+"|r",GetObjectName('n06C')))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,BAO("|c00004000"+"天灾军团"+"|r","天灾军团"))
 call AdjustPlayerStateBJ(200,CO[1],PLAYER_STATE_RESOURCE_GOLD)
 call AdjustPlayerStateBJ(200,CO[2],PLAYER_STATE_RESOURCE_GOLD)
 call AdjustPlayerStateBJ(200,CO[3],PLAYER_STATE_RESOURCE_GOLD)
@@ -14640,7 +14673,7 @@ endif
 return false
 endfunction
 function BNO takes player G11,player GO1 returns string
-local string s=GetObjectName('n0AP')
+local string s="$dead的信使被杀死了！"
 set s=FS1(s,"$dead",(D80[GetPlayerId((G11))]))
 return s
 endfunction
@@ -14704,7 +14737,7 @@ else
 if IsUnitDead(K1[id])==false then
 call PlayerSetLeaderboard(Player(id),FN0[id])
 call LeaderboardDisplay(FN0[id],true)
-call LeaderboardSetLabel(FN0[id],"    "+GetObjectName('n0LZ')+" "+I2S(BQO))
+call LeaderboardSetLabel(FN0[id],"    "+"信使复活时间："+" "+I2S(BQO))
 endif
 endif
 endloop
@@ -14883,9 +14916,9 @@ local integer id=GetUnitTypeId(GetTriggerUnit())
 if id=='e00R' or id=='e011' or id=='e00S' or id=='e019' or id=='u00M' or id=='u00D' or id=='u00N' or id=='u00T' then
 if IsUnitAlly(GetTriggerUnit(),GetOwningPlayer(GetKillingUnit()))then
 set X[GetPlayerId(GetOwningPlayer(GetKillingUnit()))]=X[GetPlayerId(GetOwningPlayer(GetKillingUnit()))]+1
-call QRI(P2,10,C0[GetPlayerId(GetOwningPlayer(GetKillingUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetKillingUnit())))])+"|r "+GetObjectName('n04P')+".")
+call QRI(P2,10,C0[GetPlayerId(GetOwningPlayer(GetKillingUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetKillingUnit())))])+"|r "+"反补了一座防御塔"+".")
 else
-call QRI(P2,10,C0[GetPlayerId(GetOwningPlayer(GetKillingUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetKillingUnit())))])+"|r "+GetObjectName('n0EN')+".")
+call QRI(P2,10,C0[GetPlayerId(GetOwningPlayer(GetKillingUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetKillingUnit())))])+"|r "+"摧毁了一座防御塔"+".")
 endif
 endif
 endfunction
@@ -16238,7 +16271,7 @@ set u=null
 set r=null
 endfunction
 function D5O takes unit u returns string
-local string s=GetObjectName('n0FO')
+local string s="$hero已经复活（买活）"
 set s=FS1(s,"$hero",C0[GetPlayerId(GetOwningPlayer(u))]+GetUnitName(u)+"|r")
 return s
 endfunction
@@ -16277,7 +16310,7 @@ call GN1(GetOwningPlayer(GetSoldUnit()))
 else
 call SetPlayerState(GetOwningPlayer(GetSoldUnit()),PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(GetOwningPlayer(GetSoldUnit()),PLAYER_STATE_RESOURCE_GOLD)+WS[GV1(GetHeroLevel(K1[GetPlayerId(GetOwningPlayer(GetSellingUnit()))]))])
 if(XS[GetPlayerId((GetOwningPlayer(GetSoldUnit())))]==false)==false then
-call PZI(GetOwningPlayer(GetSoldUnit()),GetObjectName('n0N4'))
+call PZI(GetOwningPlayer(GetSoldUnit()),"被死神镰刀杀死，无法买活")
 endif
 endif
 endif
@@ -16321,9 +16354,9 @@ endif
 call EnableTrigger(MO0)
 if IsPlayerAlly(GetLocalPlayer(),MDI)==true then
 if DAO==VD0 then
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(MDI)]+(D80[GetPlayerId((MDI))])+"|r |c00ffff00"+GetObjectName('n0LX')+"|r")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(MDI)]+(D80[GetPlayerId((MDI))])+"|r |c00ffff00"+"购买了梅肯斯姆"+"|r")
 elseif DAO==W30 then
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(MDI)]+(D80[GetPlayerId((MDI))])+"|r |c00ffff00"+GetObjectName('n0LY')+"|r")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(MDI)]+(D80[GetPlayerId((MDI))])+"|r |c00ffff00"+"购买了圣剑"+"|r")
 endif
 endif
 set BA1=null
@@ -16757,7 +16790,7 @@ local integer E81=FO1(u)
 local real x
 local real y
 if EZO(GetSellingUnit(),u)then
-call PZI(p,GetObjectName('n02G'))
+call PZI(p,"你不能从敌方商店购买侦查守卫")
 if IsUnitAlly(u,BO[0])then
 set p=CO[0]
 else
@@ -16769,7 +16802,7 @@ call EK1(FT0[FO1(u)],x,y,p,true,F51(FO1(u)))
 else
 call EHO(p,E71(E81))
 if FR0[E81]==0 then
-call PZI(p,GetObjectName('n02H'))
+call PZI(p,"你不用为这个物品购买合成卷轴")
 else
 set x=EXO(GetSellingUnit(),u)
 set y=EJO(GetSellingUnit(),u)
@@ -16793,27 +16826,27 @@ call EMO()
 if IsPlayerAlly(GetLocalPlayer(),GetOwningPlayer(GetSoldUnit()))or(C2 and(GetLocalPlayer()==D60 or GetLocalPlayer()==D70))then
 if GetUnitTypeId(GetSoldUnit())=='h02F' then
 call PingMinimapEx(GetUnitX(GetSoldUnit()),GetUnitY(GetSoldUnit()),3,255,255,255,false)
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,20,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+GetObjectName('n0HU')+"|r")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,20,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+"购买了一个动物信使"+"|r")
 elseif GetUnitTypeId(GetSoldUnit())=='h03Q' then
 call PingMinimapEx(GetUnitX(GetSoldUnit()),GetUnitY(GetSoldUnit()),3,255,255,255,false)
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,20,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+GetObjectName('n0KG')+"|r")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,20,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+"购买了一个飞行信使"+"|r")
 elseif GetUnitTypeId(GetSoldUnit())=='h076' then
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+GetObjectName('n0KO')+"|r")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+"购买了显影之尘"+"|r")
 elseif GetUnitTypeId(GetSoldUnit())=='h02C' then
 call PingMinimapEx(GetUnitX(GetSoldUnit()),GetUnitY(GetSoldUnit()),3,255,255,255,false)
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+GetObjectName('n0KP')+"|r")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+"购买了侦查守卫"+"|r")
 elseif GetUnitTypeId(GetSoldUnit())=='h02D' then
 call PingMinimapEx(GetUnitX(GetSoldUnit()),GetUnitY(GetSoldUnit()),3,255,255,255,false)
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+GetObjectName('n0KQ')+"|r")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+"购买了岗哨守卫"+"|r")
 elseif GetUnitTypeId(GetSoldUnit())=='h0BA' then
 call PingMinimapEx(GetUnitX(GetSoldUnit()),GetUnitY(GetSoldUnit()),3,255,255,255,false)
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+GetObjectName('n0KT')+"|r")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+"购买了影之灵龛"+"|r")
 elseif GetUnitTypeId(GetSoldUnit())=='h01G' then
 call PingMinimapEx(GetUnitX(GetSoldUnit()),GetUnitY(GetSoldUnit()),3,255,255,255,false)
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+GetObjectName('n0LB')+"|r")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+"购买了真视宝石"+"|r")
 elseif GetUnitTypeId(GetSoldUnit())=='h0D3' then
 call PingMinimapEx(GetUnitX(GetSoldUnit()),GetUnitY(GetSoldUnit()),3,255,255,255,false)
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+GetObjectName('n0LP')+"|r")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,4,C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r |c00ffff00"+"购买了诡计之雾"+"|r")
 endif
 endif
 else
@@ -17133,7 +17166,7 @@ call SetItemUserData(VK,1)
 endif
 call MUDisableItemTrigger()
 if(E81==ZM0 or E81==ZL0 or E81==ZN0)and(EM1(u,FR0[ZM0],BA1)!=null or EM1(u,FR0[ZL0],BA1)!=null or EM1(u,FR0[ZN0],BA1)!=null)then
-call PZI(GetOwningPlayer(u),GetObjectName('n02L'))
+call PZI(GetOwningPlayer(u),"你只能携带一个动力鞋")
 set JK=GetItemPlayer(BA1)
 call RemoveItem(BA1)
 set VK=CreateItem(FT0[E81],x,y)
@@ -17141,7 +17174,7 @@ call SetItemPlayer(VK,JK,false)
 call SetItemUserData(VK,1)
 endif
 if(E81==HL0)and(EM1(u,FR0[HL0],BA1)!=null or EM1(u,FR0[HM0],BA1)!=null)then
-call PZI(GetOwningPlayer(u),GetObjectName('n0HL'))
+call PZI(GetOwningPlayer(u),"你只能携带一个压制之刃")
 set JK=GetItemPlayer(BA1)
 call RemoveItem(BA1)
 set VK=CreateItem(FT0[E81],x,y)
@@ -17150,7 +17183,7 @@ call SetItemUserData(VK,1)
 set F0O=false
 endif
 if F0O and(E81==HM0)and(EM1(u,FR0[HL0],BA1)!=null or EM1(u,FR0[HM0],BA1)!=null)then
-call PZI(GetOwningPlayer(u),GetObjectName('n0HL'))
+call PZI(GetOwningPlayer(u),"你只能携带一个压制之刃")
 set JK=GetItemPlayer(BA1)
 call RemoveItem(BA1)
 set VK=CreateItem(FT0[E81],x,y)
@@ -17159,7 +17192,7 @@ call SetItemUserData(VK,1)
 set F0O=false
 endif
 if(E81==WT0 or E81==WS0 or E81==WP0 or E81==WR0)and(EM1(u,FR0[WT0],BA1)!=null or EM1(u,FR0[WS0],BA1)!=null or EM1(u,FR0[WP0],BA1)!=null or EM1(u,FR0[WR0],BA1)!=null)then
-call PZI(GetOwningPlayer(u),GetObjectName('n02C'))
+call PZI(GetOwningPlayer(u),"你只能携带一个莫尔迪基安的臂章")
 set JK=GetItemPlayer(BA1)
 call RemoveItem(BA1)
 set VK=CreateItem(FT0[E81],x,y)
@@ -17175,7 +17208,7 @@ call SetItemUserData(VK,1)
 endif
 if(E81==VL0)and(RXI(u)or B61(u))then
 if RXI(u)then
-call PZI(GetOwningPlayer(u),GetObjectName('n02K'))
+call PZI(GetOwningPlayer(u),"你的信使不能携带这件物品")
 endif
 set JK=GetItemPlayer(BA1)
 set UJ=GetItemCharges(BA1)
@@ -17197,7 +17230,7 @@ call SetItemPlayer(VK,JK,false)
 call SetItemUserData(VK,1)
 endif
 if F0O and(E81==HL0 or E81==HM0)and(EE1=='H06S')then
-call PZI(GetOwningPlayer(u),GetObjectName('n02J'))
+call PZI(GetOwningPlayer(u),"你的英雄不能携带这件物品")
 set JK=GetItemPlayer(BA1)
 call RemoveItem(BA1)
 set VK=CreateItem(FT0[E81],x,y)
@@ -17206,7 +17239,7 @@ call SetItemUserData(VK,1)
 set F0O=false
 endif
 if(E81==VZ0 or E81==VV0 or E81==VW0 or E81==VX0 or E81==VY0 or E81==VJ0)and EE1=='U00C' then
-call DisplayTimedTextToPlayer(GetOwningPlayer(u),0,U2,10,"|c00ff0303"+GetObjectName('n02P')+"|r")
+call DisplayTimedTextToPlayer(GetOwningPlayer(u),0,U2,10,"|c00ff0303"+"由于War3的自有bug，不要在一次天神下凡结束前使用另一次"+"|r")
 endif
 call MUEnableItemTrigger()
 if F0O then
@@ -17376,7 +17409,7 @@ function F9O takes nothing returns boolean
 			else
 				call EK1(FT0[E81],D40[GetPlayerId(FCO)],D50[GetPlayerId(FCO)],FCO,EX1,EY1)
 			endif
-			call PZI(p,GetObjectName('n0DR'))
+			call PZI(p,"你不可以用你的能量环來拿起其他人的物品")
 			if FBO==false then
 				set FHO=true
 				call EL1(BA1)
@@ -17449,7 +17482,7 @@ function F9O takes nothing returns boolean
 		elseif FBO and EZ1(E71(E81))then
 			call MUDisableItemTrigger()
 			if EQ1(B71)==0 and ER1(FCO,B71,E81)==null then
-				call PZI(p,GetObjectName('n02O'))
+				call PZI(p,"物品栏已满")
 				call EK1(FT0[(E81)],(((LoadReal(LY,(handle_id),(6))))*1.0),(((LoadReal(LY,(handle_id),(7))))*1.0),(FCO),(true),(EY1))
 			else
 				set FFO=ER1(FCO,B71,E81)
@@ -17698,32 +17731,32 @@ if FSO then
 set FRO="Store"
 endif
 if FNO=='I006' then
-set FTO="|c00ff0000"+GetObjectName('n0JQ')+"|r"
+set FTO="|c00ff0000"+"加速"+"|r"
 call FL1("Rune"+FRO+"1",GetPlayerId(p))
 elseif FNO=='I008' then
-set FTO="|c0000ff00"+GetObjectName('n0JN')+"|r"
+set FTO="|c0000ff00"+"恢复"+"|r"
 call FL1("Rune"+FRO+"2",GetPlayerId(p))
 elseif FNO=='I00K' then
-set FTO="|c000000ff"+GetObjectName('n0K3')+"|r"
+set FTO="|c000000ff"+"双倍伤害"+"|r"
 call FL1("Rune"+FRO+"3",GetPlayerId(p))
 elseif FNO=='I007' then
-set FTO="|c00afaf00"+GetObjectName('n0K2')+"|r"
+set FTO="|c00afaf00"+"幻象"+"|r"
 call FL1("Rune"+FRO+"4",GetPlayerId(p))
 elseif FNO=='I00J' then
-set FTO="|c00652DC1"+GetObjectName('n0K4')+"|r"
+set FTO="|c00652DC1"+"隐身"+"|r"
 call FL1("Rune"+FRO+"5",GetPlayerId(p))
 elseif FNO=='I0RC' then
-set FTO="|c00FFD700"+GetObjectName('n0NR')+"|r"
+set FTO="|c00FFD700"+"赏金"+"|r"
 call FL1("Rune"+FRO+"6",GetPlayerId(p))
 endif
 if FSO then
-set s=C0[GetPlayerId(p)]+GetUnitName(SFI)+"|r "+GetObjectName('n0GU')+"|r "+FTO+" "+GetObjectName('n0GW')
+set s=C0[GetPlayerId(p)]+GetUnitName(SFI)+"|r "+"装载了"+"|r "+FTO+" "+"神符"
 set d=1
 else
 if M10 then
-set s=C0[GetPlayerId(p)]+GetUnitName(SFI)+"|r "+GetObjectName('n0GV')+"|r "+FTO+" "+GetObjectName('n0GW')
+set s=C0[GetPlayerId(p)]+GetUnitName(SFI)+"|r "+"使用了储备的"+"|r "+FTO+" "+"神符"
 else
-set s=C0[GetPlayerId(p)]+GetUnitName(SFI)+"|r "+GetObjectName('n0GT')+"|r "+FTO+" "+GetObjectName('n0GW')
+set s=C0[GetPlayerId(p)]+GetUnitName(SFI)+"|r "+"获得了"+"|r "+FTO+" "+"神符"
 endif
 endif
 if(IsPlayerAlly(GetLocalPlayer(),p)and GetLocalPlayer()!=p)or P0I(GetLocalPlayer())then
@@ -19710,7 +19743,7 @@ function W3O takes nothing returns boolean
 if GetIssuedOrderId()==851971 then
 if GetOrderTargetItem()!=null and C8O(GetItemTypeId(GetOrderTargetItem()))then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n0LU'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"信使不能使用神符")
 endif
 endif
 return false
@@ -20349,7 +20382,7 @@ if X5O!=null then
 call RemoveItem(X5O)
 call X2O(hero)
 else
-call PZI(GetOwningPlayer(hero),GetObjectName('n02Q'))
+call PZI(GetOwningPlayer(hero),"合成所需物品尚未备齐！")
 endif
 call FlushChildHashtable(LY,(handle_id))
 call FlushTrigger(t)
@@ -20397,7 +20430,7 @@ elseif GetItemTypeId(BA1)==FR0[VL0]and GetUnitTypeId(SFI)!='n00L' and FX0==false
 set FW0=SFI
 set FX0=true
 call FL1("AegisOn",GetPlayerId(GetOwningPlayer(SFI)))
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,C0[GetPlayerId(GetOwningPlayer(SFI))]+GetUnitName(SFI)+"|r "+GetObjectName('n0EQ'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,C0[GetPlayerId(GetOwningPlayer(SFI))]+GetUnitName(SFI)+"|r "+"获得了不朽之守护")
 elseif GetItemTypeId(BA1)==FR0[YG0]and RWI(SFI)then
 call X6O(SFI)
 elseif GetItemTypeId(BA1)==FR0[KL0]and GetUnitTypeId(SFI)=='Emoo' then
@@ -21103,7 +21136,7 @@ endif
 endfunction
 function YXO takes nothing returns nothing
 if((LoadInteger(LY,(GetHandleId((GetEnumUnit()))),((4258))))==1)==true then
-call PZI(GetOwningPlayer(GetEnumUnit()),GetObjectName('n02M')+" "+GetUnitName(GetEnumUnit())+" "+GetObjectName('n02S'))
+call PZI(GetOwningPlayer(GetEnumUnit()),"梅肯斯姆不能治疗"+" "+GetUnitName(GetEnumUnit())+" "+"，因为该目标在前25秒内已经被梅肯斯姆治疗过一次")
 else
 if IsUnitType(GetEnumUnit(),UNIT_TYPE_HERO)==true then
 call SCI(GetEnumUnit(),4258,25)
@@ -21142,7 +21175,7 @@ function YLO takes nothing returns nothing
 local trigger t
 local integer handle_id
 if((LoadInteger(LY,(GetHandleId((GetEnumUnit()))),((4346))))==1)==true then
-call PZI(GetOwningPlayer(GetEnumUnit()),GetObjectName('n0NQ')+" "+GetUnitName(GetEnumUnit()))
+call PZI(GetOwningPlayer(GetEnumUnit()),"赤红甲未能应用于"+" "+GetUnitName(GetEnumUnit()))
 else
 if IsUnitType(GetEnumUnit(),UNIT_TYPE_HERO)==true then
 call SCI(GetEnumUnit(),4346,70)
@@ -21177,7 +21210,7 @@ endif
 endfunction
 function YSO takes nothing returns nothing
 if((LoadInteger(LY,(GetHandleId((GetEnumUnit()))),((4278))))==1)==true then
-call PZI(GetOwningPlayer(GetEnumUnit()),GetObjectName('n02M'))
+call PZI(GetOwningPlayer(GetEnumUnit()),"梅肯斯姆不能治疗")
 else
 if IsUnitType(GetEnumUnit(),UNIT_TYPE_HERO)==true then
 call SCI(GetEnumUnit(),4278,50)
@@ -21358,7 +21391,7 @@ call UnitAddAbility(J7O,'A0VU')
 call SetUnitState(J7O,UNIT_STATE_MANA,400)
 call DestroyEffect(AddSpecialEffectTarget("Abilities\\Spells\\Items\\AIem\\AIemTarget.mdl",J7O,"origin"))
 else
-call PZI(GetOwningPlayer(J7O),GetObjectName('n02Q'))
+call PZI(GetOwningPlayer(J7O),"合成所需物品尚未备齐！")
 endif
 set J7O=null
 endfunction
@@ -23527,7 +23560,7 @@ set EJ1=null
 endfunction
 function NKO takes nothing returns nothing
 if GetItemTypeId(GetManipulatedItem())==FR0[ZV0]then
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n0G1'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"无法单击拆分，请使用你的能量圈或者飞行信使的拆分功能来拆分")
 endif
 endfunction
 function NLO takes nothing returns boolean
@@ -24170,7 +24203,7 @@ endif
 return true
 endfunction
 function TNO takes nothing returns nothing
-call QRI(bj_FORCE_ALL_PLAYERS,20.00,GetObjectName('n04O')+" "+GetObjectName('n0C7'))
+call QRI(bj_FORCE_ALL_PLAYERS,20.00,"近卫军团摧毁了天灾军团所有的生产建筑"+" "+"现在近卫军团的兵力将远远超过对手并会出动超级士兵")
 call SetPlayerTechResearchedSwap('R00D',(GetPlayerTechCountSimple('R00D',BO[0])+30),BO[0])
 call SetPlayerTechResearchedSwap('R00C',(GetPlayerTechCountSimple('R00C',BO[0])+30),BO[0])
 call DisableTrigger(PG)
@@ -24182,7 +24215,7 @@ endif
 return true
 endfunction
 function TRO takes nothing returns nothing
-call QRI(bj_FORCE_ALL_PLAYERS,20.00,GetObjectName('n04X')+" "+GetObjectName('n0C9'))
+call QRI(bj_FORCE_ALL_PLAYERS,20.00,"天灾军团摧毁了近卫军团所有的生产建筑"+" "+"现在天灾军团的兵力将远远超过对手并会出动超级士兵")
 call SetPlayerTechResearchedSwap('R009',(GetPlayerTechCountSimple('R009',CO[0])+30),CO[0])
 call SetPlayerTechResearchedSwap('R00B',(GetPlayerTechCountSimple('R00B',CO[0])+30),CO[0])
 call DisableTrigger(QG)
@@ -24673,109 +24706,109 @@ endif
 if(TJI==1)then
 set point=GetRectCenter(TA)
 call CreateNUnitsAtLoc(1,'n003',BO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n051'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一只|cff0000ff攻城傀儡|r现在效忠于|cffff0000近卫军团|r，向上路进发！")
 call SSO(bj_lastCreatedGroup,4)
 endif
 if(TJI==2)then
 set point=GetRectCenter(SA)
 call CreateNUnitsAtLoc(1,'n003',BO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n052'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一只|cff0000ff攻城傀儡|r现在效忠于|cffff0000近卫军团|r，向中路进发！")
 call SSO(bj_lastCreatedGroup,2)
 endif
 if(TJI==3)then
 set point=GetRectCenter(NA)
 call CreateNUnitsAtLoc(1,'n003',BO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n053'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一只|cff0000ff攻城傀儡|r现在效忠于|cffff0000近卫军团|r，向下路进发！")
 call SSO(bj_lastCreatedGroup,3)
 endif
 if(TJI==4)then
 set point=GetRectCenter(TA)
 call CreateNUnitsAtLoc(1,'n00E',BO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n058'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一条|cff0000ff恐怖怪鱼|r现在效忠于|cffff0000近卫军团|r，向上路进发！")
 call SSO(bj_lastCreatedGroup,4)
 endif
 if(TJI==5)then
 set point=GetRectCenter(SA)
 call CreateNUnitsAtLoc(1,'n00E',BO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n04Z'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一条|cff0000ff恐怖怪鱼|r现在效忠于|cffff0000近卫军团|r，向中路进发！")
 call SSO(bj_lastCreatedGroup,2)
 endif
 if(TJI==6)then
 set point=GetRectCenter(NA)
 call CreateNUnitsAtLoc(1,'n00E',BO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n057'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一条|cff0000ff恐怖怪鱼|r现在效忠于|cffff0000近卫军团|r，向下路进发！")
 call SSO(bj_lastCreatedGroup,3)
 endif
 if(TJI==7)and O2I==false then
 set point=GetRectCenter(TA)
 call CreateNUnitsAtLoc(1,'n00D',BO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n056'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一头|cff0000ff远古九头蛇|r现在效忠于|cffff0000近卫军团|r，向上路进发！")
 call SSO(bj_lastCreatedGroup,4)
 endif
 if(TJI==8)and O2I==false then
 set point=GetRectCenter(SA)
 call CreateNUnitsAtLoc(1,'n00D',BO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n04T'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一头|cff0000ff远古九头蛇|r现在效忠|cffff0000近卫军团|r，向中路进发！")
 call SSO(bj_lastCreatedGroup,2)
 endif
 if(TJI==9)then
 set point=GetRectCenter(NA)
 call CreateNUnitsAtLoc(1,'n00D',BO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n05C'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一头|cff0000ff远古九头蛇|r现在效忠于|cffff0000近卫军团|r，向下路进发！")
 call SSO(bj_lastCreatedGroup,3)
 endif
 if(TJI==1)then
 set point=GetRectCenter(LA)
 call CreateNUnitsAtLoc(1,'n003',CO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n0CD'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一只|cff0000ff攻城傀儡|r现在效忠于|cff004000天灾军团|r，向上路进发！")
 call SSO(bj_lastCreatedGroup,4)
 endif
 if(TJI==2)then
 set point=GetRectCenter(KA)
 call CreateNUnitsAtLoc(1,'n003',CO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n0CE'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一只|cff0000ff攻城傀儡|r现在效忠于|cff004000天灾军团|r，向中路进发！")
 call SSO(bj_lastCreatedGroup,2)
 endif
 if(TJI==3)then
 set point=GetRectCenter(MA)
 call CreateNUnitsAtLoc(1,'n003',CO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n0CC'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一只|cff0000ff攻城傀儡|r现在效忠于|cff004000天灾军团|r，向下路进发！")
 call SSO(bj_lastCreatedGroup,3)
 endif
 if(TJI==4)then
 set point=GetRectCenter(LA)
 call CreateNUnitsAtLoc(1,'n00E',CO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n0CG'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一条|cff0000ff恐怖怪鱼|r现在效忠于|cff004000天灾军团|r，向上路进发！")
 call SSO(bj_lastCreatedGroup,4)
 endif
 if(TJI==5)then
 set point=GetRectCenter(KA)
 call CreateNUnitsAtLoc(1,'n00E',CO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n0CH'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一条|cff0000ff恐怖怪鱼|r现在效忠于|cff004000天灾军团|r，向中路进发！")
 call SSO(bj_lastCreatedGroup,2)
 endif
 if(TJI==6)then
 set point=GetRectCenter(MA)
 call CreateNUnitsAtLoc(1,'n00E',CO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n0CF'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一条|cff0000ff恐怖怪鱼|r现在效忠于|cff004000天灾军团|r，向下路进发！")
 call SSO(bj_lastCreatedGroup,3)
 endif
 if(TJI==7)then
 set point=GetRectCenter(LA)
 call CreateNUnitsAtLoc(1,'n00D',CO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n0CJ'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一头|cff0000ff远古九头蛇|r现在效忠于|cff004000天灾军团|r，向上路进发！")
 call SSO(bj_lastCreatedGroup,4)
 endif
 if(TJI==8)then
 set point=GetRectCenter(KA)
 call CreateNUnitsAtLoc(1,'n00D',CO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n0CK'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一头|cff0000ff远古九头蛇|r现在效忠于|cff004000天灾军团|r，向中路进发！")
 call SSO(bj_lastCreatedGroup,2)
 endif
 if(TJI==9)then
 set point=GetRectCenter(MA)
 call CreateNUnitsAtLoc(1,'n00D',CO[0],point,bj_UNIT_FACING)
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n0CI'))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"一头|cff0000ff远古九头蛇|r现在效忠于|cff004000天灾军团|r，向下路进发！")
 call SSO(bj_lastCreatedGroup,3)
 endif
 endfunction
@@ -24839,10 +24872,10 @@ call N5I(M0,3,1,"|c00838B8BL|r")
 call N5I(M0,4,1,SB0+"K|r")
 call N5I(M0,5,1,SD0+"D|r")
 call N5I(M0,6,1,SE0+"A|r")
-call N5I(M0,1,2,GetObjectName('n0DK'))
+call N5I(M0,1,2,"近卫军团")
 call N5I(M0,4,2,SB0+"0|r")
 call N5I(M0,5,2,SD0+"0|r")
-call N5I(M0,1,3+S90,GetObjectName('n0DO'))
+call N5I(M0,1,3+S90,"天灾军团")
 call N5I(M0,4,3+S90,SB0+"0|r")
 call N5I(M0,5,3+S90,SD0+"0|r")
 call NEI(M0,1,2,(TSI(SubString(C0[GetPlayerId((BO[0]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((BO[0]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((BO[0]))],8,10)))/255.0*100,0)
@@ -25072,9 +25105,9 @@ set i=i+1
 endloop
 if PPO>0 then
 if IsPlayerAlly(GetLocalPlayer(),BO[0])==true then
-set PTO=SF0+"["+GetObjectName('n0JS')+" |r"+PTO+SF0+"]|r"
+set PTO=SF0+"["+"友方："+" |r"+PTO+SF0+"]|r"
 else
-set PTO=SC0+"["+GetObjectName('n0JR')+" |r"+PTO+SC0+"]|r"
+set PTO=SC0+"["+"敌方："+" |r"+PTO+SC0+"]|r"
 endif
 endif
 set i=1
@@ -25102,9 +25135,9 @@ set i=i+1
 endloop
 if PQO>0 then
 if IsPlayerAlly(GetLocalPlayer(),CO[0])==true then
-set PRO=SF0+"["+GetObjectName('n0JS')+" |r"+PRO+SF0+"]|r"
+set PRO=SF0+"["+"友方："+" |r"+PRO+SF0+"]|r"
 else
-set PRO=SC0+"["+GetObjectName('n0JR')+" |r"+PRO+SC0+"]|r"
+set PRO=SC0+"["+"敌方："+" |r"+PRO+SC0+"]|r"
 endif
 endif
 if M0!=null then
@@ -25597,12 +25630,12 @@ set SG0=CreateMultiboard()
 call MultiboardSetItemsWidth(SG0,0)
 call MultiboardSetRowCount(SG0,QUO)
 call MultiboardSetColumnCount(SG0,U0O)
-call MultiboardSetTitleText(SG0,GetObjectName('n0E3')+" "+" - "+(EL))
+call MultiboardSetTitleText(SG0,"DotA 记分板"+" "+" - "+(EL))
 call MultiboardMinimize(SG0,true)
 call MultiboardSetItemsStyle(SG0,false,false)
 call MultiboardDisplay(SG0,true)
 call MultiboardMinimize(SG0,false)
-call MultiboardSetTitleText(SG0,GetObjectName('n0E3')+" "+" - "+(EL)+" - "+("|c00ff0303"+I2S(I[GetPlayerId(BO[0])])+"|r/|c0020c000"+I2S(O[GetPlayerId(BO[0])])+"|r"))
+call MultiboardSetTitleText(SG0,"DotA 记分板"+" "+" - "+(EL)+" - "+("|c00ff0303"+I2S(I[GetPlayerId(BO[0])])+"|r/|c0020c000"+I2S(O[GetPlayerId(BO[0])])+"|r"))
 set x=1
 set i=1
 loop
@@ -25699,7 +25732,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0EB')+e)
+call MultiboardSetItemValue(N8I,c0+"物品"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -25820,7 +25853,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0E2')+e)
+call MultiboardSetItemValue(N8I,c0+"现有金钱"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -25849,7 +25882,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0E1')+e)
+call MultiboardSetItemValue(N8I,c0+"击杀/死亡/助攻"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -25878,7 +25911,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DZ')+e)
+call MultiboardSetItemValue(N8I,c0+"补兵数"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -25907,7 +25940,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0JU')+e)
+call MultiboardSetItemValue(N8I,c0+"额外黄金"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -25936,7 +25969,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0KF')+e)
+call MultiboardSetItemValue(N8I,c0+"额外经验"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -25965,7 +25998,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0E0')+e)
+call MultiboardSetItemValue(N8I,c0+"购买守卫"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -25994,7 +26027,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DT')+e)
+call MultiboardSetItemValue(N8I,c0+"拆塔数"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26023,7 +26056,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DY')+e)
+call MultiboardSetItemValue(N8I,c0+"杀野数"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26052,7 +26085,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DU')+e)
+call MultiboardSetItemValue(N8I,c0+"击杀英雄奖励"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26081,7 +26114,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DV')+e)
+call MultiboardSetItemValue(N8I,c0+"死亡累计时间"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26110,7 +26143,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DW')+e)
+call MultiboardSetItemValue(N8I,c0+"死亡损失金钱"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26139,7 +26172,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DN')+e)
+call MultiboardSetItemValue(N8I,c0+"消耗品"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26168,7 +26201,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0D8')+e)
+call MultiboardSetItemValue(N8I,c0+"双杀次数"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26197,7 +26230,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DI')+e)
+call MultiboardSetItemValue(N8I,c0+"三杀次数"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26226,7 +26259,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DM')+e)
+call MultiboardSetItemValue(N8I,c0+"最高连杀数"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26258,7 +26291,7 @@ set U1O=QQO
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DL')+e)
+call MultiboardSetItemValue(N8I,c0+"击杀细节"+e)
 call MultiboardReleaseItem(N8I)
 set QPO=UIO
 set x=1
@@ -26319,7 +26352,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0CZ')+e)
+call MultiboardSetItemValue(N8I,c0+"离开于："+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26356,7 +26389,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SG0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0D9')+e)
+call MultiboardSetItemValue(N8I,c0+"胜利者"+e)
 call MultiboardReleaseItem(N8I)
 set N8I=MultiboardGetItem(SG0,QPO,QQO+1)
 call MultiboardSetItemStyle(N8I,true,false)
@@ -26432,7 +26465,7 @@ set SY0=CreateMultiboard()
 call MultiboardSetItemsWidth(SY0,0)
 call MultiboardSetRowCount(SY0,UAO)
 call MultiboardSetColumnCount(SY0,UBO)
-call MultiboardSetTitleText(SY0,GetObjectName('n0E3')+" "+" - "+(EL))
+call MultiboardSetTitleText(SY0,"DotA 记分板"+" "+" - "+(EL))
 call MultiboardMinimize(SY0,true)
 call MultiboardSetItemsStyle(SY0,false,false)
 if GetLocalPlayer()==D60 or GetLocalPlayer()==D70 then
@@ -26531,7 +26564,7 @@ endloop
 if PQO>0 then
 set PRO=SF0+"[Scourge: |r"+PRO+SF0+"]|r"
 endif
-call MultiboardSetTitleText(SY0,PTO+" "+PRO+" "+GetObjectName('n0E3')+" "+" - "+(EL)+" - "+("|c00ff0303"+I2S(I[GetPlayerId(BO[0])])+"|r/|c0020c000"+I2S(O[GetPlayerId(BO[0])])+"|r"))
+call MultiboardSetTitleText(SY0,PTO+" "+PRO+" "+"DotA 记分板"+" "+" - "+(EL)+" - "+("|c00ff0303"+I2S(I[GetPlayerId(BO[0])])+"|r/|c0020c000"+I2S(O[GetPlayerId(BO[0])])+"|r"))
 set x=1
 set i=1
 loop
@@ -26628,7 +26661,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0EB')+e)
+call MultiboardSetItemValue(N8I,c0+"物品"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26749,7 +26782,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0E2')+e)
+call MultiboardSetItemValue(N8I,c0+"现有金钱"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26778,7 +26811,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0LT')+e)
+call MultiboardSetItemValue(N8I,c0+"买活花费"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26809,7 +26842,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DZ')+e)
+call MultiboardSetItemValue(N8I,c0+"补兵数"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26838,7 +26871,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0E1')+e)
+call MultiboardSetItemValue(N8I,c0+"击杀/死亡/助攻"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26869,7 +26902,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0JU')+e)
+call MultiboardSetItemValue(N8I,c0+"额外黄金"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26898,7 +26931,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0KF')+e)
+call MultiboardSetItemValue(N8I,c0+"额外经验"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26929,7 +26962,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0E0')+e)
+call MultiboardSetItemValue(N8I,c0+"购买守卫"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26958,7 +26991,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DT')+e)
+call MultiboardSetItemValue(N8I,c0+"拆塔数"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -26989,7 +27022,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DY')+e)
+call MultiboardSetItemValue(N8I,c0+"杀野数"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -27018,7 +27051,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DU')+e)
+call MultiboardSetItemValue(N8I,c0+"击杀英雄奖励"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -27049,7 +27082,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DV')+e)
+call MultiboardSetItemValue(N8I,c0+"死亡累计时间"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -27078,7 +27111,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DW')+e)
+call MultiboardSetItemValue(N8I,c0+"死亡损失金钱"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -27109,7 +27142,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DN')+e)
+call MultiboardSetItemValue(N8I,c0+"消耗品"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -27138,7 +27171,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0D8')+e)
+call MultiboardSetItemValue(N8I,c0+"双杀次数"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -27169,7 +27202,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DI')+e)
+call MultiboardSetItemValue(N8I,c0+"三杀次数"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -27198,7 +27231,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DM')+e)
+call MultiboardSetItemValue(N8I,c0+"最高连杀数"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -27232,7 +27265,7 @@ set U1O=QQO
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0DL')+e)
+call MultiboardSetItemValue(N8I,c0+"击杀细节"+e)
 call MultiboardReleaseItem(N8I)
 set QPO=UIO
 set x=1
@@ -27293,7 +27326,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0HS')+e)
+call MultiboardSetItemValue(N8I,c0+"冷却时间"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -27334,7 +27367,7 @@ set QQO=0
 set QPO=QPO+1
 set N8I=MultiboardGetItem(SY0,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,c0+GetObjectName('n0E4')+e)
+call MultiboardSetItemValue(N8I,c0+"重生"+e)
 call MultiboardReleaseItem(N8I)
 set QQO=0
 set i=1
@@ -27458,14 +27491,14 @@ endif
 return false
 endfunction
 function IsChinese takes nothing returns boolean
-return GetObjectName('n0K5')!="Only Translate This String If Simplified Chinese"
+return "只有简体中文版需要翻译该文本"!="Only Translate This String If Simplified Chinese"
 endfunction
 function UXO takes nothing returns boolean
 local integer i=0
 local string s="我开通了中文微博：@IceFrogCN(新浪)，@IceFrogdev(腾讯)"
 loop
 exitwhen i>12
-if GetRandomInt(0,10)<11 and(GetObjectName('n0K5')!="Only Translate This String If Simplified Chinese")then
+if GetRandomInt(0,10)<11 and("只有简体中文版需要翻译该文本"!="Only Translate This String If Simplified Chinese")then
 call DisplayTimedTextToPlayer(Player(i),0,0,20,"|CFF00FF00"+s+"|r")
 endif
 set i=i+1
@@ -28538,7 +28571,7 @@ call PlaySoundBJ(OE)
 call BW1(BX1,BY1,true)
 elseif BQO==20 then
 if GetRandomInt(0,10)<2 then
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,6,"|c006699CC"+GetObjectName('n0LG')+"|r")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,6,"|c006699CC"+"如果你发现bug，请致信IceFrog@gmail.com。不要在公共场合讨论任何Bug。"+"|r")
 endif
 elseif BQO==60 then
 call ExecuteFunc("UXO")
@@ -28548,16 +28581,16 @@ endif
 if K0==true and ModuloInteger(GetTriggerEvalCount(GetTriggeringTrigger()),4)==0 then
 if r==85 then
 if K1[GetPlayerId(GetLocalPlayer())]==null then
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,6,"|c006699CC"+GetObjectName('n0NJ')+"|r")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,6,"|c006699CC"+"如果10秒后再不选择英雄，你的金钱将会逐秒减少"+"|r")
 endif
 elseif r==80 then
 if K1[GetPlayerId(GetLocalPlayer())]==null then
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,6,"|c006699CC"+GetObjectName('n0NK')+"|r")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,6,"|c006699CC"+"如果5秒后再不选择英雄，你的金钱将会逐秒减少"+"|r")
 endif
 elseif r<75 and r>0 then
 if r==74 then
 if K1[GetPlayerId(GetLocalPlayer())]==null then
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,6,"|c006699CC"+GetObjectName('n0NL')+"|r")
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,6,"|c006699CC"+"现在你将每秒损失1点金钱，直到你选择了英雄为止"+"|r")
 endif
 endif
 set i=0
@@ -29005,7 +29038,7 @@ call DisableTrigger(SJ0)
 endif
 call DisableTrigger(EX0)
 call ClearTextMessages()
-call QRI(bj_FORCE_ALL_PLAYERS,60,J3+" "+GetObjectName('n054')+" www.getdota.com.")
+call QRI(bj_FORCE_ALL_PLAYERS,60,J3+" "+"获得了胜利！|c00ff8000汉化作者：HippoVic，Outskirts。|r获取最新版本请访问："+" www.getdota.com.")
 set Q2=true
 call I91()
 call DisableTrigger(ZG)
@@ -29019,7 +29052,7 @@ call PanCameraToTimed(GetUnitX(GetTriggerUnit()),GetUnitY(GetTriggerUnit()),0)
 call TriggerRegisterTimerEvent(t,2.5,false)
 call TriggerAddCondition(t,Condition(function OK2))
 set R10=2
-set J3="|c0020c000"+GetObjectName('n03O')+"|r"
+set J3="|c0020c000"+"天灾军团"+"|r"
 call ON2()
 call OM2()
 call OJ2("2")
@@ -29039,7 +29072,7 @@ call PanCameraToTimed(GetUnitX(GetTriggerUnit()),GetUnitY(GetTriggerUnit()),0)
 call TriggerRegisterTimerEvent(t,1.5,false)
 call TriggerAddCondition(t,Condition(function OK2))
 set R10=1
-set J3="|c00ff0303"+GetObjectName('n03N')+"|r"
+set J3="|c00ff0303"+"近卫军团"+"|r"
 call ON2()
 call OM2()
 call OJ2("1")
@@ -29167,7 +29200,7 @@ endif
 if GetSpellAbilityId()==R30 and(GetPlayerSlotState(GetOwningPlayer((GetSpellTargetUnit())))==PLAYER_SLOT_STATE_LEFT)and((LoadInteger(LY,(GetHandleId((GetSpellTargetUnit()))),((4259))))==1)==false then
 call A52()
 elseif(GetSpellAbilityId()==R40 or GetSpellAbilityId()==R30)and(GetPlayerSlotState(GetOwningPlayer((GetSpellTargetUnit())))==PLAYER_SLOT_STATE_LEFT)==false then
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n02N'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"只能以离开的英雄为目标")
 endif
 return false
 endfunction
@@ -29200,7 +29233,7 @@ if GetUnitTypeId(GetTriggerUnit())=='n00L' then
 if IsUnitIllusion(GetAttacker())==true then
 call KillUnit(GetAttacker())
 elseif IsUnitInRegion(R60,GetAttacker())==false then
-call PZI(GetOwningPlayer(GetAttacker()),GetObjectName('n035'))
+call PZI(GetOwningPlayer(GetAttacker()),"你不能从这里攻击Roshan")
 call IssueImmediateOrder(GetAttacker(),"stop")
 endif
 endif
@@ -29734,16 +29767,16 @@ function BY2 takes nothing returns nothing
 call EnumDestructablesInRectAll(bj_mapInitialPlayableArea,function AA2)
 endfunction
 function BJ2 takes nothing returns boolean
-call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,60,"**** "+GetObjectName('n06F')+" ****")
-call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,60,GetObjectName('n076')+" -lvlup xx, -refresh, -spawncreeps, -powerup, -neutrals, -kill, -gold xxxx, -time xx, -killsent, -killscourge, -killall, -noherolimit, -trees, -killwards, -spawnoff, -spawnon, -roshan, -respawn, -dummy")
-call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,60,"**** "+GetObjectName('n06F')+" ****")
+call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,60,"**** "+"提示"+" ****")
+call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,60,"系统侦测到你在使用单机模式。你可以使用下列单机命令："+" -lvlup xx, -refresh, -spawncreeps, -powerup, -neutrals, -kill, -gold xxxx, -time xx, -killsent, -killscourge, -killall, -noherolimit, -trees, -killwards, -spawnoff, -spawnon, -roshan, -respawn, -dummy")
+call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,60,"**** "+"提示"+" ****")
 return false
 endfunction
 function BK2 takes nothing returns nothing
 local player OnlyPlayer=WO
 local trigger t
 set R80=true
-call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,60,GetObjectName('n076')+" -lvlup xx, -refresh, -spawncreeps, -powerup, -neutrals, -kill, -gold xxxx, -time xx, -killsent, -killscourge, -killall, -noherolimit, -trees, -killwards, -spawnoff, -spawnon, -roshan, -respawn, -dummy")
+call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,60,"系统侦测到你在使用单机模式。你可以使用下列单机命令："+" -lvlup xx, -refresh, -spawncreeps, -powerup, -neutrals, -kill, -gold xxxx, -time xx, -killsent, -killscourge, -killall, -noherolimit, -trees, -killwards, -spawnoff, -spawnon, -roshan, -respawn, -dummy")
 set t=CreateTrigger()
 call TriggerAddCondition(t,Condition(function BJ2))
 call TriggerRegisterTimerEvent(t,GetRandomReal(60,100),false)
@@ -30010,8 +30043,8 @@ set A2I=true
 if PE0==false then
 set RA0=true
 call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,60.00," ")
-call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,90.00,GetObjectName('n077'))
-call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,90.00,GetObjectName('n078'))
+call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,90.00,"WTF模式已经被激活。在这个模式下使用技能不需要消耗魔法并且没有冷却时间")
+call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,90.00,"此模式仅供娱乐")
 set t=CreateTrigger()
 call UMI(t,EVENT_PLAYER_UNIT_SPELL_EFFECT)
 call TriggerAddAction(t,function BS2)
@@ -30629,7 +30662,7 @@ local integer a=S2I(SubString(GetEventPlayerChatString(),10,StringLength(GetEven
 local integer MLI=GetPlayerId(GetTriggerPlayer())
 set RH0[MLI]=RH0[MLI]+1
 if RH0[MLI]>10 then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,GetObjectName('n0DQ'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,"你用太多次！")
 return
 endif
 if a<1 or a>8 then
@@ -30699,7 +30732,7 @@ call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(p,PLAYER_STATE_R
 call RGI(p)
 endif
 else
-call DisplayTimedTextToPlayer(p,0,U2,10,GetObjectName('n079'))
+call DisplayTimedTextToPlayer(p,0,U2,10,"不能为你随机选择英雄")
 endif
 set t=null
 set p=null
@@ -30712,7 +30745,7 @@ set L2=T4I
 if G52()and F3[GetPlayerId(T4I)]==false then
 set F3[GetPlayerId(T4I)]=true
 call TFI(T4I)
-call DisplayTimedTextToPlayer(T4I,0,U2,10,GetObjectName('n07A'))
+call DisplayTimedTextToPlayer(T4I,0,U2,10,"你马上会得到一个随机选择的英雄")
 set t=CreateTrigger()
 call TriggerRegisterTimerEvent(t,6,false)
 call TriggerAddCondition(t,Condition(function G62))
@@ -30724,12 +30757,12 @@ endfunction
 function G82 takes nothing returns boolean
 local unit SFI=K1[GetPlayerId(GetTriggerPlayer())]
 if O8I then
-call PZI(GetTriggerPlayer(),GetObjectName('n030'))
+call PZI(GetTriggerPlayer(),"主机禁止重选英雄")
 return false
 endif
 if A3==false then
 if IAI==false and N2==false and QT0==false and BN==false and INI==false and IQI==false and B3==false and E2==false then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"-repick "+GetObjectName('n05B'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"-repick "+"指令在这几秒内无效")
 endif
 return false
 endif
@@ -30743,19 +30776,19 @@ if X0 or N2 or B3 then
 return false
 endif
 if(H3==true)then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n050'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"已经太晚，不能重新选择英雄了")
 return false
 endif
 if(GetPlayerState(GetTriggerPlayer(),PLAYER_STATE_RESOURCE_GOLD)<T0)then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n059'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"没有足够的黄金重新选择英雄")
 return false
 endif
 if GetPlayerState(GetTriggerPlayer(),PLAYER_STATE_RESOURCE_GOLD)<350 and K0 or J2 then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n05U'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"没有足够的金钱重新选择并买一个新英雄")
 return false
 endif
 if GetUnitState(SFI,UNIT_STATE_MANA)!=GetUnitState(SFI,UNIT_STATE_MAX_MANA)or GetUnitState(SFI,UNIT_STATE_LIFE)!=GetUnitState(SFI,UNIT_STATE_MAX_LIFE)then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n05J'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"只有在满血满魔的状态下才能重新选择英雄")
 return false
 endif
 return true
@@ -30768,7 +30801,7 @@ elseif GetUnitTypeId(GetEnumUnit())=='U008' or GetUnitTypeId(GetEnumUnit())=='E0
 set NK=GetEnumUnit()
 call ExecuteFunc("AZO")
 endif
-call QRI(MCI(GetTriggerPlayer()),10.00,GetObjectName('n05L')+" "+S8I(GetEnumUnit())+".")
+call QRI(MCI(GetTriggerPlayer()),10.00,"一名对方玩家放弃使用"+" "+S8I(GetEnumUnit())+".")
 endif
 if(GetUnitTypeId(GetEnumUnit())=='n004')then
 call RemoveUnit(GetEnumUnit())
@@ -30892,124 +30925,124 @@ function EM2 takes nothing returns nothing
 local player T4I=GetTriggerPlayer()
 local string GD2="|c006699CC"
 if INI then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"League Mode"+"|r:      "+GetObjectName('n075'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"League Mode"+"|r:      "+"两边将轮流选取英雄")
 endif
 if IQI then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Extended League"+"|r:      "+GetObjectName('n07B'))
-call DisplayTimedTextToPlayer(T4I,0,U2,20,"                                 "+GetObjectName('n070'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Extended League"+"|r:      "+"两边将轮流选取英雄")
+call DisplayTimedTextToPlayer(T4I,0,U2,20,"                                 "+"每方阵营的队长可以从酒馆中移除4个英雄")
 endif
 if X0 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Death Match"+"|r:        "+GetObjectName('n06Z'))
-call DisplayTimedTextToPlayer(T4I,0,U2,20,"                              "+GetObjectName('n06Y')+" "+I2S(Q9I(DF0,DH0-DG0+1))+" "+GetObjectName('n07C'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Death Match"+"|r:        "+"当你死亡后，你将必须选择一个新英雄")
+call DisplayTimedTextToPlayer(T4I,0,U2,20,"                              "+"在你的队伍用完"+" "+I2S(Q9I(DF0,DH0-DG0+1))+" "+"位英雄后，你们就输掉了这场比赛")
 endif
 if E2 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Mirror Match"+"|r:       "+GetObjectName('n06W'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Mirror Match"+"|r:       "+"一分钟之后，两边队伍将获得同样的英雄阵容")
 endif
 if K0 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"All Pick"+"|r:                 "+GetObjectName('n06V'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"All Pick"+"|r:                 "+"你可以使用任意酒馆里的英雄")
 endif
 if QT0 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Random Draft"+"|r:                 "+GetObjectName('n072'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Random Draft"+"|r:                 "+"你将从被系统随机挑选出的英雄中选择一个")
 endif
 if IAI then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Single Draft"+"|r:                 "+GetObjectName('n07G'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Single Draft"+"|r:                 "+"你可以从系统提供的3个选项中选择一个英雄")
 endif
 if Y0 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"All Random"+"|r:          "+GetObjectName('n071'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"All Random"+"|r:          "+"你将会随机分配到一个来自任意酒馆的英雄")
 endif
 if N2 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Vote Random"+"|r:         "+GetObjectName('n074'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Vote Random"+"|r:         "+"你将随机分配到一个英雄，该英雄来自你们所选举出的团队阵容")
 endif
 if J0 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Team Random"+"|r:     "+GetObjectName('n06M'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Team Random"+"|r:     "+"你将会随机分配到一个来自本方酒馆的英雄")
 endif
 if B3 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Reverse"+"|r:                 "+GetObjectName('n073'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Reverse"+"|r:                 "+"你为你的对手选择他将使用的英雄")
 endif
 if FO then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Shuffle Players"+"|r:     "+GetObjectName('n07H'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Shuffle Players"+"|r:     "+"重新分配两个阵营的玩家")
 endif
 if H2 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"All Agility"+"|r:             "+GetObjectName('n07L'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"All Agility"+"|r:             "+"只允许选择敏捷英雄")
 endif
 if V2 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"All Strength"+"|r:         "+GetObjectName('n07K'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"All Strength"+"|r:         "+"只允许选择力量英雄")
 endif
 if Z2 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"All Intelligence"+"|r:    "+GetObjectName('n07J'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"All Intelligence"+"|r:    "+"只允许选择智力英雄")
 endif
 if OOI then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Range Only"+"|r:    "+GetObjectName('n0G4'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Range Only"+"|r:    "+"只对远程英雄有效")
 endif
 if O1I then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Melee Only"+"|r:    "+GetObjectName('n0G5'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Melee Only"+"|r:    "+"只对近程英雄有效")
 endif
 if F2 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Duplicate Mode"+"|r:   "+GetObjectName('n07I'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Duplicate Mode"+"|r:   "+"同样的英雄可以被多次选择")
 endif
 if L0 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Item Drop"+"|r:             "+GetObjectName('n07F'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Item Drop"+"|r:             "+"当你死亡后，会随机掉落物品栏某一格的物品")
 endif
 if P0 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"No Powerups"+"|r:        "+GetObjectName('n07M'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"No Powerups"+"|r:        "+"神符被禁止了")
 endif
 if Q0 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Super Creeps"+"|r:        "+GetObjectName('n07N'))
-call DisplayTimedTextToPlayer(T4I,0,U2,20,"                             "+GetObjectName('n07O'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Super Creeps"+"|r:        "+"攻城傀儡，恐怖怪鱼和远古九头蛇")
+call DisplayTimedTextToPlayer(T4I,0,U2,20,"                             "+"将随机加入双方阵营")
 endif
 if R0 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Easy Mode"+"|r:           "+GetObjectName('n07T'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Easy Mode"+"|r:           "+"削弱防御塔的攻击力和生命，提升英雄所得到的经验值以及周期性的金钱供应")
 endif
 if Y2 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Same Hero"+"|r:           "+GetObjectName('n07U')+" "+(D80[GetPlayerId((WO))])+"|r"+" "+GetObjectName('n07W'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Same Hero"+"|r:           "+"所有的玩家都将得到"+" "+(D80[GetPlayerId((WO))])+"|r"+" "+"所选的英雄")
 endif
 if O2I then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Only Mid"+"|r:           "+GetObjectName('n080'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Only Mid"+"|r:           "+"只能中路塔能够被摧毁")
 endif
 if O4I then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"No Bot"+"|r:           "+GetObjectName('n07V'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"No Bot"+"|r:           "+"下路将不会出兵")
 endif
 if O6I then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"No Mid"+"|r:           "+GetObjectName('n07S'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"No Mid"+"|r:           "+"中路将不会出兵")
 endif
 if O7I then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"No Top"+"|r:           "+GetObjectName('n07R'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"No Top"+"|r:           "+"上路将不会出兵")
 endif
 if FL then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"No Swap"+"|r:           "+GetObjectName('n07X'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"No Swap"+"|r:           "+"禁止玩家之间交换英雄")
 endif
 if FL then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"No Repick"+"|r:           "+GetObjectName('n07Q'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"No Repick"+"|r:           "+"禁止玩家重选英雄")
 endif
 if ZL then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Pool Mode"+"|r:           "+GetObjectName('n07Y'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Pool Mode"+"|r:           "+"允许为队友养人")
 endif
 if O9I then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Observer Info"+"|r:           "+GetObjectName('n07Z'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Observer Info"+"|r:           "+"禁止为裁判显示额外信息")
 endif
 if OBI then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Mini Hereos"+"|r:           "+GetObjectName('n0EC'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Mini Hereos"+"|r:           "+"创建微缩英雄模型")
 endif
 if OCI then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Fast Respawn"+"|r:           "+GetObjectName('n0DP'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Fast Respawn"+"|r:           "+"缩短50%的死亡等待时间")
 endif
 if CN then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Captains Mode"+"|r:           "+GetObjectName('n0ED'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Captains Mode"+"|r:           "+"各团队的队长必须决定禁用的英雄，然后开始选择英雄")
 endif
 if HL then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Experimental Runes"+"|r:           "+GetObjectName('n0G6'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Experimental Runes"+"|r:           "+"另一种神符刷新系统")
 endif
 if BN then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Captains Draft"+"|r:           "+GetObjectName('n0GF'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Captains Draft"+"|r:           "+"队长可以从限定的阵容中征召英雄")
 endif
 if OFI then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Capture Point"+"|r:           "+GetObjectName('n0KH'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Capture Point"+"|r:           "+"据点占据模式将会在10分钟后开始，占据据点的英雄越多，获得的额外属性越快。")
 endif
 if ODI then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Capture Point"+"|r:           "+GetObjectName('n0KI'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Capture Point"+"|r:           "+"观察者将会通过放大模式观看游戏。")
 endif
 if J2 then
-call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Normal Mode"+"|r:        "+GetObjectName('n07P'))
+call DisplayTimedTextToPlayer(T4I,0,U2,20,GD2+"Normal Mode"+"|r:        "+"没有选择模式")
 endif
 endfunction
 function GF2 takes nothing returns nothing
@@ -31250,11 +31283,11 @@ call GG2(u1,u2)
 return true
 else
 call DisplayTimedTextToPlayer(GetOwningPlayer(u2),0,U2,30,"  ")
-call DisplayTimedTextToPlayer(GetOwningPlayer(u2),0,U2,30,"                         "+C0[GetPlayerId(GetOwningPlayer(u1))]+GetUnitName(u1)+"|r |cff99ccff"+GetObjectName('n082')+" "+GetObjectName('n083')+"|r |c00ff0303-swap "+I2S(GK2(GetOwningPlayer(u1)))+"|r |cff99ccff"+GetObjectName('n081')+"|r")
+call DisplayTimedTextToPlayer(GetOwningPlayer(u2),0,U2,30,"                         "+C0[GetPlayerId(GetOwningPlayer(u1))]+GetUnitName(u1)+"|r |cff99ccff"+"想和你交换英雄"+" "+"输入"+"|r |c00ff0303-swap "+I2S(GK2(GetOwningPlayer(u1)))+"|r |cff99ccff"+"来接受请求"+"|r")
 call DisplayTimedTextToPlayer(GetOwningPlayer(u2),0,U2,30,"  ")
 if GM2 then
 call DisplayTimedTextToPlayer(GetOwningPlayer(u1),0,U2,30,"  ")
-call DisplayTimedTextToPlayer(GetOwningPlayer(u1),0,U2,30,"|cff99ccff"+GetObjectName('n08C')+" |r"+C0[GetPlayerId(GetOwningPlayer(u2))]+GetUnitName(u2)+"|r")
+call DisplayTimedTextToPlayer(GetOwningPlayer(u1),0,U2,30,"|cff99ccff"+"你请求同以下玩家进行交换"+" |r"+C0[GetPlayerId(GetOwningPlayer(u2))]+GetUnitName(u2)+"|r")
 call DisplayTimedTextToPlayer(GetOwningPlayer(u1),0,U2,30,"  ")
 endif
 endif
@@ -31282,7 +31315,7 @@ set i=i+1
 endloop
 return
 elseif i<1 or i>5 then
-call PZI(GetTriggerPlayer(),GetObjectName('n02Z'))
+call PZI(GetTriggerPlayer(),"无效的交换对象")
 return
 endif
 set HK=K1[GetPlayerId(GetTriggerPlayer())]
@@ -31293,7 +31326,7 @@ set JK=CO[i]
 endif
 set GK=K1[GetPlayerId(JK)]
 if HK==null or GetOwningPlayer(HK)!=GetTriggerPlayer()or GK==null or GetOwningPlayer(GK)!=JK or JK==GetTriggerPlayer()then
-call PZI(GetTriggerPlayer(),GetObjectName('n02Z'))
+call PZI(GetTriggerPlayer(),"无效的交换对象")
 return
 endif
 call GL2(HK,GK,true)
@@ -31306,7 +31339,7 @@ local string s
 if GetLocalPlayer()==GetTriggerPlayer()then
 call ClearTextMessages()
 endif
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,45,"|cff99ccff"+GetObjectName('n08B')+"|r")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,45,"|cff99ccff"+"交换英雄选项："+"|r")
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,45," ")
 set i=1
 loop
@@ -31316,7 +31349,7 @@ set u=K1[GetPlayerId(p)]
 if IsPlayerAlly(GetTriggerPlayer(),p)and GetTriggerPlayer()!=p and u!=null and GetOwningPlayer(u)==p then
 set s=" "
 if GJ2(K1[GetPlayerId(GetTriggerPlayer())],u)then
-set s=" |c00ff0303("+GetObjectName('n085')+")|r"
+set s=" |c00ff0303("+"请求与你交换"+")|r"
 endif
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,45,C0[GetPlayerId(p)]+I2S(i)+"|r"+" - "+"|cff99ccff"+GetUnitName(u)+"|r"+s)
 endif
@@ -31325,14 +31358,14 @@ set u=K1[GetPlayerId(p)]
 if IsPlayerAlly(GetTriggerPlayer(),p)and GetTriggerPlayer()!=p and u!=null and GetOwningPlayer(u)==p then
 set s=" "
 if GJ2(K1[GetPlayerId(GetTriggerPlayer())],u)then
-set s=" |c00ff0303("+GetObjectName('n085')+")|r"
+set s=" |c00ff0303("+"请求与你交换"+")|r"
 endif
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,45,C0[GetPlayerId(p)]+I2S(i)+"|r"+" - "+"|cff99ccff"+GetUnitName(u)+"|r"+s)
 endif
 set i=i+1
 endloop
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,45," ")
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,45,"|cff99ccff"+GetObjectName('n083')+"|r |c00ff0303-swap #|r |cff99ccff"+GetObjectName('n086')+" -swapcancel "+GetObjectName('n087')+"|r")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,45,"|cff99ccff"+"输入"+"|r |c00ff0303-swap #|r |cff99ccff"+"来做一个选择 或者"+" -swapcancel "+"来取消交换请求"+"|r")
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,45," ")
 endfunction
 function GT2 takes player MDI returns boolean
@@ -31359,7 +31392,7 @@ endif
 endfunction
 function GP2 takes nothing returns boolean
 if FL or GL==false then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"-swaphero "+GetObjectName('n088'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"-swaphero "+"被禁止了")
 return false
 endif
 if S0[GetPlayerId(GetTriggerPlayer())]==true then
@@ -31369,15 +31402,15 @@ return false
 endif
 endif
 if GetUnitState(K1[GetPlayerId(GetTriggerPlayer())],UNIT_STATE_LIFE)<1 then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n08F'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"你必须有一个活着的英雄才能选择和别人交换")
 return false
 endif
 if CL==true then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n08G')+" -swaphero.")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"已经太晚，不能使用"+" -swaphero.")
 return false
 endif
 if GT2(GetTriggerPlayer())==false then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n08H'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"没有可供交换的英雄")
 return false
 endif
 return true
@@ -31468,7 +31501,7 @@ function H32 takes nothing returns nothing
 local unit SFI=K1[GetPlayerId(GetTriggerPlayer())]
 call UnitAddAbility(SFI,'A0FI')
 call IssueImmediateOrder(SFI,"chemicalrage")
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,120.00,"|c00ff0303"+GetObjectName('n08I')+" "+S8I(GetEnumUnit())+". "+GetObjectName('n08J')+"|r")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,120.00,"|c00ff0303"+"正在使用-recreate指令"+" "+S8I(GetEnumUnit())+". "+"请耐心等待约2分钟的时间"+"|r")
 endfunction
 function ES2 takes nothing returns nothing
 if H22()then
@@ -31508,7 +31541,7 @@ local unit SFI=K1[GetPlayerId(p)]
 local trigger t
 if IsUnitDead(SFI)==false then
 set t=CreateTrigger()
-call DisplayTimedTextToPlayer(p,0,U2,30.0,GetObjectName('n08K'))
+call DisplayTimedTextToPlayer(p,0,U2,30.0,"你在使用-unstuck命令，在60秒后，你将会被传送回基地")
 call UnitRemoveBuffs(SFI,true,false)
 call UnitRemoveAbility(SFI,'Bcyc')
 call UnitRemoveAbility(SFI,'Bcy2')
@@ -31556,7 +31589,7 @@ endfunction
 function H82 takes player p returns string
 local string s=K3[GetPlayerId(p)]
 if K3[GetPlayerId(p)]!="Here"then
-return" |c00ff0303("+GetObjectName('n089')+" at "+SubString(s,10,StringLength(s))+"|c00ff0303)|r"
+return" |c00ff0303("+"离开游戏"+" at "+SubString(s,10,StringLength(s))+"|c00ff0303)|r"
 endif
 return" "
 endfunction
@@ -31570,7 +31603,7 @@ loop
 exitwhen TGI>THI
 set MLI=GetPlayerId(BO[TGI])
 if(K1[MLI]!=null)then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,20,C0[MLI]+(D80[GetPlayerId((BO[TGI]))])+"|r "+GetObjectName('n08M')+" "+GetUnitName(K1[MLI])+" ("+GetObjectName('n08L')+" "+I2S(GetUnitLevel(K1[MLI]))+")"+H82(BO[TGI]))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,20,C0[MLI]+(D80[GetPlayerId((BO[TGI]))])+"|r "+"控制"+" "+GetUnitName(K1[MLI])+" ("+"等级"+" "+I2S(GetUnitLevel(K1[MLI]))+")"+H82(BO[TGI]))
 endif
 set TGI=TGI+1
 endloop
@@ -31579,7 +31612,7 @@ loop
 exitwhen TGI>THI
 set MLI=GetPlayerId(CO[TGI])
 if(K1[MLI]!=null)then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,20,C0[MLI]+(D80[GetPlayerId((CO[TGI]))])+"|r "+GetObjectName('n08M')+" "+GetUnitName(K1[MLI])+" ("+GetObjectName('n08L')+" "+I2S(GetUnitLevel(K1[MLI]))+")"+H82(CO[TGI]))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,20,C0[MLI]+(D80[GetPlayerId((CO[TGI]))])+"|r "+"控制"+" "+GetUnitName(K1[MLI])+" ("+"等级"+" "+I2S(GetUnitLevel(K1[MLI]))+")"+H82(CO[TGI]))
 endif
 set TGI=TGI+1
 endloop
@@ -31597,13 +31630,13 @@ function EP2 takes nothing returns nothing
 local unit u
 local integer i=0
 if(K1[GetPlayerId(GetTriggerPlayer())]==null)then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetObjectName('n08A'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,"你还没有选择英雄")
 else
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetUnitName(K1[GetPlayerId(GetTriggerPlayer())])+" "+GetObjectName('n08N')+" "+I2S(R2I(0.5+H51(K1[GetPlayerId(GetTriggerPlayer())]))))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetUnitName(K1[GetPlayerId(GetTriggerPlayer())])+" "+"的移动速度为"+" "+I2S(R2I(0.5+H51(K1[GetPlayerId(GetTriggerPlayer())]))))
 if HA2(K1[GetPlayerId(GetTriggerPlayer())])then
 set u=HB2(K1[GetPlayerId(GetTriggerPlayer())])
 if u!=null then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetUnitName(u)+" "+GetObjectName('n08N')+" "+I2S(R2I(0.5+GetUnitMoveSpeed(u))))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetUnitName(u)+" "+"的移动速度为"+" "+I2S(R2I(0.5+GetUnitMoveSpeed(u))))
 endif
 endif
 endif
@@ -31612,20 +31645,20 @@ function EQ2 takes nothing returns nothing
 local unit u
 local integer i=0
 if(K1[GetPlayerId(GetTriggerPlayer())]==null)then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetObjectName('n08A'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,"你还没有选择英雄")
 else
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetUnitName(K1[GetPlayerId(GetTriggerPlayer())])+" "+GetObjectName('n08N')+" "+I2S(R2I(0.5+H51(K1[GetPlayerId(GetTriggerPlayer())]))))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetUnitName(K1[GetPlayerId(GetTriggerPlayer())])+" "+"的移动速度为"+" "+I2S(R2I(0.5+H51(K1[GetPlayerId(GetTriggerPlayer())]))))
 if HA2(K1[GetPlayerId(GetTriggerPlayer())])then
 set u=HB2(K1[GetPlayerId(GetTriggerPlayer())])
 if u!=null then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetUnitName(u)+" "+GetObjectName('n08N')+" "+I2S(R2I(0.5+GetUnitMoveSpeed(u))))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetUnitName(u)+" "+"的移动速度为"+" "+I2S(R2I(0.5+GetUnitMoveSpeed(u))))
 endif
 endif
 loop
 exitwhen i>16
 set u=K1[i]
 if u!=null and u!=K1[GetPlayerId(GetTriggerPlayer())]and IsUnitAlly(u,GetTriggerPlayer())==true then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetUnitName(u)+" "+GetObjectName('n08N')+" "+I2S(R2I(0.5+GetUnitMoveSpeed(u))))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetUnitName(u)+" "+"的移动速度为"+" "+I2S(R2I(0.5+GetUnitMoveSpeed(u))))
 endif
 set i=i+1
 endloop
@@ -31633,14 +31666,14 @@ endif
 endfunction
 function EU2 takes nothing returns nothing
 call SaveBoolean(LY,(GetHandleId(GetTriggerPlayer())),(139),(true))
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n08R'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"拒绝友方一些特定的技能")
 endfunction
 function F02 takes nothing returns nothing
 call SaveBoolean(LY,(GetHandleId(GetTriggerPlayer())),(139),(false))
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n08O'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"允许队友对自己施放一些特定的友方技能")
 endfunction
 function FI2 takes nothing returns nothing
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,"   "+GetObjectName('n08P')+" "+I2S(A[GetPlayerId(GetTriggerPlayer())])+" "+GetObjectName('n08Q')+" "+I2S(B[GetPlayerId(GetTriggerPlayer())])+" "+GetObjectName('n08S')+" "+I2S(C[GetPlayerId(GetTriggerPlayer())]))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,"   "+"正补："+" "+I2S(A[GetPlayerId(GetTriggerPlayer())])+" "+"反补："+" "+I2S(B[GetPlayerId(GetTriggerPlayer())])+" "+"消灭中立单位数量："+" "+I2S(C[GetPlayerId(GetTriggerPlayer())]))
 endfunction
 function F12 takes nothing returns nothing
 local integer x=GetPlayerId(GetTriggerPlayer())
@@ -31682,19 +31715,19 @@ set handle_id=GetHandleId(t)
 call TriggerRegisterTimerEvent(t,0.01,true)
 call TriggerAddCondition(t,Condition(function HG2))
 call SaveInteger(LY,(handle_id),(34),(x))
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,GetObjectName('n0JW'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,"你开启了镜头置中；使用 -centeroff 或 -co 关闭镜头置中")
 elseif GetEventPlayerChatString()=="-centeroff"or GetEventPlayerChatString()=="-co"then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,GetObjectName('n0JX'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,"你关闭了镜头置中；使用 -center 或 -c 重新开启")
 set RV0[x]=false
 endif
 endfunction
 function G02 takes nothing returns nothing
 set RW0[GetPlayerId(GetTriggerPlayer())]=false
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,5,GetObjectName('n0JZ'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,5,"控制帮助选项已经关闭")
 endfunction
 function GI2 takes nothing returns nothing
 set RW0[GetPlayerId(GetTriggerPlayer())]=true
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,5,GetObjectName('n0K0'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,5,"控制帮助选项已经开启")
 endfunction
 function FU2 takes nothing returns nothing
 local integer i=0
@@ -31741,7 +31774,7 @@ loop
 exitwhen i>5
 set p=BO[i]
 if EF0[GetPlayerId(p)]==true and RX0[GetPlayerId(p)]==false then
-call QRI(OO,10,GetObjectName('n0KD')+" "+(D80[GetPlayerId((p))]))
+call QRI(OO,10,"已经为该玩家解锁金钱和物品："+" "+(D80[GetPlayerId((p))]))
 call BB1(p)
 set RX0[GetPlayerId(p)]=true
 endif
@@ -31753,7 +31786,7 @@ loop
 exitwhen i>5
 set p=CO[i]
 if EF0[GetPlayerId(p)]==true and RX0[GetPlayerId(p)]==false then
-call QRI(AO,10,GetObjectName('n0KD')+" "+(D80[GetPlayerId((p))]))
+call QRI(AO,10,"已经为该玩家解锁金钱和物品："+" "+(D80[GetPlayerId((p))]))
 call BB1(p)
 set RX0[GetPlayerId(p)]=true
 endif
@@ -31762,9 +31795,9 @@ endloop
 endif
 else
 if IsPlayerTeam1(GetTriggerPlayer())then
-call QRI(OO,10,GetObjectName('n0KB')+" "+I2S(NPI)+"/"+I2S(HV2)+" ("+(D80[GetPlayerId((GetTriggerPlayer()))])+")")
+call QRI(OO,10,"解锁总计："+" "+I2S(NPI)+"/"+I2S(HV2)+" ("+(D80[GetPlayerId((GetTriggerPlayer()))])+")")
 else
-call QRI(AO,10,GetObjectName('n0KB')+" "+I2S(NPI)+"/"+I2S(HV2)+" ("+(D80[GetPlayerId((GetTriggerPlayer()))])+")")
+call QRI(AO,10,"解锁总计："+" "+I2S(NPI)+"/"+I2S(HV2)+" ("+(D80[GetPlayerId((GetTriggerPlayer()))])+")")
 endif
 endif
 endfunction
@@ -31779,7 +31812,7 @@ set Q4I=R2I(TimerGetRemaining(F0[GetPlayerId(p)]))
 if Q4I>0 and RL0[GetPlayerId(p)]and WL==false and Q2==false then
 call PlayerSetLeaderboard(p,RM0[GetPlayerId(p)])
 call LeaderboardDisplay(RM0[GetPlayerId(p)],true)
-call LeaderboardSetLabel(RM0[GetPlayerId(p)],"   "+GetObjectName('n08V')+" "+I2S(Q4I)+" "+GetObjectName('n095'))
+call LeaderboardSetLabel(RM0[GetPlayerId(p)],"   "+"复活剩余时间："+" "+I2S(Q4I)+" "+"秒")
 else
 call LeaderboardDisplay(RM0[GetPlayerId(p)],false)
 endif
@@ -31788,7 +31821,7 @@ set Q4I=R2I(TimerGetRemaining(F0[GetPlayerId(p)]))
 if Q4I>0 and RL0[GetPlayerId(p)]and WL==false and Q2==false then
 call PlayerSetLeaderboard(p,RM0[GetPlayerId(p)])
 call LeaderboardDisplay(RM0[GetPlayerId(p)],true)
-call LeaderboardSetLabel(RM0[GetPlayerId(p)],"   "+GetObjectName('n08V')+" "+I2S(Q4I)+" "+GetObjectName('n095'))
+call LeaderboardSetLabel(RM0[GetPlayerId(p)],"   "+"复活剩余时间："+" "+I2S(Q4I)+" "+"秒")
 else
 call LeaderboardDisplay(RM0[GetPlayerId(p)],false)
 endif
@@ -31801,56 +31834,56 @@ set x=x+1
 set RM0[GetPlayerId(BO[x])]=CreateLeaderboard()
 call PlayerSetLeaderboard(BO[x],RM0[GetPlayerId(BO[x])])
 call LeaderboardDisplay(RM0[GetPlayerId(BO[x])],false)
-call LeaderboardSetLabel(RM0[GetPlayerId(BO[x])],GetObjectName('n0E4')+": ")
+call LeaderboardSetLabel(RM0[GetPlayerId(BO[x])],"重生"+": ")
 set RM0[GetPlayerId(CO[x])]=CreateLeaderboard()
 call PlayerSetLeaderboard(CO[x],RM0[GetPlayerId(CO[x])])
 call LeaderboardDisplay(RM0[GetPlayerId(CO[x])],false)
-call LeaderboardSetLabel(RM0[GetPlayerId(CO[x])],GetObjectName('n0E4')+": ")
+call LeaderboardSetLabel(RM0[GetPlayerId(CO[x])],"重生"+": ")
 set x=x+1
 set RM0[GetPlayerId(BO[x])]=CreateLeaderboard()
 call PlayerSetLeaderboard(BO[x],RM0[GetPlayerId(BO[x])])
 call LeaderboardDisplay(RM0[GetPlayerId(BO[x])],false)
-call LeaderboardSetLabel(RM0[GetPlayerId(BO[x])],GetObjectName('n0E4')+": ")
+call LeaderboardSetLabel(RM0[GetPlayerId(BO[x])],"重生"+": ")
 set RM0[GetPlayerId(CO[x])]=CreateLeaderboard()
 call PlayerSetLeaderboard(CO[x],RM0[GetPlayerId(CO[x])])
 call LeaderboardDisplay(RM0[GetPlayerId(CO[x])],false)
-call LeaderboardSetLabel(RM0[GetPlayerId(CO[x])],GetObjectName('n0E4')+": ")
+call LeaderboardSetLabel(RM0[GetPlayerId(CO[x])],"重生"+": ")
 set x=x+1
 set RM0[GetPlayerId(BO[x])]=CreateLeaderboard()
 call PlayerSetLeaderboard(BO[x],RM0[GetPlayerId(BO[x])])
 call LeaderboardDisplay(RM0[GetPlayerId(BO[x])],false)
-call LeaderboardSetLabel(RM0[GetPlayerId(BO[x])],GetObjectName('n0E4')+": ")
+call LeaderboardSetLabel(RM0[GetPlayerId(BO[x])],"重生"+": ")
 set RM0[GetPlayerId(CO[x])]=CreateLeaderboard()
 call PlayerSetLeaderboard(CO[x],RM0[GetPlayerId(CO[x])])
 call LeaderboardDisplay(RM0[GetPlayerId(CO[x])],false)
-call LeaderboardSetLabel(RM0[GetPlayerId(CO[x])],GetObjectName('n0E4')+": ")
+call LeaderboardSetLabel(RM0[GetPlayerId(CO[x])],"重生"+": ")
 set x=x+1
 set RM0[GetPlayerId(BO[x])]=CreateLeaderboard()
 call PlayerSetLeaderboard(BO[x],RM0[GetPlayerId(BO[x])])
 call LeaderboardDisplay(RM0[GetPlayerId(BO[x])],false)
-call LeaderboardSetLabel(RM0[GetPlayerId(BO[x])],GetObjectName('n0E4')+": ")
+call LeaderboardSetLabel(RM0[GetPlayerId(BO[x])],"重生"+": ")
 set RM0[GetPlayerId(CO[x])]=CreateLeaderboard()
 call PlayerSetLeaderboard(CO[x],RM0[GetPlayerId(CO[x])])
 call LeaderboardDisplay(RM0[GetPlayerId(CO[x])],false)
-call LeaderboardSetLabel(RM0[GetPlayerId(CO[x])],GetObjectName('n0E4')+": ")
+call LeaderboardSetLabel(RM0[GetPlayerId(CO[x])],"重生"+": ")
 set x=x+1
 set RM0[GetPlayerId(BO[x])]=CreateLeaderboard()
 call PlayerSetLeaderboard(BO[x],RM0[GetPlayerId(BO[x])])
 call LeaderboardDisplay(RM0[GetPlayerId(BO[x])],false)
-call LeaderboardSetLabel(RM0[GetPlayerId(BO[x])],GetObjectName('n0E4')+": ")
+call LeaderboardSetLabel(RM0[GetPlayerId(BO[x])],"重生"+": ")
 set RM0[GetPlayerId(CO[x])]=CreateLeaderboard()
 call PlayerSetLeaderboard(CO[x],RM0[GetPlayerId(CO[x])])
 call LeaderboardDisplay(RM0[GetPlayerId(CO[x])],false)
-call LeaderboardSetLabel(RM0[GetPlayerId(CO[x])],GetObjectName('n0E4')+": ")
+call LeaderboardSetLabel(RM0[GetPlayerId(CO[x])],"重生"+": ")
 endfunction
 function F62 takes nothing returns nothing
 local integer x=GetPlayerId(GetTriggerPlayer())
 if GetEventPlayerChatString()=="-don"or GetEventPlayerChatString()=="-deathon"then
 set RL0[x]=true
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n08W'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"在你死后，将会出现等待复活计时器")
 else
 set RL0[x]=false
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n08X'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"在你死后，不会出现等待复活计时器")
 endif
 endfunction
 function HJ2 takes nothing returns nothing
@@ -31869,7 +31902,7 @@ set RN0[GetPlayerId(GetTriggerPlayer())]=false
 endif
 endfunction
 function F52 takes nothing returns nothing
-call PZI(GetTriggerPlayer(),GetObjectName('n0HG'))
+call PZI(GetTriggerPlayer(),"-di功能默认为开启，使用-cson和-csoff命令可以开/关该功能")
 endfunction
 function HM2 takes nothing returns nothing
 local integer i=0
@@ -31882,11 +31915,11 @@ endloop
 endfunction
 function FO2 takes nothing returns nothing
 call ForceRemovePlayer(P2,GetTriggerPlayer())
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n08U'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"隐藏信息")
 endfunction
 function F22 takes nothing returns nothing
 call ForceAddPlayer(P2,GetTriggerPlayer())
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n08Z'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"显示信息")
 endfunction
 function HT2 takes nothing returns boolean
 local integer x=GetRandomInt(1,4)
@@ -31995,7 +32028,7 @@ local integer a=S2I(SubString(GetEventPlayerChatString(),6,StringLength(GetEvent
 local integer MLI=GetPlayerId(GetTriggerPlayer())
 set FM[MLI]=FM[MLI]+1
 if FM[MLI]>20 then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,GetObjectName('n0DQ'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,"你用太多次！")
 return
 endif
 if GetEventPlayerChatString()=="-rollon"or GetEventPlayerChatString()=="-rolloff"then
@@ -32005,9 +32038,9 @@ if a==0 then
 set a=100
 endif
 if a>0 and a<2001 then
-call QQI(P2,5,C0[GetPlayerId(GetTriggerPlayer())]+(D80[GetPlayerId((GetTriggerPlayer()))])+"|r "+GetObjectName('n05I')+" "+I2S(GetRandomInt(1,a))+" "+GetObjectName('n05M')+" "+I2S(a))
+call QQI(P2,5,C0[GetPlayerId(GetTriggerPlayer())]+(D80[GetPlayerId((GetTriggerPlayer()))])+"|r "+"掷出了"+" "+I2S(GetRandomInt(1,a))+" "+"上限为"+" "+I2S(a))
 else
-call PZI(GetTriggerPlayer(),GetObjectName('n02Y'))
+call PZI(GetTriggerPlayer(),"Roll的取值必须在1与2000之间")
 endif
 endfunction
 function FN2 takes nothing returns nothing
@@ -32017,7 +32050,7 @@ set a=GetRandomInt(DG0,DH0)
 else
 set a=GetRandomInt(DE0,DF0)
 endif
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,GetObjectName('n0GS')+" "+S9I(a))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,"你随机掷到了"+" "+S9I(a))
 endfunction
 function FK2 takes nothing returns nothing
 local integer a=S2I(SubString(GetEventPlayerChatString(),4,StringLength(GetEventPlayerChatString())))
@@ -32028,9 +32061,9 @@ set PK0=a
 set PL0=a
 set PZ0=true
 if a==1 then
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(BO[1])]+(D80[GetPlayerId((BO[1]))])+"|r "+GetObjectName('n0DS'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(BO[1])]+(D80[GetPlayerId((BO[1]))])+"|r "+"被手动指定以开始选择英雄")
 else
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(CO[1])]+(D80[GetPlayerId((CO[1]))])+"|r "+GetObjectName('n0DS'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(CO[1])]+(D80[GetPlayerId((CO[1]))])+"|r "+"被手动指定以开始选择英雄")
 endif
 if PK0==1 then
 set PM0=BO[1]
@@ -32047,7 +32080,7 @@ function FV2 takes nothing returns nothing
 set GM[GetPlayerId(GetTriggerPlayer())]=true
 endfunction
 function F82 takes nothing returns nothing
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n090'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"聊天中的英雄名称将被隐藏")
 set RP0[GetPlayerId(GetTriggerPlayer())]=true
 if GetLocalPlayer()==GetTriggerPlayer()then
 call SetPlayerName(BO[1],(D80[GetPlayerId((BO[1]))]))
@@ -32066,10 +32099,10 @@ function F92 takes nothing returns nothing
 local integer id=GetPlayerId(GetTriggerPlayer())
 if HM[id]==true then
 set HM[id]=false
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,GetObjectName('n08T'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,"打开特殊音效")
 else
 set HM[id]=true
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,GetObjectName('n091'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,"关闭特殊音效")
 endif
 endfunction
 function FR2 takes nothing returns nothing
@@ -32087,12 +32120,12 @@ exitwhen i>5
 set p=BO[i]
 if T3I(p)then
 set Z12=K[GetPlayerId(p)]/(TimerGetElapsed(M))*60
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+GetObjectName('n084')+" "+R2S(Z12))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"的APM为"+" "+R2S(Z12))
 endif
 set p=CO[i]
 if T3I(p)then
 set Z12=K[GetPlayerId(p)]/(TimerGetElapsed(M))*60
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+GetObjectName('n084')+" "+R2S(Z12))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"的APM为"+" "+R2S(Z12))
 endif
 set i=i+1
 endloop
@@ -32145,22 +32178,22 @@ exitwhen i>5
 set p=BO[i]
 if T3I(p)and((TimerGetElapsed(M))-L[GetPlayerId(p)])>300.0 and P00[GetPlayerId(p)]==false then
 set P00[GetPlayerId(p)]=true
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+GetObjectName('n05G')+" "+R2S(((TimerGetElapsed(M))-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,GetObjectName('n05O')+" |cff99ccff-kickafk "+I2S(GetPlayerId(p))+" |r "+GetObjectName('n05P'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"已经离开游戏超过"+" "+R2S(((TimerGetElapsed(M))-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,"你可以使用"+" |cff99ccff-kickafk "+I2S(GetPlayerId(p))+" |r "+"将这位玩家踢出游戏")
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00," ")
 endif
 set p=CO[i]
 if T3I(p)and((TimerGetElapsed(M))-L[GetPlayerId(p)])>300.0 and P00[GetPlayerId(p)]==false then
 set P00[GetPlayerId(p)]=true
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+GetObjectName('n05G')+" "+R2S(((TimerGetElapsed(M))-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,GetObjectName('n05O')+" |cff99ccff-kickafk "+I2S(GetPlayerId(p))+" |r "+GetObjectName('n05P'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"已经离开游戏超过"+" "+R2S(((TimerGetElapsed(M))-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,"你可以使用"+" |cff99ccff-kickafk "+I2S(GetPlayerId(p))+" |r "+"将这位玩家踢出游戏")
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00," ")
 endif
 set i=i+1
 endloop
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00," ")
 elseif T3I(Player(MLI))==true and IsPlayerAlly(GetTriggerPlayer(),Player(MLI))==true then
-call DisplayTimedTextToPlayer(Player(MLI),0,U2,3600,"|c00ff0303"+GetObjectName('n05E')+"|r")
+call DisplayTimedTextToPlayer(Player(MLI),0,U2,3600,"|c00ff0303"+"因为暂离时间过长而被踢出游戏！"+"|r")
 call VY1(Player(MLI))
 set K3[GetPlayerId(Player(MLI))]="|c00555555"+GW1+"|r"
 call RemovePlayer(Player(MLI),PLAYER_GAME_RESULT_DEFEAT)
@@ -32170,7 +32203,7 @@ call B91(Player(MLI))
 endif
 set EF0[GetPlayerId(Player(MLI))]=true
 call VX1(Player(MLI))
-call QRI(P2,30.00,"|c00ff0303"+(D80[GetPlayerId((Player(MLI)))])+" "+GetObjectName('n05E')+"|r")
+call QRI(P2,30.00,"|c00ff0303"+(D80[GetPlayerId((Player(MLI)))])+" "+"因为暂离时间过长而被踢出游戏！"+"|r")
 endif
 endif
 endfunction
@@ -32184,12 +32217,12 @@ exitwhen i>5
 set p=BO[i]
 if T3I(p)and((TimerGetElapsed(M))-L[GetPlayerId(p)])/60>0.2 then
 set x=x+1
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+GetObjectName('n05D')+" "+R2S(((TimerGetElapsed(M))-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"已经离开游戏了"+" "+R2S(((TimerGetElapsed(M))-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
 endif
 set p=CO[i]
 if T3I(p)and((TimerGetElapsed(M))-L[GetPlayerId(p)])/60>0.2 then
 set x=x+1
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+GetObjectName('n05D')+" "+R2S(((TimerGetElapsed(M))-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"已经离开游戏了"+" "+R2S(((TimerGetElapsed(M))-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
 endif
 set i=i+1
 endloop
@@ -32210,15 +32243,15 @@ exitwhen i>5
 set p=BO[i]
 if T3I(p)and(GW1-L[GetPlayerId(p)])>300.0 and P00[GetPlayerId(p)]==false then
 set P00[GetPlayerId(p)]=true
-call QRI(OO,15,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+GetObjectName('n05G')+" "+R2S((GW1-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
-call QRI(OO,15,GetObjectName('n05O')+" |cff99ccff-kickafk "+I2S(GetPlayerId(p))+" |r "+GetObjectName('n05P'))
+call QRI(OO,15,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"已经离开游戏超过"+" "+R2S((GW1-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
+call QRI(OO,15,"你可以使用"+" |cff99ccff-kickafk "+I2S(GetPlayerId(p))+" |r "+"将这位玩家踢出游戏")
 call QRI(OO,15," ")
 endif
 set p=CO[i]
 if T3I(p)and(GW1-L[GetPlayerId(p)])>300.0 and P00[GetPlayerId(p)]==false then
 set P00[GetPlayerId(p)]=true
-call QRI(AO,15,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+GetObjectName('n05G')+" "+R2S((GW1-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
-call QRI(AO,15,GetObjectName('n05O')+" |cff99ccff-kickafk "+I2S(GetPlayerId(p))+" |r "+GetObjectName('n05P'))
+call QRI(AO,15,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"已经离开游戏超过"+" "+R2S((GW1-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
+call QRI(AO,15,"你可以使用"+" |cff99ccff-kickafk "+I2S(GetPlayerId(p))+" |r "+"将这位玩家踢出游戏")
 call QRI(AO,15," ")
 endif
 set i=i+1
@@ -32278,10 +32311,10 @@ if ZC2==false and ZD2==false then
 return
 endif
 if(TimerGetElapsed(M))>60 then
-call PXI(GetTriggerPlayer(),GetObjectName('n02X'))
+call PXI(GetTriggerPlayer(),"命令必须在游戏开始后15至60秒内键入")
 return
 elseif(TimerGetElapsed(M))<15 then
-call PXI(GetTriggerPlayer(),GetObjectName('n02X'))
+call PXI(GetTriggerPlayer(),"命令必须在游戏开始后15至60秒内键入")
 return
 endif
 if ZC2 then
@@ -32290,8 +32323,8 @@ elseif ZD2 then
 set UK=2
 endif
 call C82()
-call QRI(P2,15,GetObjectName('n05N')+" "+GetObjectName('n055'))
-call QRI(P2,15,GetObjectName('n05R'))
+call QRI(P2,15,"这个指令带有实验性质。如果在使用中遇到bug，"+" "+"请致信IceFrog@gmail.com。")
+call QRI(P2,15,"游戏中出现的暂停并非bug")
 call FlushTrigger(GetTriggeringTrigger())
 endfunction
 function ZE2 takes nothing returns boolean
@@ -32302,11 +32335,11 @@ function AH_RegisterCommands takes nothing returns nothing
 local trigger t=CreateTrigger()
 call TriggerRegisterPlayerChatEvent(t,WO,"-",false)
 call TriggerAddCondition(t,Condition(function ZE2))
-call QRI(P2,30,"|cff99ccff"+GetObjectName('n05S')+"|r")
-call QRI(P2,30,GetObjectName('n05T')+" "+GetObjectName('n05H')+" "+GetObjectName('n05V')+" ")
+call QRI(P2,30,"|cff99ccff"+"游戏在选择这个模式后将暂停一会"+"|r")
+call QRI(P2,30,"提示文字将在不久后被清除"+" "+"如果你想阅读屏幕当前文字，请先暂停游戏"+" "+"当你准备好之后，继续进行游戏并选择一个模式"+" ")
 call QRI(P2,30," ")
-call QRI(P2,30,"|cff99ccff-mode1|r "+GetObjectName('n05W')+". ("+GetObjectName('n05X')+")")
-call QRI(P2,30,"|cff99ccff-mode2|r "+GetObjectName('n062'))
+call QRI(P2,30,"|cff99ccff-mode1|r "+"这个模式是一个基础模式，只监控小地图"+". ("+"只在-mode2 遇到问题时使用此模式"+")")
+call QRI(P2,30,"|cff99ccff-mode2|r "+"这个模式监控更广的区域，也是|c00ff0303推荐|r模式")
 endfunction
 function AH_RegisterCommands_Delayed takes nothing returns nothing
 local trigger t=CreateTrigger()
@@ -32315,37 +32348,37 @@ set t=null
 endfunction
 function FF2 takes nothing returns nothing
 if(TimerGetElapsed(M))>60 then
-call PXI(GetTriggerPlayer(),GetObjectName('n02X'))
+call PXI(GetTriggerPlayer(),"命令必须在游戏开始后15至60秒内键入")
 return
 elseif(TimerGetElapsed(M))<15 then
-call PXI(GetTriggerPlayer(),GetObjectName('n02X'))
+call PXI(GetTriggerPlayer(),"命令必须在游戏开始后15至60秒内键入")
 return
 endif
 if GetTriggerPlayer()!=WO then
-call PXI(GetTriggerPlayer(),GetObjectName('n02W'))
+call PXI(GetTriggerPlayer(),"只有选择游戏模式的玩家才能使用该命令")
 return
 endif
 if IL==false then
 set IL=true
 set UK=2
 call C82()
-call QRI(P2,15,GetObjectName('n05N')+" "+GetObjectName('n055'))
-call QRI(P2,15,GetObjectName('n05R'))
+call QRI(P2,15,"这个指令带有实验性质。如果在使用中遇到bug，"+" "+"请致信IceFrog@gmail.com。")
+call QRI(P2,15,"游戏中出现的暂停并非bug")
 else
-call PZI(GetTriggerPlayer(),GetObjectName('n02V'))
+call PZI(GetTriggerPlayer(),"代码已经被激活")
 endif
 endfunction
 function FG2 takes nothing returns nothing
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n0CV')+" [|cffff0000E|r|cffff0000E|r|cffff0000E|r] - [|cffffcc00T|r]")
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n0CU')+" [|cffff0000E|r|cffff0000E|r|cff00ffffW|r] - [|cffffcc00D|r]")
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n0CT')+" [|cffff0000E|r|cffff0000E|r|cff0000ffQ|r] - [|cffffcc00F|r]")
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n0C6')+" [|cff0000ffQ|r|cff0000ffQ|r|cff0000ffQ|r] - [|cffffcc00Y|r]")
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n0CL')+" [|cff0000ffQ|r|cff0000ffQ|r|cff00ffffW|r] - [|cffffcc00V|r]")
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n0CN')+" [|cff0000ffQ|r|cff0000ffQ|r|cffff0000E|r] - [|cffffcc00G|r]")
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n0CS')+" [|cff00ffffW|r|cff00ffffW|r|cffff0000E|r] - [|cffffcc00Z|r]")
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n0CO')+" [|cff00ffffW|r|cff00ffffW|r|cff0000ffQ|r] - [|cffffcc00X|r]")
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n0CP')+" [|cff00ffffW|r|cff00ffffW|r|cff00ffffW|r] - [|cffffcc00C|r]")
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n0CQ')+" [|cff0000ffQ|r|cff00ffffW|r|cffff0000E|r] - [|cffffcc00B|r]")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"阳炎冲击"+" [|cffff0000E|r|cffff0000E|r|cffff0000E|r] - [|cffffcc00T|r]")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"浑沌陨石"+" [|cffff0000E|r|cffff0000E|r|cff00ffffW|r] - [|cffffcc00D|r]")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"熔炉精灵"+" [|cffff0000E|r|cffff0000E|r|cff0000ffQ|r] - [|cffffcc00F|r]")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"急速冷却"+" [|cff0000ffQ|r|cff0000ffQ|r|cff0000ffQ|r] - [|cffffcc00Y|r]")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"幽灵漫步"+" [|cff0000ffQ|r|cff0000ffQ|r|cff00ffffW|r] - [|cffffcc00V|r]")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"寒冰之墙"+" [|cff0000ffQ|r|cff0000ffQ|r|cffff0000E|r] - [|cffffcc00G|r]")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"灵动迅捷"+" [|cff00ffffW|r|cff00ffffW|r|cffff0000E|r] - [|cffffcc00Z|r]")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"龙卷风"+" [|cff00ffffW|r|cff00ffffW|r|cff0000ffQ|r] - [|cffffcc00X|r]")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"电磁脉冲"+" [|cff00ffffW|r|cff00ffffW|r|cff00ffffW|r] - [|cffffcc00C|r]")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"超震声波"+" [|cff0000ffQ|r|cff00ffffW|r|cffff0000E|r] - [|cffffcc00B|r]")
 endfunction
 function ZF2 takes string s returns nothing
 call StopMusic(true)
@@ -32404,7 +32437,7 @@ call ZF2(VF)
 elseif s=="-music special"then
 call ZF2(PO0)
 else
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n0CW')+" ")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"可以使用 -music [曲目] 命令来播放音乐，具体[曲目]为："+" ")
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"off, random, nightelf1, nightelf2, nightelf3, human1, human2, human3, orc1, orc2, orc3, undead1, undead2, undead3, other1, other2, other3, other4, other5, other6, other7, other8, other9, special")
 endif
 endif
@@ -32507,7 +32540,7 @@ set r=GetRandomInt(0,255)
 set g=GetRandomInt(0,255)
 set b=GetRandomInt(0,255)
 call ZZ2(p,r,g,b,255)
-call DisplayTimedTextToPlayer(p,0,0,5,GetObjectName('n0HD')+" r="+I2S(r)+" g="+I2S(g)+" b="+I2S(b))
+call DisplayTimedTextToPlayer(p,0,0,5,"你随机地设置水的颜色为"+" r="+I2S(r)+" g="+I2S(g)+" b="+I2S(b))
 else
 call ZV2(ZK2)
 set r=P30
@@ -32530,7 +32563,7 @@ return false
 endfunction
 function GO2 takes nothing returns boolean
 if BII>0 then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetObjectName('n0LO')+": "+I2S(BII))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,"赏金总计"+": "+I2S(BII))
 endif
 return false
 endfunction
@@ -32553,7 +32586,7 @@ local integer x=S2I(SubString(GetEventPlayerChatString(),7,StringLength(GetEvent
 local integer i=1
 if x<1 or x>P80 then
 set x=GetRandomInt(1,P80)
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n0E5')+" "+I2S(x))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"你随机地引用编号"+" "+I2S(x))
 endif
 if P90 then
 loop
@@ -32568,13 +32601,13 @@ endif
 call PEI(GetTriggerPlayer(),P60[x])
 endfunction
 function ZN2 takes player p1 returns string
-local string s=GetObjectName('n0GB')
+local string s="$p1 $c1 拒绝了你的交换请求"
 set s=FS1(s,"$c1","|c00ff0303")
 set s=FS1(s,"$p1",C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r")
 return s
 endfunction
 function ZS2 takes nothing returns string
-local string s=GetObjectName('n0GA')
+local string s="$c1如果你想投否决票，键入|r $c2-no|r"
 set s=FS1(s,"$c1","|c006699CC")
 set s=FS1(s,"$c2","|c00ff0303")
 return s
@@ -32605,7 +32638,7 @@ set SFI=null
 endif
 endfunction
 function ZR2 takes player p1,player p2 returns string
-local string s=GetObjectName('n0G2')
+local string s="$c1键入|r $c2-switch accept|r $c1或|r $c2-ok|r $c1来允许玩家|r $p1 $c1与玩家|r $p2 $c1的交换|r"
 set s=FS1(s,"$c1","|c006699CC")
 set s=FS1(s,"$c1","|c006699CC")
 set s=FS1(s,"$c1","|c006699CC")
@@ -32617,7 +32650,7 @@ set s=FS1(s,"$p2",C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r")
 return s
 endfunction
 function ZP2 takes string ZQ2,string ZU2 returns string
-local string s=GetObjectName('n0FV')
+local string s="$c1|r$p1 和 |r $p2 $c1的交换已经成功"
 set s=FS1(s,"$c1","|c006699CC")
 set s=FS1(s,"$c1","|c006699CC")
 set s=FS1(s,"$c1","|c006699CC")
@@ -32627,7 +32660,7 @@ set s=FS1(s,"$p2",ZU2)
 return s
 endfunction
 function V02 takes player p2 returns string
-local string s=GetObjectName('n0FS')
+local string s="$c1你已经请求玩家|r$p2$c1与交换位置|r"
 set s=FS1(s,"$p2",C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r")
 set s=FS1(s,"$c1","|c006699CC")
 return s
@@ -32924,7 +32957,7 @@ local integer VC2=0
 if TM[GetPlayerId(GetTriggerPlayer())]==false then
 set TM[GetPlayerId(GetTriggerPlayer())]=true
 call V72()
-call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,20,C0[GetPlayerId(GetTriggerPlayer())]+(D80[GetPlayerId((GetTriggerPlayer()))])+"|r|c006699CC "+GetObjectName('n0FT')+"|r ("+I2S(ON)+"/"+I2S(AN)+")")
+call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,20,C0[GetPlayerId(GetTriggerPlayer())]+(D80[GetPlayerId((GetTriggerPlayer()))])+"|r|c006699CC "+"接受交换的请求"+"|r ("+I2S(ON)+"/"+I2S(AN)+")")
 endif
 loop
 exitwhen i>5
@@ -32970,19 +33003,19 @@ else
 set VE2=BO[i]
 endif
 if GetPlayerSlotState(VE2)==PLAYER_SLOT_STATE_LEFT and GetPlayerController(VE2)==MAP_CONTROL_USER then
-set s="|c00ff0303["+GetObjectName('n0FY')+"]|r"
+set s="|c00ff0303["+"离开游戏"+"]|r"
 endif
 if K1[GetPlayerId(VE2)]!=null then
 set s2=" ("+GetUnitName(K1[GetPlayerId(VE2)])+")"
 endif
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,15,GetObjectName('n083')+"|c006699CC "+"-switch "+I2S(i)+"|r "+GetObjectName('n0FQ')+" "+C0[GetPlayerId(VE2)]+(D80[GetPlayerId((VE2))])+s2+"|r "+s)
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,15,"输入"+"|c006699CC "+"-switch "+I2S(i)+"|r "+"交换位置"+" "+C0[GetPlayerId(VE2)]+(D80[GetPlayerId((VE2))])+s2+"|r "+s)
 set i=i+1
 endloop
 endfunction
 function VF2 takes nothing returns boolean
 local integer i=0
 if JM then
-call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,20,"|c00ff0303"+GetObjectName('n0FU')+"|r")
+call DisplayTimedTextToForce(bj_FORCE_ALL_PLAYERS,20,"|c00ff0303"+"投票数不足，交换请求被驳回"+"|r")
 endif
 set RY0=true
 set JM=false
@@ -33042,11 +33075,11 @@ set t=null
 endfunction
 function FT2 takes nothing returns nothing
 if JL==false then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,GetObjectName('n0GX'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,"-switch命令在这场比赛中已被禁用")
 return
 endif
 if C2 and GetEventPlayerChatString()!="-ok"and GetEventPlayerChatString()!="-switch accept"and GetEventPlayerChatString()!="-no"then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,GetObjectName('n0G0'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,"OB模式下无法使用-switch命令，不久之后会改进这一点")
 return
 endif
 if GetEventPlayerChatString()=="-switch accept"or GetEventPlayerChatString()=="-ok"then
@@ -33068,13 +33101,13 @@ if IsPlayerTeam1(GetTriggerPlayer())then
 if RX0[GetPlayerId(CO[RM])]==false then
 call VG2(GetTriggerPlayer(),CO[RM])
 else
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,GetObjectName('n0HY'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,"敌方队伍解锁了那名英雄的物品，因此他将不能被交换。")
 endif
 else
 if RX0[GetPlayerId(BO[RM])]==false then
 call VG2(GetTriggerPlayer(),BO[RM])
 else
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,GetObjectName('n0HY'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,"敌方队伍解锁了那名英雄的物品，因此他将不能被交换。")
 endif
 endif
 endif
@@ -33083,7 +33116,7 @@ endfunction
 function Command_NoSwitch takes nothing returns nothing
 if B0==false and JL and GetTriggerPlayer()==WO then
 set JL=false
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,GetObjectName('n0GX'))
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,"-switch命令在这场比赛中已被禁用")
 endif
 endfunction
 function VH2 takes nothing returns boolean
@@ -33118,7 +33151,7 @@ endfunction
 function FP2 takes nothing returns nothing
 if PB0[GetPlayerId(GetTriggerPlayer())]==false then
 set PB0[GetPlayerId(GetTriggerPlayer())]=true
-if GetObjectName('n0HH')=="Language: English"then
+if "语言：简体中文"=="Language: English"then
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,"You have activated the -tips system.")
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,"Please remember that these are just introductory recommendations and are not the only way to play heroes.")
 endif
@@ -33406,7 +33439,7 @@ elseif GetEventPlayerChatString()=="-terrain bluedungeon"then
 call VR2(7)
 endif
 else
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,GetObjectName('n0GL'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,10,"你用这条命令太多次了！")
 endif
 endif
 endfunction
@@ -33567,6 +33600,7 @@ local boolean CP
 local boolean ZM
 local boolean UB
 local boolean TT
+local boolean mode_js
 set WA2[1]="allpick"
 set WB2[1]="ap"
 set WA2[2]="allrandom"
@@ -33653,7 +33687,9 @@ set WA2[42]="unban"
 set WB2[42]="ub"
 set WA2[43]="tagteam"
 set WB2[43]="tt"
-set WD2=43
+set WA2[44] = "js"
+set WB2[44] = "js"
+set WD2=44
 set x=-1
 loop
 exitwhen x==FQ1-1
@@ -33745,82 +33781,87 @@ set ZM=WC2[40]
 set CP=WC2[41]
 set UB=WC2[42]
 set TT=WC2[43]
+set mode_js = WC2[44]
 if DC2!=""or W02(W92)then
 return
 endif
-if(AR and(CM or AP or TR or LM or MR or RV or RD or CD or SD or TT))or(AP and(TR or MR))or(TR and(LM or MR))or(LM and MR)or(MM and SH)then
-call PZI(WO,GetObjectName('n02U'))
+if(AR and(CM or AP or TR or LM or MR or RV or RD or CD or SD or TT or mode_js))or(AP and(TR or MR))or(TR and(LM or MR))or(LM and MR)or(MM and SH)then
+call PZI(WO,"无效的游戏组合模式！")
 return
 endif
 if(AA and(AI or AS or DM))or(AS and(AI or DM))or(AI and DM)then
-call PZI(WO,GetObjectName('n02U'))
+call PZI(WO,"无效的游戏组合模式！")
 return
 endif
 if(RO and(MO or DM))or(MO and DM)then
-call PZI(WO,GetObjectName('n02U'))
+call PZI(WO,"无效的游戏组合模式！")
 return
 endif
 if RV and(CM or AR or TR or MR or LM or DM or SH or TT)then
-call PZI(WO,GetObjectName('n02U'))
+call PZI(WO,"无效的游戏组合模式！")
 return
 endif
-if(DM and(CM or TR or LM or MR or SH or RV or RD or CD or SD or TT))or(MM and DM)or(SH and DM)then
-call PZI(WO,GetObjectName('n02T'))
+if(DM and(CM or TR or LM or MR or SH or RV or RD or CD or SD or TT or mode_js))or(MM and DM)or(SH and DM)then
+call PZI(WO,"死亡模式与已选模式不兼容！")
 return
 endif
-if LM and(TT or CM or AP or RD or CD or AR or SD or MM or TR or DM or MR or AA or AI or AS or ID or NP or SC or EM or DU or SH or RV or OM or NB or NM or NT or XL or MO or RO)then
-call PZI(WO,GetObjectName('n031'))
+if LM and(TT or CM or AP or RD or CD or AR or SD or MM or TR or DM or MR or AA or AI or AS or ID or NP or SC or EM or DU or SH or RV or OM or NB or NM or NT or XL or MO or RO or mode_js)then
+call PZI(WO,"联赛模式与已选模式不兼容！")
 return
 endif
-if XL and(TT or CM or AP or RD or CD or AR or SD or MM or TR or DM or MR or AA or AI or AS or ID or NP or SC or EM or DU or SH or RV or OM or NB or NM or NT or LM or RO or MO)then
-call PZI(WO,GetObjectName('n032'))
+if XL and(TT or CM or AP or RD or CD or AR or SD or MM or TR or DM or MR or AA or AI or AS or ID or NP or SC or EM or DU or SH or RV or OM or NB or NM or NT or LM or RO or MO or mode_js)then
+call PZI(WO,"全近程模式|r(|cffff0303MO|r)")
 return
 endif
-if CM and(TT or SP or XL or AP or RD or CD or AR or SD or MM or TR or DM or MR or AA or AI or AS or ID or NP or SC or EM or DU or SH or RV or OM or NB or NM or NT or LM or MO or RO)then
-call PZI(WO,GetObjectName('n032'))
+if CM and(TT or SP or XL or AP or RD or CD or AR or SD or MM or TR or DM or MR or AA or AI or AS or ID or NP or SC or EM or DU or SH or RV or OM or NB or NM or NT or LM or MO or RO or mode_js)then
+call PZI(WO,"全近程模式|r(|cffff0303MO|r)")
 return
 endif
-if RD and(TT or CD or CM or AP or LM or AR or SD or MM or TR or DM or MR or AA or AI or AS or SH or RV or RO or MO)then
-call PZI(WO,GetObjectName('n02U'))
+if RD and(TT or CD or CM or AP or LM or AR or SD or MM or TR or DM or MR or AA or AI or AS or SH or RV or RO or MO or mode_js)then
+call PZI(WO,"无效的游戏组合模式！")
 return
 endif
-if CD and(TT or RD or CM or AP or LM or AR or SD or MM or TR or DM or MR or AA or AI or AS or SH or RV or RO or MO)then
-call PZI(WO,GetObjectName('n02U'))
+if CD and(TT or RD or CM or AP or LM or AR or SD or MM or TR or DM or MR or AA or AI or AS or SH or RV or RO or MO or mode_js)then
+call PZI(WO,"无效的游戏组合模式！")
+return
+endif
+if mode_js and(TT or RD or CD or CM or AP or LM or AR or SD or MM or TR or DM or MR or AA or AI or AS or SH or RV or RO or MO)then
+call PZI(WO,"无效的游戏组合模式！")
 return
 endif
 if MR and(TT or CM or AP or LM or AR or SD or MM or TR or DM or AA or AI or AS or SH or RV or RO or MO)then
-call PZI(WO,GetObjectName('n02U'))
+call PZI(WO,"无效的游戏组合模式！")
 return
 endif
-if SD and(TT or CM or AP or LM or AR or RD or CD or MM or TR or DM or MR or AA or AI or AS or SH or RV or RO or MO)then
-call PZI(WO,GetObjectName('n02U'))
+if SD and(TT or CM or AP or LM or AR or RD or CD or MM or TR or DM or MR or AA or AI or AS or SH or RV or RO or MO or mode_js)then
+call PZI(WO,"无效的游戏组合模式！")
 return
 endif
-if VR and(TT or CM or LM or RD or CD or SD or AR or MM or TR or DM or MR or AA or AI or AS or SH or RV or RO or MO)then
-call PZI(WO,GetObjectName('n02U'))
+if VR and(TT or CM or LM or RD or CD or SD or AR or MM or TR or DM or MR or AA or AI or AS or SH or RV or RO or MO or mode_js)then
+call PZI(WO,"无效的游戏组合模式！")
 return
 endif
-if TT and(SO or VR or CM or LM or RD or CD or SD or AR or MM or TR or DM or MR or AA or AI or AS or SH or RV or RO or MO)then
-call PZI(WO,GetObjectName('n02U'))
+if TT and(SO or VR or CM or LM or RD or CD or SD or AR or MM or TR or DM or MR or AA or AI or AS or SH or RV or RO or MO or mode_js)then
+call PZI(WO,"无效的游戏组合模式！")
 return
 endif
 if MM and T8I(OO)!=T8I(AO)then
-call PZI(WO,GetObjectName('n034'))
+call PZI(WO,"两边必须拥有相等的人数才能激活这个模式")
 return
 endif
 if VR and T8I(OO)!=T8I(AO)then
-call PZI(WO,GetObjectName('n034'))
+call PZI(WO,"两边必须拥有相等的人数才能激活这个模式")
 return
 endif
 if RV and T8I(OO)!=T8I(AO)then
-call PZI(WO,GetObjectName('n034'))
+call PZI(WO,"两边必须拥有相等的人数才能激活这个模式")
 return
 endif
 if LM and not(T3I(BO[1])and T3I(BO[2])and T3I(BO[3])and T3I(BO[4])and T3I(BO[5])and T3I(CO[1])and T3I(CO[2])and T3I(CO[3])and T3I(CO[4])and T3I(CO[5]))then
 endif
 if XL and not(T3I(BO[1])and T3I(BO[2])and T3I(BO[3])and T3I(BO[4])and T3I(BO[5])and T3I(CO[1])and T3I(CO[2])and T3I(CO[3])and T3I(CO[4])and T3I(CO[5]))then
 endif
-if TT or ZM or CP or FR or CM or AP or AR or LM or MM or TR or DM or MR or SP or AA or AI or AS or ID or NP or SC or DU or EM or SH or VR or RV or RD or CD or OM or NB or NM or NT or NS or NR or XL or SD or PM or OI or MI or MO or RO or ER or RS or SO then
+if TT or ZM or CP or FR or CM or AP or AR or LM or MM or TR or DM or MR or SP or AA or AI or AS or ID or NP or SC or DU or EM or SH or VR or RV or RD or CD or OM or NB or NM or NT or NS or NR or XL or SD or PM or OI or MI or MO or RO or ER or RS or SO or mode_js then
 call DisableTrigger(PF0)
 else
 return
@@ -33840,172 +33881,177 @@ call FL1("Mode"+EL,GetPlayerId(WO))
 endif
 set J2=false
 if LM then
-set D3=GetObjectName('n0HZ')
+set D3="联赛模式|r(|cffff0303LM|r)"
 elseif XL then
-set D3=GetObjectName('n0I8')
+set D3="扩展联赛模式|r(|cffff0303XL|r)"
 elseif RD then
-set D3=GetObjectName('n0IN')
+set D3="随机征召模式|r(|cffff0303RD|r)"
 elseif CD then
-set D3=GetObjectName('n0I9')
+set D3="随机队长模式|r(|cffff0303CD|r)"
 elseif MM then
-set D3=GetObjectName('n0IH')
+set D3="镜像模式|r(|cffff0303MM|r)"
 elseif DM then
-set D3=GetObjectName('n0II')
+set D3="死亡竞赛模式|r(|cffff0303DM|r)"
 elseif RV then
-set D3=GetObjectName('n0IC')
+set D3="反转模式|r(|cffff0303RV|r)"
 elseif AP then
-set D3=GetObjectName('n0ID')
+set D3="全阵营选择|r(|cffff0303AP|r)"
 elseif AR then
-set D3=GetObjectName('n0I7')
+set D3="全阵营随机模式|r(|cffff0303AR|r)"
 elseif TR then
-set D3=GetObjectName('n0I6')
+set D3="阵营内随机模式|r(|cffff0303TR|r)"
 elseif MR then
-set D3=GetObjectName('n0IJ')
+set D3="模式随机|r(|cffff0303MR|r)"
 elseif VR then
-set D3=GetObjectName('n0I5')
+set D3="阵容投票模式|r(|cffff0303VR|r)"
 elseif SD then
-set D3=GetObjectName('n0I4')
+set D3="单选方案模式|r(|cffff0303SD|r)"
 elseif CM then
-set D3=GetObjectName('n0IG')
+set D3="队长模式|r(|cffff0303CM|r)"
 elseif TT then
-set D3=GetObjectName('n0MP')
+set D3="Teamteam"
+elseif mode_js then
+set D3 = "竞赛模式|r(|cffff0303JS|r)"
 endif
 if CM then
-call W12(GetObjectName('n0IK'))
+call W12("队长模式|r(|cffff0303CM|r)")
 endif
 if TT then
-call W12(GetObjectName('n0MQ'))
+call W12("双英雄模式")
 endif
 if LM then
-call W12(GetObjectName('n0I3'))
+call W12("联赛模式|r(|cffff0303LM|r)")
 endif
 if XL then
-call W12(GetObjectName('n0I2'))
+call W12("扩展联赛模式|r(|cffff0303XL|r)")
 endif
 if RD then
-call W12(GetObjectName('n0IF'))
+call W12("随机征召模式|r(|cffff0303RD|r)")
+endif
+if mode_js then
+call W12("竞赛模式|r(|cffff0303JS|r)")
 endif
 if CD then
-call W12(GetObjectName('n0I1'))
+call W12("随机队长模式|r(|cffff0303CD|r)")
 endif
 if DM then
-call W12(GetObjectName('n0IA'))
+call W12("死亡竞赛模式|r(|cffff0303DM|r)")
 endif
 if MM then
-call W12(GetObjectName('n0I0'))
+call W12("镜像模式|r(|cffff0303MM|r)")
 endif
 if AP then
-call W12(GetObjectName('n0IL'))
+call W12("全阵营选择|r(|cffff0303AP|r)")
 endif
 if AR then
-call W12(GetObjectName('n0IQ'))
+call W12("全阵营随机模式|r(|cffff0303AR|r)")
 endif
 if VR then
-call W12(GetObjectName('n0IM'))
+call W12("阵容投票模式|r(|cffff0303VR|r)")
 endif
 if MR then
-call W12(GetObjectName('n0IE'))
+call W12("模式随机|r(|cffff0303MR|r)")
 endif
 if TR then
-call W12(GetObjectName('n0IB'))
+call W12("阵营内随机模式|r(|cffff0303TR|r)")
 endif
 if SP then
-call W12(GetObjectName('n0IO'))
+call W12("洗牌模式|r(|cffff0303SP|r)")
 endif
 if AA then
-call W12(GetObjectName('n0IU'))
+call W12("全敏捷模式|r(|cffff0303AA|r)")
 endif
 if AS then
-call W12(GetObjectName('n0IP'))
+call W12("全力量模式|r(|cffff0303AS|r)")
 endif
 if AI then
-call W12(GetObjectName('n0IS'))
+call W12("全智力模式|r(|cffff0303AI|r)")
 endif
 if RO then
-call W12(GetObjectName('n0IT'))
+call W12("全远程模式|r(|cffff0303RO|r)")
 endif
 if MO then
-call W12(GetObjectName('n032'))
+call W12("全近程模式|r(|cffff0303MO|r)")
 endif
 if DU then
-call W12(GetObjectName('n0IX'))
+call W12("复选模式|r(|cffff0303DU|r)")
 endif
 if ID then
-call W12(GetObjectName('n0IZ'))
+call W12("物品掉落模式|r(|cffff0303ID|r)")
 endif
 if NP then
-call W12(GetObjectName('n0J6'))
+call W12("无神符模式|r(|cffff0303NP|r)")
 endif
 if SC then
-call W12(GetObjectName('n0J7'))
+call W12("超级士兵|r(|cffff0303SC|r)")
 endif
 if EM then
-call W12(GetObjectName('n0J9'))
+call W12("简易模式|r(|cffff0303EM|r)")
 endif
 if SH then
-call W12(GetObjectName('n0JA'))
+call W12("相同英雄|r(|cffff0303SH|r)")
 endif
 if RV then
-call W12(GetObjectName('n0IW'))
+call W12("反转模式|r(|cffff0303RV|r)")
 endif
 if OM then
-call W12(GetObjectName('n0IV'))
+call W12("中路模式|r(|cffff0303OM|r)")
 endif
 if NM then
-call W12(GetObjectName('n0IR'))
+call W12("中路禁兵|r(|cffff0303NM|r)")
 endif
 if NB then
-call W12(GetObjectName('n0JB'))
+call W12("下路禁兵|r(|cffff0303NB|r)")
 endif
 if NT then
-call W12(GetObjectName('n0J8'))
+call W12("上路禁兵|r(|cffff0303NT|r)")
 endif
 if NS then
-call W12(GetObjectName('n0JC'))
+call W12("禁止交换|r(|cffff0303NS|r)")
 endif
 if NR then
-call W12(GetObjectName('n0JF'))
+call W12("禁止重选|r(|cffff0303NR|r)")
 endif
 if SD then
-call W12(GetObjectName('n0J0'))
+call W12("单选方案模式|r(|cffff0303SD|r)")
 endif
 if PM then
-call W12(GetObjectName('n0IY'))
+call W12("养人模式|r(|cffff0303PM|r)")
 endif
 if OI then
-call W12(GetObjectName('n0J5'))
+call W12("观察者信息|r(|cffff0303OI|r)")
 endif
 if MI then
-call W12(GetObjectName('n0J4'))
+call W12("迷你英雄模式|r(|cffff0303MI|r)")
 endif
 if FR then
-call W12(GetObjectName('n0JD'))
+call W12("快速重生|r(|cffff0303FR|r)")
 endif
 if ER then
-call W12(GetObjectName('n0JE'))
+call W12("实验神符|r(|cffff0303ER|r)")
 endif
 if RS then
-call W12(GetObjectName('n0J1'))
+call W12("随机阵营模式|r(|cffff0303RS|r)")
 endif
 if SO then
-call W12(GetObjectName('n0J2'))
+call W12("交换命令开启|r(|cffff0303SO|r)")
 endif
 if ZM then
-call W12(GetObjectName('n0KA'))
+call W12("放大模式|r(|cffff0303ZM|r)")
 endif
 if CP then
-call W12(GetObjectName('n0KC'))
+call W12("据点占据模式|r(|cffff0303CP|r)")
 endif
 if UB then
-call W12(GetObjectName('n0L2'))
+call W12("反禁用")
 endif
 call QRI(bj_FORCE_ALL_PLAYERS,20.00," ")
 if KBO==1 then
-call QRI(bj_FORCE_ALL_PLAYERS,20.00,C0[GetPlayerId(WO)]+(D80[GetPlayerId((WO))])+"|r"+" "+GetObjectName('n061')+" "+W2)
+call QRI(bj_FORCE_ALL_PLAYERS,20.00,C0[GetPlayerId(WO)]+(D80[GetPlayerId((WO))])+"|r"+" "+"选择了"+" "+W2)
 else
-call QRI(bj_FORCE_ALL_PLAYERS,20.00,GetObjectName('n0HN')+" "+W2)
+call QRI(bj_FORCE_ALL_PLAYERS,20.00,"游戏模式已被自动设定为"+" "+W2)
 endif
-call QRI(bj_FORCE_ALL_PLAYERS,20.00,GetObjectName('n063')+" -gameinfo.")
+call QRI(bj_FORCE_ALL_PLAYERS,20.00,"需要获取更多关于游戏模式的信息，请使用"+" -gameinfo.")
 call QRI(bj_FORCE_ALL_PLAYERS,20.00," ")
 call PMI("WE2",SP)
 call PMI("WF2",RS)
@@ -34028,6 +34074,7 @@ call PMI("WP2",LM)
 call PMI("WQ2",XL)
 call PMI("WU2",CM)
 call PMI("X02",RD)
+call PMI("MUModeJS",mode_js)
 call PMI("XI2",SD)
 call PMI("X12",MR)
 call PMI("XO2",ID)
@@ -34247,7 +34294,7 @@ set QPO=QPO+2
 set QQO=Y92
 set N8I=MultiboardGetItem(Q20,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,"|c006699CC"+GetObjectName('n0EV'))
+call MultiboardSetItemValue(N8I,"|c006699CC"+"禁止的英雄:")
 call MultiboardSetItemWidth(N8I,0.035)
 call MultiboardReleaseItem(N8I)
 set i=0
@@ -34300,7 +34347,7 @@ set QPO=QPO+2
 set QQO=Y92
 set N8I=MultiboardGetItem(Q20,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,"|c006699CC"+GetObjectName('n0EX'))
+call MultiboardSetItemValue(N8I,"|c006699CC"+"选取：")
 call MultiboardSetItemWidth(N8I,0.035)
 call MultiboardReleaseItem(N8I)
 set i=0
@@ -34353,7 +34400,7 @@ set QPO=QPO+2
 set QQO=Y92
 set N8I=MultiboardGetItem(Q20,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,"|c006699CC"+GetObjectName('n0EU'))
+call MultiboardSetItemValue(N8I,"|c006699CC"+"时间：")
 call MultiboardSetItemWidth(N8I,0.035)
 call MultiboardReleaseItem(N8I)
 set QQO=Y92+1
@@ -34370,7 +34417,7 @@ set QPO=QPO+1
 set QQO=Y92
 set N8I=MultiboardGetItem(Q20,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,"|c006699CC"+GetObjectName('n0ET'))
+call MultiboardSetItemValue(N8I,"|c006699CC"+"额外时间：")
 call MultiboardSetItemWidth(N8I,0.035)
 call MultiboardReleaseItem(N8I)
 set QQO=Y92+1
@@ -34383,20 +34430,20 @@ set QPO=QPO+2
 set QQO=Y92
 set N8I=MultiboardGetItem(Q20,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,"|c006699CC"+GetObjectName('n0EY'))
+call MultiboardSetItemValue(N8I,"|c006699CC"+"状态：")
 call MultiboardSetItemWidth(N8I,0.035)
 call MultiboardReleaseItem(N8I)
 set QQO=Y92+1
 set N8I=MultiboardGetItem(Q20,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
 if TimerGetElapsed(M)<15 then
-call MultiboardSetItemValue(N8I,"|c00555555"+GetObjectName('n0F1'))
+call MultiboardSetItemValue(N8I,"|c00555555"+"等待")
 elseif PL0==1 then
-call MultiboardSetItemValue(N8I,GetObjectName('n0F4'))
+call MultiboardSetItemValue(N8I,"激活")
 elseif PL0==2 then
-call MultiboardSetItemValue(N8I,"|c00555555"+GetObjectName('n0F1'))
+call MultiboardSetItemValue(N8I,"|c00555555"+"等待")
 else
-call MultiboardSetItemValue(N8I,"|c00555555"+GetObjectName('n0F2'))
+call MultiboardSetItemValue(N8I,"|c00555555"+"完成")
 endif
 call MultiboardSetItemWidth(N8I,0.035)
 call MultiboardReleaseItem(N8I)
@@ -34411,7 +34458,7 @@ set QPO=QPO+2
 set QQO=DJ1-1
 set N8I=MultiboardGetItem(Q20,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,"|c006699CC"+" "+GetObjectName('n0EV'))
+call MultiboardSetItemValue(N8I,"|c006699CC"+" "+"禁止的英雄:")
 call MultiboardSetItemWidth(N8I,0.035)
 call MultiboardReleaseItem(N8I)
 set i=0
@@ -34463,7 +34510,7 @@ set QPO=QPO+2
 set QQO=DJ1-1
 set N8I=MultiboardGetItem(Q20,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,"|c006699CC"+" "+GetObjectName('n0EX'))
+call MultiboardSetItemValue(N8I,"|c006699CC"+" "+"选取：")
 call MultiboardSetItemWidth(N8I,0.035)
 call MultiboardReleaseItem(N8I)
 set i=0
@@ -34515,7 +34562,7 @@ set QPO=QPO+2
 set QQO=DJ1-2
 set N8I=MultiboardGetItem(Q20,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,"|c006699CC"+GetObjectName('n0EU'))
+call MultiboardSetItemValue(N8I,"|c006699CC"+"时间：")
 call MultiboardSetItemWidth(N8I,0.035)
 call MultiboardReleaseItem(N8I)
 set QQO=DJ1-1
@@ -34532,7 +34579,7 @@ set QPO=QPO+1
 set QQO=DJ1-2
 set N8I=MultiboardGetItem(Q20,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,"|c006699CC"+GetObjectName('n0ET'))
+call MultiboardSetItemValue(N8I,"|c006699CC"+"额外时间：")
 call MultiboardSetItemWidth(N8I,0.035)
 call MultiboardReleaseItem(N8I)
 set QQO=DJ1-1
@@ -34545,20 +34592,20 @@ set QPO=QPO+2
 set QQO=DJ1-2
 set N8I=MultiboardGetItem(Q20,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
-call MultiboardSetItemValue(N8I,"|c006699CC"+GetObjectName('n0EY'))
+call MultiboardSetItemValue(N8I,"|c006699CC"+"状态：")
 call MultiboardSetItemWidth(N8I,0.035)
 call MultiboardReleaseItem(N8I)
 set QQO=DJ1-1
 set N8I=MultiboardGetItem(Q20,QPO,QQO)
 call MultiboardSetItemStyle(N8I,true,false)
 if TimerGetElapsed(M)<15 then
-call MultiboardSetItemValue(N8I,"|c00555555"+GetObjectName('n0F1'))
+call MultiboardSetItemValue(N8I,"|c00555555"+"等待")
 elseif PL0==2 then
-call MultiboardSetItemValue(N8I,GetObjectName('n0F4'))
+call MultiboardSetItemValue(N8I,"激活")
 elseif PL0==1 then
-call MultiboardSetItemValue(N8I,"|c00555555"+GetObjectName('n0F1'))
+call MultiboardSetItemValue(N8I,"|c00555555"+"等待")
 else
-call MultiboardSetItemValue(N8I,"|c00555555"+GetObjectName('n0F2'))
+call MultiboardSetItemValue(N8I,"|c00555555"+"完成")
 endif
 call MultiboardSetItemWidth(N8I,0.035)
 call MultiboardReleaseItem(N8I)
@@ -34576,7 +34623,7 @@ set Q20=CreateMultiboard()
 call MultiboardSetItemsWidth(Q20,0.015)
 call MultiboardSetRowCount(Q20,QUO)
 call MultiboardSetColumnCount(Q20,U0O)
-call MultiboardSetTitleText(Q20,GetObjectName('n0K6'))
+call MultiboardSetTitleText(Q20,"队长模式|r(|cffff0303CM|r)")
 call MultiboardSetItemsStyle(Q20,false,false)
 call MultiboardMinimize(Q20,false)
 call MultiboardDisplay(Q20,true)
@@ -34600,7 +34647,7 @@ local real y
 local real a
 if GetUnitTypeId(YC2)=='h06N' and IsPlayerAlly(GetOwningPlayer(YC2),GetOwningPlayer(GetSellingUnit()))then
 if K1[GetPlayerId(p)]!=null then
-call PZI(p,GetObjectName('n0F3'))
+call PZI(p,"你已经选择了英雄")
 call KillUnit(YC2)
 set YC2=null
 set p=null
@@ -34660,6 +34707,7 @@ exitwhen i==5
 set x=YF2-300+i*150
 set y=YG2
 set u=CreateUnit(BO[0],DT0[Q00[i]],x,y,270)
+call MUDisableMove(u)
 call TriggerRegisterUnitEvent(t,u,EVENT_UNIT_SELL)
 call PanCameraToTimedForPlayer(BO[i+1],YF2,YG2,0)
 call CreateUnit(BO[i+1],'n00C',YF2,YG2,bj_UNIT_FACING)
@@ -34672,6 +34720,7 @@ exitwhen i==5
 set x=YH2-300+i*150
 set y=YZ2
 set u=CreateUnit(CO[0],DT0[QI0[i]],x,y,270)
+call MUDisableMove(u)
 call TriggerRegisterUnitEvent(t,u,EVENT_UNIT_SELL)
 call PanCameraToTimedForPlayer(CO[i+1],YH2,YZ2,0)
 call CreateUnit(CO[i+1],'n00C',YH2,YZ2,bj_UNIT_FACING)
@@ -34744,7 +34793,7 @@ set t=CreateTrigger()
 call TriggerRegisterTimerEvent(t,1,false)
 call TriggerAddCondition(t,Condition(function YE2))
 call Y02(7)
-call MultiboardSetTitleText(Q20,GetObjectName('n0K6'))
+call MultiboardSetTitleText(Q20,"队长模式|r(|cffff0303CM|r)")
 call SetPlayerState(BO[1],PLAYER_STATE_RESOURCE_GOLD,0)
 call SetPlayerState(CO[1],PLAYER_STATE_RESOURCE_GOLD,0)
 else
@@ -34827,8 +34876,8 @@ set PJ0=YL2
 set PL0=XL2()
 call SetPlayerState(YL2,PLAYER_STATE_RESOURCE_GOLD,250)
 call PEI(YL2,"Sound\\Interface\\Rescue.wav")
-call MultiboardSetTitleText(Q20,GetObjectName('n0K6')+" - |c00ffffff"+GetObjectName('n0MY'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,"|c006699CC"+GetObjectName('n0MZ')+"|r")
+call MultiboardSetTitleText(Q20,"队长模式|r(|cffff0303CM|r)"+" - |c00ffffff"+"第三阶段选人")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"|c006699CC"+"第三阶段选人已开始"+"|r")
 else
 if GetTriggerEvalCount(t)>30 then
 if PX0[YW2]>0 then
@@ -34909,8 +34958,8 @@ set PJ0=YL2
 set PL0=XL2()
 call SetPlayerState(YL2,PLAYER_STATE_RESOURCE_GOLD,250)
 call PEI(YL2,"Sound\\Interface\\Rescue.wav")
-call MultiboardSetTitleText(Q20,GetObjectName('n0K6')+" - |c00ffffff"+GetObjectName('n0N0'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,"|c006699CC"+GetObjectName('n0N1')+"|r")
+call MultiboardSetTitleText(Q20,"队长模式|r(|cffff0303CM|r)"+" - |c00ffffff"+"第三阶段禁用")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"|c006699CC"+"第三阶段禁用已开始"+"|r")
 else
 if GetTriggerEvalCount(t)>40 then
 if PX0[YW2]>0 then
@@ -35071,8 +35120,8 @@ set PJ0=YL2
 set PL0=XL2()
 call SetPlayerState(YL2,PLAYER_STATE_RESOURCE_GOLD,250)
 call PEI(YL2,"Sound\\Interface\\Rescue.wav")
-call MultiboardSetTitleText(Q20,GetObjectName('n0K6')+" - |c00ffffff"+GetObjectName('n0L8'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,"|c006699CC"+GetObjectName('n0L3')+"|r")
+call MultiboardSetTitleText(Q20,"队长模式|r(|cffff0303CM|r)"+" - |c00ffffff"+"选择阶段 #2")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"|c006699CC"+"第二选择阶段已经开始"+"|r")
 else
 if GetTriggerEvalCount(t)>30 then
 if PX0[YW2]>0 then
@@ -35233,8 +35282,8 @@ set PJ0=YL2
 set PL0=XL2()
 call SetPlayerState(YL2,PLAYER_STATE_RESOURCE_GOLD,250)
 call PEI(YL2,"Sound\\Interface\\Rescue.wav")
-call MultiboardSetTitleText(Q20,GetObjectName('n0K6')+" - |c00ffffff"+GetObjectName('n0L7'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,"|c006699CC"+GetObjectName('n0L4')+"|r")
+call MultiboardSetTitleText(Q20,"队长模式|r(|cffff0303CM|r)"+" - |c00ffffff"+"禁用阶段 #2")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"|c006699CC"+"第二禁用阶段已经开始"+"|r")
 else
 if GetTriggerEvalCount(t)>40 then
 if PX0[YW2]>0 then
@@ -35395,8 +35444,8 @@ set PL0=XL2()
 call SetPlayerState(YL2,PLAYER_STATE_RESOURCE_GOLD,250)
 call SetPlayerState(YK2,PLAYER_STATE_RESOURCE_GOLD,0)
 call PEI(YL2,"Sound\\Interface\\Rescue.wav")
-call MultiboardSetTitleText(Q20,GetObjectName('n0K6')+" - |c00ffffff"+GetObjectName('n0L9'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,"|c006699CC"+GetObjectName('n0L5')+"|r")
+call MultiboardSetTitleText(Q20,"队长模式|r(|cffff0303CM|r)"+" - |c00ffffff"+"选择阶段 #1")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"|c006699CC"+"第一选择阶段已经开始"+"|r")
 else
 if GetTriggerEvalCount(t)>30 then
 if PX0[YW2]>0 then
@@ -35535,15 +35584,15 @@ local trigger t=CreateTrigger()
 set PV0=true
 call FlushTrigger(GetTriggeringTrigger())
 if PZ0==false then
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(PM0)]+(D80[GetPlayerId((PM0))])+"|r "+GetObjectName('n0EA'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(PM0)]+(D80[GetPlayerId((PM0))])+"|r "+"被随机指定以开始选择英雄")
 endif
 set PJ0=PM0
 set PY0=30
 call SetPlayerState(PM0,PLAYER_STATE_RESOURCE_GOLD,250)
 call PEI(PM0,"Sound\\Interface\\Rescue.wav")
 call Y02(1)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,"|c006699CC"+GetObjectName('n0L6')+"|r")
-call MultiboardSetTitleText(Q20,GetObjectName('n0K6')+" - |c00ffffff"+GetObjectName('n0LA'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"|c006699CC"+"第一禁用阶段已经开始"+"|r")
+call MultiboardSetTitleText(Q20,"队长模式|r(|cffff0303CM|r)"+" - |c00ffffff"+"禁用阶段 #1")
 call UMI(t,EVENT_PLAYER_UNIT_SELL)
 call TriggerRegisterTimerEvent(t,1,true)
 call TriggerAddCondition(t,Condition(function J82))
@@ -35617,8 +35666,8 @@ set t=CreateTrigger()
 call TriggerRegisterTimerEvent(t,15-TimerGetElapsed(M),false)
 call TriggerAddCondition(t,Condition(function J92))
 call YA2()
-call QRI(bj_FORCE_ALL_PLAYERS,4.00,GetObjectName('n0ES'))
-call QRI(bj_FORCE_ALL_PLAYERS,4.00,GetObjectName('n0ER'))
+call QRI(bj_FORCE_ALL_PLAYERS,4.00,"起始队伍将被随机抽取")
+call QRI(bj_FORCE_ALL_PLAYERS,4.00,"输入 |c006699CC-cm 1|r 让近卫军团先选，或者输入 |c006699CC-cm 2|r 让天灾军团先选")
 set t=null
 set ZC1=null
 set ZD1=null
@@ -35862,7 +35911,7 @@ endfunction
 function JP2 takes nothing returns integer
 local integer i=1
 loop
-exitwhen i>24
+exitwhen i>40
 if Q90[i]==false then
 return i
 endif
@@ -35874,7 +35923,7 @@ function JQ2 takes player p returns nothing
 local integer i=1
 local boolean JU2=IsPlayerTeam1(p)
 loop
-exitwhen i==24
+exitwhen i==40
 if GetOwningPlayer(QA0[i])==BO[0]or GetOwningPlayer(QA0[i])==CO[0]then
 if JU2 then
 call SetUnitOwner(QA0[i],BO[0],false)
@@ -35912,7 +35961,7 @@ call ClearTextMessages()
 endif
 call DisplayTimedTextToPlayer(p1,0,0,10," ")
 call DisplayTimedTextToPlayer(p1,0,0,10," ")
-call DisplayTimedTextToPlayer(p1,0,0,20,GetObjectName('n068'))
+call DisplayTimedTextToPlayer(p1,0,0,20,"|c006699CC使用|r |c00ff0303选择英雄|r |c006699CC键来选择一个英雄|r")
 call DisplayTimedTextToPlayer(p1,0,0,10," ")
 else
 call JT2(p1)
@@ -35930,7 +35979,7 @@ call ClearTextMessages()
 endif
 call DisplayTimedTextToPlayer(p1,0,0,10," ")
 call DisplayTimedTextToPlayer(p1,0,0,10," ")
-call DisplayTimedTextToPlayer(p1,0,0,20,GetObjectName('n068'))
+call DisplayTimedTextToPlayer(p1,0,0,20,"|c006699CC使用|r |c00ff0303选择英雄|r |c006699CC键来选择一个英雄|r")
 call DisplayTimedTextToPlayer(p1,0,0,10," ")
 endif
 if p2!=null then
@@ -35950,7 +35999,7 @@ call ClearTextMessages()
 endif
 call DisplayTimedTextToPlayer(p2,0,0,10," ")
 call DisplayTimedTextToPlayer(p2,0,0,10," ")
-call DisplayTimedTextToPlayer(p2,0,0,20,GetObjectName('n068'))
+call DisplayTimedTextToPlayer(p2,0,0,20,"|c006699CC使用|r |c00ff0303选择英雄|r |c006699CC键来选择一个英雄|r")
 call DisplayTimedTextToPlayer(p2,0,0,10," ")
 else
 if GetLocalPlayer()==p2 then
@@ -35966,7 +36015,7 @@ call ClearTextMessages()
 endif
 call DisplayTimedTextToPlayer(p2,0,0,10," ")
 call DisplayTimedTextToPlayer(p2,0,0,10," ")
-call DisplayTimedTextToPlayer(p2,0,0,20,GetObjectName('n068'))
+call DisplayTimedTextToPlayer(p2,0,0,20,"|c006699CC使用|r |c00ff0303选择英雄|r |c006699CC键来选择一个英雄|r")
 call DisplayTimedTextToPlayer(p2,0,0,10," ")
 endif
 endif
@@ -35988,7 +36037,7 @@ else
 set QM0=CO[1]
 endif
 call JQ2(QM0)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QM0)]+(D80[GetPlayerId((QM0))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QM0)]+(D80[GetPlayerId((QM0))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call KI2(QM0,QN0)
 call JW2(20,QQ0,QU0)
 elseif KO2==1 then
@@ -36013,8 +36062,8 @@ if QP0[GetPlayerId(K22)]==false then
 call JR2(K22,JP2(),true)
 endif
 call JQ2(QM0)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QM0)]+(D80[GetPlayerId((QM0))])+"|r"+" "+GetObjectName('n064'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QN0)]+(D80[GetPlayerId((QN0))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QM0)]+(D80[GetPlayerId((QM0))])+"|r"+" "+"有20秒的时间选择一个英雄")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QN0)]+(D80[GetPlayerId((QN0))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call KI2(QM0,QN0)
 call JW2(20,QQ0,QU0)
 elseif KO2==2 then
@@ -36042,8 +36091,8 @@ if QP0[GetPlayerId(K32)]==false then
 call JR2(K32,JP2(),true)
 endif
 call JQ2(QM0)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QM0)]+(D80[GetPlayerId((QM0))])+"|r"+" "+GetObjectName('n064'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QN0)]+(D80[GetPlayerId((QN0))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QM0)]+(D80[GetPlayerId((QM0))])+"|r"+" "+"有20秒的时间选择一个英雄")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QN0)]+(D80[GetPlayerId((QN0))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call KI2(QM0,QN0)
 call JW2(20,QQ0,QU0)
 elseif KO2==3 then
@@ -36071,8 +36120,8 @@ if QP0[GetPlayerId(K32)]==false then
 call JR2(K32,JP2(),true)
 endif
 call JQ2(QM0)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QM0)]+(D80[GetPlayerId((QM0))])+"|r"+" "+GetObjectName('n064'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QN0)]+(D80[GetPlayerId((QN0))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QM0)]+(D80[GetPlayerId((QM0))])+"|r"+" "+"有20秒的时间选择一个英雄")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QN0)]+(D80[GetPlayerId((QN0))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call KI2(QM0,QN0)
 call JW2(20,QQ0,QU0)
 elseif KO2==4 then
@@ -36100,8 +36149,8 @@ if QP0[GetPlayerId(K32)]==false then
 call JR2(K32,JP2(),true)
 endif
 call JQ2(QM0)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QM0)]+(D80[GetPlayerId((QM0))])+"|r"+" "+GetObjectName('n064'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QN0)]+(D80[GetPlayerId((QN0))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QM0)]+(D80[GetPlayerId((QM0))])+"|r"+" "+"有20秒的时间选择一个英雄")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QN0)]+(D80[GetPlayerId((QN0))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call KI2(QM0,QN0)
 call JW2(20,QQ0,QU0)
 elseif KO2==5 then
@@ -36125,7 +36174,7 @@ if QP0[GetPlayerId(K32)]==false then
 call JR2(K32,JP2(),true)
 endif
 call JQ2(QM0)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QM0)]+(D80[GetPlayerId((QM0))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(QM0)]+(D80[GetPlayerId((QM0))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call KI2(QM0,QN0)
 call JW2(20,QQ0,QU0)
 elseif KO2==6 then
@@ -36141,7 +36190,7 @@ if KO2==8 then
 call JB2()
 set i=1
 loop
-exitwhen i>24
+exitwhen i>40
 call RemoveUnit(QA0[i])
 set i=i+1
 endloop
@@ -36176,7 +36225,7 @@ endfunction
 function K42 takes unit SFI returns integer
 local integer i=1
 loop
-exitwhen i>24
+exitwhen i>40
 if QA0[i]==SFI then
 return i
 endif
@@ -36188,14 +36237,19 @@ function K52 takes nothing returns boolean
 local unit YC2=GetSoldUnit()
 local player p=GetOwningPlayer(YC2)
 call KillUnit(YC2)
+if LoadBoolean(LY, StringHash("全局"), StringHash("竞赛模式禁用阶段")) then
+	set YC2=null
+	set p=null
+	return false
+endif
 if QP0[GetPlayerId(p)]==true then
-call PZI(p,GetObjectName('n0D7'))
+call PZI(p,"你已经有一个英雄了")
 set YC2=null
 set p=null
 return false
 endif
 if p!=QM0 and p!=QN0 then
-call PZI(p,GetObjectName('n0CR'))
+call PZI(p,"没有轮到你选择")
 set YC2=null
 set p=null
 return false
@@ -36227,14 +36281,16 @@ function K72 takes nothing returns boolean
 local trigger t=GetTriggeringTrigger()
 local integer handle_id
 local integer i=1
-call FlushTrigger(t)
+if t != null then
+	call FlushTrigger(t)
+endif
 call SuspendTimeOfDay(true)
 set QS0=GetRandomInt(1,2)
 call QRI(bj_FORCE_ALL_PLAYERS,15.00," ")
 if QS0==1 then
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,GetObjectName('n05K')+" "+C0[GetPlayerId(BO[0])]+GetObjectName('n065')+"|r"+" "+GetObjectName('n066'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"从"+" "+C0[GetPlayerId(BO[0])]+"近卫军团"+"|r"+" "+"开始，双方按照1-2-2-2-2-1的顺序选择英雄")
 else
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,GetObjectName('n05K')+" "+C0[GetPlayerId(CO[0])]+GetObjectName('n06C')+"|r"+" "+GetObjectName('n066'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"从"+" "+C0[GetPlayerId(CO[0])]+"天灾军团"+"|r"+" "+"开始，双方按照1-2-2-2-2-1的顺序选择英雄")
 endif
 call QRI(bj_FORCE_ALL_PLAYERS,15.00," ")
 set t=CreateTrigger()
@@ -36249,7 +36305,7 @@ endfunction
 function ModeRD_SetCap takes nothing returns boolean
 if U50==false then
 set U50=true
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,GetObjectName('n0GD'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"RD队长模式已被激活")
 endif
 return false
 endfunction
@@ -36448,6 +36504,7 @@ set a=i/I2R(24)*360.0
 set x=QV0+DJ1*Cos(a*bj_DEGTORAD)
 set y=QW0+DJ1*Sin(a*bj_DEGTORAD)
 set QA0[i]=CreateUnit(BO[0],DT0[Q80[i]],x,y,UEI(x,y,QV0,QW0))
+call MUDisableMove(QA0[i])
 call JC2(x,y)
 if KZ2 then
 call SetUnitColor(QA0[i],GetPlayerColor(CO[5]))
@@ -36461,37 +36518,352 @@ call TZI()
 set t=null
 set p=null
 endfunction
-function KV2 takes nothing returns boolean
-local unit YC2=GetSoldUnit()
-local player p=GetOwningPlayer(YC2)
-local integer i
+
+function MUModeJS_BanCountDown takes nothing returns nothing
+	local integer handle_id = GetHandleId(GetExpiredTimer())
+	local integer count = LoadInteger(LY, handle_id, 5)
+	local real x = QV0 + 40
+	local real y = QW0 - 70
+	if count < 20 then
+		call DestroyImage(LoadImageHandle(LY, handle_id, 158))
+		call DestroyImage(LoadImageHandle(LY, handle_id, 159))
+	endif
+	if count <= 0 then
+		call DestroyTimer(GetExpiredTimer())
+		call SaveBoolean(LY, StringHash("全局"), StringHash("竞赛模式禁用阶段"), false)
+
+		call DestroyImage(LoadImageHandle(LY, handle_id, 1))
+		call DestroyImage(LoadImageHandle(LY, handle_id, 2))
+		call DestroyImage(LoadImageHandle(LY, handle_id, 3))
+		call DestroyTrigger(LoadTriggerHandle(LY, handle_id, 4))
+
+		call FlushChildHashtable(LY, handle_id)
+		call K72()
+		return
+	endif
+	if count > 10 then
+		call JE2(count, 255, 255, 255, 255, x, y, handle_id)
+	elseif count > 5 then
+		call JE2(count, 255, 255, 50, 255, x, y, handle_id)
+	else
+		call JE2(count, 255, 50, 50, 255, x, y, handle_id)
+	endif
+	call SaveInteger(LY, handle_id, 5, count - 1)
+endfunction
+
+function MUModeJS_BanHero takes nothing returns nothing
+	local unit dummy = GetSoldUnit()
+	local player owner = GetOwningPlayer(dummy)
+	local unit hero
+	if LoadBoolean(LY, GetHandleId(owner), StringHash("竞赛模式已禁用英雄")) then
+		call PZI(owner, "你已经禁用过英雄了")
+		set dummy = null
+		set owner = null
+		return
+	endif
+	call SaveBoolean(LY, GetHandleId(owner), StringHash("竞赛模式已禁用英雄"), true)
+	set hero = GetSellingUnit()
+	call UnitAddAbility(hero, 'Aloc')
+	call SetUnitVertexColor(hero, 255, 255, 255, 100)
+	call PauseUnit(hero, true)
+	set Q90[K42(hero)] = true
+	call QRI(bj_FORCE_ALL_PLAYERS, 15.00, C0[GetPlayerId(owner)] + D80[GetPlayerId(owner)] + "|r 禁用了英雄: |cffff1111" + GetUnitName(hero) + "|r")
+	set dummy = null
+	set owner = null
+	set hero = null
+endfunction
+
+function MUModeJS_StepBan takes nothing returns nothing
+	local image array temp_image
+	local real x = QV0 + 40
+	local real y = QW0 + 70
+	local trigger trg
+	local integer i
+	local timer t
+	call DestroyTimer(GetExpiredTimer())
+
+	call PEI(GetLocalPlayer(),"Sound\\Interface\\Rescue.wav")
+	call QRI(bj_FORCE_ALL_PLAYERS, 15.00, " ")
+	call QRI(bj_FORCE_ALL_PLAYERS, 15.00, "每个玩家有20秒的时间禁用一个英雄")
+	call QRI(bj_FORCE_ALL_PLAYERS, 15.00, " ")
+
+	set temp_image[1] = XM2("Fonts\\B.blp", 90, 90, x - 40, y, 0, true, 255, 0, 0)
+	set temp_image[2] = XM2("Fonts\\A.blp", 90, 90, x , y, 0, true, 255, 0, 0)
+	set temp_image[3] = XM2("Fonts\\N.blp", 90, 90, x + 50, y, 0, true, 255, 0, 0)
+
+	call SaveBoolean(LY, StringHash("全局"), StringHash("竞赛模式禁用阶段"), true)
+
+	set trg = CreateTrigger()
+	call TriggerAddCondition(trg, Condition(function MUModeJS_BanHero))
+	set i = 1
+	loop
+		exitwhen i > 40
+		call TriggerRegisterUnitEvent(trg, QA0[i], EVENT_UNIT_SELL)
+		set i = i + 1
+	endloop
+
+
+	set t = CreateTimer()
+	call SaveImageHandle(LY, GetHandleId(t), 1, temp_image[1])
+	call SaveImageHandle(LY, GetHandleId(t), 2, temp_image[2])
+	call SaveImageHandle(LY, GetHandleId(t), 3, temp_image[3])
+	call SaveTriggerHandle(LY, GetHandleId(t), 4, trg)
+	call SaveInteger(LY, GetHandleId(t), 5, 20)
+	call TimerStart(t, 1, true, function MUModeJS_BanCountDown)
+	set t = null
+
+	set trg = null
+	set temp_image[1] = null
+	set temp_image[2] = null
+	set temp_image[3] = null
+endfunction
+
+//============竞赛模式============
+function MUModeJS takes nothing returns nothing
+local integer i=1
 local real x
 local real y
 local real a
-if GetUnitTypeId(YC2)=='h06N' and IsPlayerAlly(GetOwningPlayer(YC2),GetOwningPlayer(GetSellingUnit()))then
-if K1[GetPlayerId(p)]!=null then
-call PZI(p,GetObjectName('n0F3'))
-call KillUnit(YC2)
-set YC2=null
+local integer r
+local integer TJI
+local boolean K82=false
+local boolean K92=false
+local boolean KA2=false
+local boolean KB2=false
+local boolean KC2=false
+local boolean KD2=false
+local boolean KE2=false
+local boolean KF2=false
+local boolean KG2=false
+local boolean array KH2
+local player p
+local real DJ1
+local boolean KZ2=false
+local real z
+set QW0 = QW0 - 100 // 把选人中心位置往下挪100
+set RU0=false
+set U20=CreateTrigger()
+call TriggerAddCondition(U20,Condition(function K52))
+call PEI(GetLocalPlayer(),"Sound\\Interface\\Rescue.wav")
+set p=BO[1]
+call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD)-250)
+set p=BO[2]
+call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD)-250)
+set p=BO[3]
+call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD)-250)
+set p=BO[4]
+call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD)-250)
+set p=BO[5]
+call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD)-250)
+set p=CO[1]
+call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD)-250)
+set p=CO[2]
+call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD)-250)
+set p=CO[3]
+call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD)-250)
+set p=CO[4]
+call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD)-250)
+set p=CO[5]
+call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD)-250)
+set QT0=true
+set BL=180
+set A3=false
+set O3=false
+call UnitAddAbility(EI0,'Agho')
+call UnitAddAbility(E10,'Agho')
+call UnitAddAbility(EO0,'Agho')
+call UnitAddAbility(E20,'Agho')
+call UnitAddAbility(E70,'Agho')
+call UnitAddAbility(E80,'Agho')
+call UnitAddAbility(E90,'Agho')
+call UnitAddAbility(EA0,'Agho')
+call UnitAddAbility(E30,'Agho')
+call UnitAddAbility(E40,'Agho')
+call UnitAddAbility(E50,'Agho')
+call UnitAddAbility(E60,'Agho')
+call ShowUnit(EI0,false)
+call ShowUnit(E10,false)
+call ShowUnit(EO0,false)
+call ShowUnit(E20,false)
+call ShowUnit(E70,false)
+call ShowUnit(E80,false)
+call ShowUnit(E90,false)
+call ShowUnit(EA0,false)
+call ShowUnit(E30,false)
+call ShowUnit(E40,false)
+call ShowUnit(E50,false)
+call ShowUnit(E60,false)
+set i=1
+loop
+exitwhen i>40
+set TJI=RHI(true,true)
+if K82 then
+set K82=false
+set TJI=91
+elseif K92 then
+set K92=false
+set TJI=51
+elseif KA2 then
+set KA2=false
+set TJI=99
+elseif KB2 then
+set KB2=false
+if GetRandomInt(1,2)==1 then
+set TJI=104
+else
+set TJI=65
+endif
+elseif KC2 then
+set KC2=false
+set TJI=109
+elseif KD2 then
+set KD2=false
+set TJI=15
+elseif KE2 then
+set KE2=false
+set TJI=110
+elseif KF2 then
+set KF2=false
+elseif KG2 then
+set KG2=false
+endif
+if KH2[TJI]==false and((TJI)!=23)then
+set KH2[TJI]=true
+set Q80[i]=TJI
+set i=i+1
+endif
+endloop
+set Q70[1]=CreateUnit(BO[0],'n0DC',QV0,QW0,0)
+set Q70[2]=CreateUnit(BO[1],'n0DC',QV0,QW0,0)
+set Q70[3]=CreateUnit(BO[2],'n0DC',QV0,QW0,0)
+set Q70[4]=CreateUnit(BO[3],'n0DC',QV0,QW0,0)
+set Q70[5]=CreateUnit(BO[4],'n0DC',QV0,QW0,0)
+set Q70[6]=CreateUnit(BO[5],'n0DC',QV0,QW0,0)
+set Q70[7]=CreateUnit(CO[0],'n0DC',QX0,QY0,0)
+set Q70[8]=CreateUnit(CO[1],'n0DC',QX0,QY0,0)
+set Q70[9]=CreateUnit(CO[2],'n0DC',QX0,QY0,0)
+set Q70[10]=CreateUnit(CO[3],'n0DC',QX0,QY0,0)
+set Q70[11]=CreateUnit(CO[4],'n0DC',QX0,QY0,0)
+set Q70[12]=CreateUnit(CO[5],'n0DC',QX0,QY0,0)
+call PanCameraToTimedForPlayer(BO[1],QV0,QW0,0)
+call PanCameraToTimedForPlayer(BO[2],QV0,QW0,0)
+call PanCameraToTimedForPlayer(BO[3],QV0,QW0,0)
+call PanCameraToTimedForPlayer(BO[4],QV0,QW0,0)
+call PanCameraToTimedForPlayer(BO[5],QV0,QW0,0)
+call PanCameraToTimedForPlayer(CO[1],QV0,QW0,0)
+call PanCameraToTimedForPlayer(CO[2],QV0,QW0,0)
+call PanCameraToTimedForPlayer(CO[3],QV0,QW0,0)
+call PanCameraToTimedForPlayer(CO[4],QV0,QW0,0)
+call PanCameraToTimedForPlayer(CO[5],QV0,QW0,0)
+set QQ0=QV0
+set QU0=QW0
+set U00=QX0
+set UI0=QY0
+set QB0[1]=QV0+QK0*(-2)
+set QC0[1]=QW0+QL0
+set QB0[2]=QV0+QK0*(-1)
+set QC0[2]=QW0+QL0
+set QB0[3]=QV0+QK0*(0)
+set QC0[3]=QW0+QL0
+set QB0[4]=QV0+QK0*(1)
+set QC0[4]=QW0+QL0
+set QB0[5]=QV0+QK0*(2)
+set QC0[5]=QW0+QL0
+set QD0[1]=QV0+QK0*(-2)
+set QE0[1]=QW0-QL0
+set QD0[2]=QV0+QK0*(-1)
+set QE0[2]=QW0-QL0
+set QD0[3]=QV0+QK0*(0)
+set QE0[3]=QW0-QL0
+set QD0[4]=QV0+QK0*(1)
+set QE0[4]=QW0-QL0
+set QD0[5]=QV0+QK0*(2)
+set QE0[5]=QW0-QL0
+set QF0[1]=QX0+QK0*(-2)
+set QG0[1]=QY0+QL0
+set QF0[2]=QX0+QK0*(-1)
+set QG0[2]=QY0+QL0
+set QF0[3]=QX0+QK0*(0)
+set QG0[3]=QY0+QL0
+set QF0[4]=QX0+QK0*(1)
+set QG0[4]=QY0+QL0
+set QF0[5]=QX0+QK0*(2)
+set QG0[5]=QY0+QL0
+set QH0[1]=QX0+QK0*(-2)
+set QZ0[1]=QY0-QL0
+set QH0[2]=QX0+QK0*(-1)
+set QZ0[2]=QY0-QL0
+set QH0[3]=QX0+QK0*(0)
+set QZ0[3]=QY0-QL0
+set QH0[4]=QX0+QK0*(1)
+set QZ0[4]=QY0-QL0
+set QH0[5]=QX0+QK0*(2)
+set QZ0[5]=QY0-QL0
+set DJ1=QJ0
+set i=1
+loop
+exitwhen i>40
+if KZ2==false then
+set KZ2=true
+else
+set KZ2=false
+endif
+if i > 15 then
+	set a=i/I2R(25)*360.0
+	set x = QV0 + (DJ1 + 75) * Cos(a * bj_DEGTORAD)
+	set y = QW0 + (DJ1 + 75) * Sin(a * bj_DEGTORAD)
+else
+	set a=i/I2R(15)*360.0
+	set x = QV0 + (DJ1 - 50) * Cos(a * bj_DEGTORAD)
+	set y = QW0 + (DJ1 - 50) * Sin(a * bj_DEGTORAD)
+endif
+set QA0[i]=CreateUnit(BO[0],DT0[Q80[i]],x,y,UEI(x,y,QV0,QW0))
+call MUDisableMove(QA0[i])
+call JC2(x,y)
+if KZ2 then
+call SetUnitColor(QA0[i],GetPlayerColor(CO[5]))
+else
+call SetUnitColor(QA0[i],GetPlayerColor(CO[4]))
+endif
+call TriggerRegisterUnitEvent(U20,QA0[i],EVENT_UNIT_SELL)
+set i=i+1
+endloop
+call TZI()
+call TimerStart(CreateTimer(), 15 - TimerGetElapsed(M), false, function MUModeJS_StepBan)
 set p=null
-return false
-endif
-set x=GetUnitX(GetSellingUnit())
-set y=GetUnitY(GetSellingUnit())
-set i=RPI(GetUnitTypeId(GetSellingUnit()))
-set a=GetUnitFacing(GetSellingUnit())
-call RemoveUnit(GetSellingUnit())
-call CreateUnit(p,i,x,y,a)
-endif
-if GetUnitTypeId(YC2)=='h06N' then
-call KillUnit(YC2)
-endif
-if K1[GetPlayerId(BO[1])]!=null and K1[GetPlayerId(BO[2])]!=null and K1[GetPlayerId(BO[3])]!=null and K1[GetPlayerId(BO[4])]!=null and K1[GetPlayerId(BO[5])]!=null and K1[GetPlayerId(CO[1])]!=null and K1[GetPlayerId(CO[2])]!=null and K1[GetPlayerId(CO[3])]!=null and K1[GetPlayerId(CO[4])]!=null and K1[GetPlayerId(CO[5])]!=null then
-call FlushTrigger(GetTriggeringTrigger())
-endif
-set YC2=null
-set p=null
-return false
+endfunction
+
+function KV2 takes nothing returns boolean
+	local unit YC2=GetSoldUnit()
+	local player p=GetOwningPlayer(YC2)
+	local integer i
+	local real x
+	local real y
+	local real a
+	if GetUnitTypeId(YC2)=='h06N' and IsPlayerAlly(GetOwningPlayer(YC2),GetOwningPlayer(GetSellingUnit()))then
+		if K1[GetPlayerId(p)]!=null then
+			call PZI(p,"你已经选择了英雄")
+			call KillUnit(YC2)
+			set YC2=null
+			set p=null
+			return false
+		endif
+		set x=GetUnitX(GetSellingUnit())
+		set y=GetUnitY(GetSellingUnit())
+		set i=RPI(GetUnitTypeId(GetSellingUnit()))
+		set a=GetUnitFacing(GetSellingUnit())
+		call RemoveUnit(GetSellingUnit())
+		call CreateUnit(p,i,x,y,a) //todo: 没有立刻记下来,导致可能会选出2个英雄
+	endif
+	if GetUnitTypeId(YC2)=='h06N' then
+		call KillUnit(YC2)
+	endif
+	if K1[GetPlayerId(BO[1])]!=null and K1[GetPlayerId(BO[2])]!=null and K1[GetPlayerId(BO[3])]!=null and K1[GetPlayerId(BO[4])]!=null and K1[GetPlayerId(BO[5])]!=null and K1[GetPlayerId(CO[1])]!=null and K1[GetPlayerId(CO[2])]!=null and K1[GetPlayerId(CO[3])]!=null and K1[GetPlayerId(CO[4])]!=null and K1[GetPlayerId(CO[5])]!=null then
+		call FlushTrigger(GetTriggeringTrigger())
+	endif
+	set YC2=null
+	set p=null
+	return false
 endfunction
 function KW2 takes nothing returns nothing
 local trigger t=CreateTrigger()
@@ -36515,6 +36887,7 @@ set x=YF2-290+(i-1)*100
 set y=YG2
 call CreateUnit(BO[i+1],'n00C',YF2,YG2,bj_UNIT_FACING)
 set u=CreateUnit(BO[0],DT0[UH0[i+2]],x,y,270)
+call MUDisableMove(u)
 call TriggerRegisterUnitEvent(t,u,EVENT_UNIT_SELL)
 call PanCameraToTimedForPlayer(BO[i],YF2,YG2,0)
 set i=i+1
@@ -36526,6 +36899,7 @@ set x=YH2-290+(i-1)*100
 set y=YZ2
 call CreateUnit(CO[i+1],'n00C',YH2,YZ2,bj_UNIT_FACING)
 set u=CreateUnit(CO[0],DT0[UZ0[i+2]],x,y,270)
+call MUDisableMove(u)
 call TriggerRegisterUnitEvent(t,u,EVENT_UNIT_SELL)
 call PanCameraToTimedForPlayer(CO[i],YH2,YZ2,0)
 set i=i+1
@@ -36687,18 +37061,18 @@ call SetUnitScale(U90[L32],d,d,d)
 call SetUnitFacing(U90[L32],270)
 if L42==false then
 if UF0==1 or UF0==2 or UF0==3 or UF0==4 then
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+GetObjectName('n0H5')+" "+GetUnitName(U90[L32]))
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+"BAN掉了"+" "+GetUnitName(U90[L32]))
 call FL1("Ban"+I2S(GetPlayerId(p)),DC0[U70[L32]])
 else
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+GetObjectName('n0H6')+" "+GetUnitName(U90[L32]))
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+"选取了"+" "+GetUnitName(U90[L32]))
 call FL1("Pick"+I2S(GetPlayerId(p)),DC0[U70[L32]])
 endif
 else
 if UF0==1 or UF0==2 or UF0==3 or UF0==4 then
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+GetObjectName('n0H7')+" "+GetUnitName(U90[L32]))
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+"随机BAN掉了"+" "+GetUnitName(U90[L32]))
 call FL1("Ban"+I2S(GetPlayerId(p)),DC0[U70[L32]])
 else
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+GetObjectName('n0H8')+" "+GetUnitName(U90[L32]))
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+"随机选取了"+" "+GetUnitName(U90[L32]))
 call FL1("Pick"+I2S(GetPlayerId(p)),DC0[U70[L32]])
 endif
 endif
@@ -36717,18 +37091,18 @@ call SetUnitScale(U90[L32],d,d,d)
 call SetUnitFacing(U90[L32],90)
 if L42==false then
 if UF0==1 or UF0==2 or UF0==3 or UF0==4 then
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+GetObjectName('n0H5')+" "+GetUnitName(U90[L32]))
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+"BAN掉了"+" "+GetUnitName(U90[L32]))
 call FL1("Ban"+I2S(GetPlayerId(p)),DC0[U70[L32]])
 else
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+GetObjectName('n0H6')+" "+GetUnitName(U90[L32]))
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+"选取了"+" "+GetUnitName(U90[L32]))
 call FL1("Pick"+I2S(GetPlayerId(p)),DC0[U70[L32]])
 endif
 else
 if UF0==1 or UF0==2 or UF0==3 or UF0==4 then
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+GetObjectName('n0H7')+" "+GetUnitName(U90[L32]))
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+"随机BAN掉了"+" "+GetUnitName(U90[L32]))
 call FL1("Ban"+I2S(GetPlayerId(p)),DC0[U70[L32]])
 else
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+GetObjectName('n0H8')+" "+GetUnitName(U90[L32]))
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r "+"随机选取了"+" "+GetUnitName(U90[L32]))
 call FL1("Pick"+I2S(GetPlayerId(p)),DC0[U70[L32]])
 endif
 endif
@@ -36767,7 +37141,7 @@ set L82=CO[1]
 endif
 call KillUnit(YC2)
 if UM0 or UL0[UD0]<1 or p!=L82 then
-call PZI(p,GetObjectName('n0CR'))
+call PZI(p,"没有轮到你选择")
 elseif GetUnitTypeId(YC2)=='h06N' then
 call L22(L52(GetSellingUnit()),false)
 endif
@@ -36838,16 +37212,16 @@ endif
 set UE0[UD0]=IMaxBJ(UE0[UD0],6)
 if UF0==1 or UF0==2 or UF0==3 or UF0==4 then
 set UL0[UD0]=1
-call QRI(f,15,c+GetObjectName('n0H2')+"|r")
+call QRI(f,15,c+"轮到你来BAN掉一位英雄"+"|r")
 elseif UF0==5 then
 set UL0[UD0]=1
-call QRI(f,15,c+GetObjectName('n0H3')+"|r")
+call QRI(f,15,c+"轮到你来选取一位英雄"+"|r")
 elseif UF0==6 or UF0==7 or UF0==8 or UF0==9 then
 set UL0[UD0]=2
-call QRI(f,15,c+GetObjectName('n0H4')+"|r")
+call QRI(f,15,c+"轮到你来选取两位英雄"+"|r")
 elseif UF0==10 then
 set UL0[UD0]=1
-call QRI(f,15,c+GetObjectName('n0H3')+"|r")
+call QRI(f,15,c+"轮到你来选取一位英雄"+"|r")
 else
 call KL2(false,true)
 call FlushTrigger(GetTriggeringTrigger())
@@ -36856,7 +37230,7 @@ set t=CreateTrigger()
 call TriggerRegisterTimerEvent(t,6,false)
 call TriggerAddCondition(t,Condition(function L92))
 set t=null
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,GetObjectName('n0H9'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"征召阶段结束，片刻之后就可以选择英雄了")
 endif
 elseif UE0[UD0]==0 then
 call L62()
@@ -36871,9 +37245,9 @@ call FlushTrigger(t)
 set UC0=GetRandomInt(1,2)
 call QRI(bj_FORCE_ALL_PLAYERS,15.00," ")
 if UC0==1 then
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,GetObjectName('n05K')+" "+C0[GetPlayerId(BO[0])]+GetObjectName('n065')+"|r"+" "+GetObjectName('n066'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"从"+" "+C0[GetPlayerId(BO[0])]+"近卫军团"+"|r"+" "+"开始，双方按照1-2-2-2-2-1的顺序选择英雄")
 else
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,GetObjectName('n05K')+" "+C0[GetPlayerId(CO[0])]+GetObjectName('n06C')+"|r"+" "+GetObjectName('n066'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"从"+" "+C0[GetPlayerId(CO[0])]+"天灾军团"+"|r"+" "+"开始，双方按照1-2-2-2-2-1的顺序选择英雄")
 endif
 call QRI(bj_FORCE_ALL_PLAYERS,15.00," ")
 set UD0=UC0
@@ -36890,7 +37264,7 @@ set f=OO
 else
 set f=AO
 endif
-call QRI(f,15,c+GetObjectName('n0H2')+"|r")
+call QRI(f,15,c+"轮到你来BAN掉一位英雄"+"|r")
 set UM0=false
 set t=null
 return false
@@ -37062,6 +37436,7 @@ set a=(i/I2R(28))*360.0
 set x=PC0+I7I*Cos(a*bj_DEGTORAD)
 set y=PD0+I7I*Sin(a*bj_DEGTORAD)
 set U90[i]=CreateUnit(BO[0],DT0[U70[i]],x,y,UEI(x,y,PC0,PD0))
+call MUDisableMove(U90[i])
 call SetUnitPathing(U90[i],false)
 call MUSetUnitX(U90[i],x)
 call MUSetUnitY(U90[i],y)
@@ -37125,7 +37500,7 @@ call SetPlayerState(p,PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(p,PLAYER_STATE_R
 call FlushChildHashtable(LY,(handle_id))
 call FlushTrigger(t)
 else
-call PZI(p,GetObjectName('n033'))
+call PZI(p,"你没有足够的金钱选择一个新的英雄")
 endif
 call RemoveLocation(ZC1)
 call RemoveLocation(ZD1)
@@ -37210,7 +37585,7 @@ call PanCameraToTimedForPlayer(p,GetRectCenterX(O4),GetRectCenterY(O4),0)
 call DisplayTimedTextToPlayer(p,0,U2,15," ")
 call DisplayTimedTextToPlayer(p,0,U2,15," ")
 call DisplayTimedTextToPlayer(p,0,U2,15," ")
-call DisplayTimedTextToPlayer(p,0,U2,15,"|cff99ccff"+GetObjectName('n0E6')+"|r")
+call DisplayTimedTextToPlayer(p,0,U2,15,"|cff99ccff"+"在你的能量圈现在有三个英雄你可以选择"+"|r")
 call DisplayTimedTextToPlayer(p,0,U2,15," ")
 endif
 set p=CO[i]
@@ -37236,7 +37611,7 @@ call PanCameraToTimedForPlayer(p,GetRectCenterX(S3),GetRectCenterY(S3),0)
 call DisplayTimedTextToPlayer(p,0,U2,15," ")
 call DisplayTimedTextToPlayer(p,0,U2,15," ")
 call DisplayTimedTextToPlayer(p,0,U2,15," ")
-call DisplayTimedTextToPlayer(p,0,U2,15,"|cff99ccff"+GetObjectName('n0E6')+"|r")
+call DisplayTimedTextToPlayer(p,0,U2,15,"|cff99ccff"+"在你的能量圈现在有三个英雄你可以选择"+"|r")
 call DisplayTimedTextToPlayer(p,0,U2,15," ")
 endif
 set i=i+1
@@ -37872,7 +38247,7 @@ endloop
 set TJI=GetRandomInt(1,2)
 if IVI>=IWI and IVI>=IXI then
 call ClearTextMessages()
-call QRI(bj_FORCE_ALL_PLAYERS,45,GetObjectName('n05Z')+" "+IYI)
+call QRI(bj_FORCE_ALL_PLAYERS,45,"已有票数："+" "+IYI)
 call QRI(bj_FORCE_ALL_PLAYERS,45," ")
 set i=1
 set x=1
@@ -37904,7 +38279,7 @@ set i=i+1
 endloop
 elseif IWI>=IVI and IWI>=IXI then
 call ClearTextMessages()
-call QRI(bj_FORCE_ALL_PLAYERS,45,GetObjectName('n05Z')+" "+IJI)
+call QRI(bj_FORCE_ALL_PLAYERS,45,"已有票数："+" "+IJI)
 call QRI(bj_FORCE_ALL_PLAYERS,45," ")
 set i=1
 set x=1
@@ -37936,7 +38311,7 @@ set i=i+1
 endloop
 elseif IXI>=IVI and IXI>=IWI then
 call ClearTextMessages()
-call QRI(bj_FORCE_ALL_PLAYERS,45,GetObjectName('n05Z')+" "+IKI)
+call QRI(bj_FORCE_ALL_PLAYERS,45,"已有票数："+" "+IKI)
 call QRI(bj_FORCE_ALL_PLAYERS,45," ")
 set i=1
 set x=1
@@ -38031,11 +38406,11 @@ elseif M02=="3"then
 set MI2=3
 endif
 if MI2==0 then
-call PYI(GetTriggerPlayer(),GetObjectName('n03D'))
+call PYI(GetTriggerPlayer(),"无效选项，请从3个选项中作出一个选择")
 return false
 endif
 if(LoadBoolean(LY,(2001),(950+LU2)))then
-call PYI(GetTriggerPlayer(),GetObjectName('n03A'))
+call PYI(GetTriggerPlayer(),"你已经投过票了")
 return false
 endif
 call SaveBoolean(LY,(2001),(950+LU2),(true))
@@ -38046,7 +38421,7 @@ call SaveInteger(LY,(2001),(127),(1+(LoadInteger(LY,(2001),(127)))))
 else
 call SaveInteger(LY,(2001),(128),(1+(LoadInteger(LY,(2001),(128)))))
 endif
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,20,GetObjectName('n09M')+" Option "+I2S(MI2)+".")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,20,"你已经选择了"+" Option "+I2S(MI2)+".")
 return false
 endfunction
 function WN2 takes nothing returns nothing
@@ -38153,8 +38528,8 @@ set IKI=IKI+"|c005BFEEA-|r"
 endif
 endloop
 call QRI(bj_FORCE_ALL_PLAYERS,75," ")
-call QRI(bj_FORCE_ALL_PLAYERS,75,GetObjectName('n06T'))
-call QRI(bj_FORCE_ALL_PLAYERS,75,GetObjectName('n06I')+" "+GetObjectName('n06D'))
+call QRI(bj_FORCE_ALL_PLAYERS,75,"在接下来的30秒内，你可以使用“-option 1/2/3”命令来为下面的选项进行投票")
+call QRI(bj_FORCE_ALL_PLAYERS,75,"请注意，这并不意味着"+" "+"近卫军团将会拥有选项中第一套英雄阵容，它是随机的")
 call QRI(bj_FORCE_ALL_PLAYERS,75," ")
 call QRI(bj_FORCE_ALL_PLAYERS,75,IYI)
 call QRI(bj_FORCE_ALL_PLAYERS,75," ")
@@ -38180,7 +38555,7 @@ function M12 takes nothing returns boolean
 local trigger t=GetTriggeringTrigger()
 local integer NPI=GetTriggerEvalCount(t)
 local integer GW1=20-(NPI-(NPI/20)*20)
-call LeaderboardSetLabel(ITI,"           "+GetObjectName('n0EZ')+" "+I2S(GW1))
+call LeaderboardSetLabel(ITI,"           "+"剩余时间："+" "+I2S(GW1))
 if NPI>125 then
 call DestroyLeaderboard(ITI)
 call HJ2()
@@ -38222,7 +38597,7 @@ set p1=BO[1]
 else
 set p1=CO[1]
 endif
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call SetPlayerState(p1,PLAYER_STATE_RESOURCE_GOLD,IMI[GetPlayerId(p1)])
 if GetLocalPlayer()==p1 then
 call LeaderboardDisplay(ITI,true)
@@ -38240,8 +38615,8 @@ set p2=BO[2]
 set K22=CO[1]
 endif
 call TFI(K22)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+GetObjectName('n064'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+"有20秒的时间选择一个英雄")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call SetPlayerState(p1,PLAYER_STATE_RESOURCE_GOLD,IMI[GetPlayerId(p1)])
 call SetPlayerState(p2,PLAYER_STATE_RESOURCE_GOLD,IMI[GetPlayerId(p2)])
 if GetLocalPlayer()==p1 or GetLocalPlayer()==p2 then
@@ -38263,8 +38638,8 @@ set K32=BO[2]
 endif
 call TFI(K22)
 call TFI(K32)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+GetObjectName('n064'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+"有20秒的时间选择一个英雄")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call SetPlayerState(p1,PLAYER_STATE_RESOURCE_GOLD,IMI[GetPlayerId(p1)])
 call SetPlayerState(p2,PLAYER_STATE_RESOURCE_GOLD,IMI[GetPlayerId(p2)])
 if GetLocalPlayer()==p1 or GetLocalPlayer()==p2 then
@@ -38286,8 +38661,8 @@ set K32=CO[3]
 endif
 call TFI(K22)
 call TFI(K32)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+GetObjectName('n064'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+"有20秒的时间选择一个英雄")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call SetPlayerState(p1,PLAYER_STATE_RESOURCE_GOLD,IMI[GetPlayerId(p1)])
 call SetPlayerState(p2,PLAYER_STATE_RESOURCE_GOLD,IMI[GetPlayerId(p2)])
 if GetLocalPlayer()==p1 or GetLocalPlayer()==p2 then
@@ -38309,8 +38684,8 @@ set K32=BO[4]
 endif
 call TFI(K22)
 call TFI(K32)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+GetObjectName('n064'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+"有20秒的时间选择一个英雄")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call SetPlayerState(p1,PLAYER_STATE_RESOURCE_GOLD,IMI[GetPlayerId(p1)])
 call SetPlayerState(p2,PLAYER_STATE_RESOURCE_GOLD,IMI[GetPlayerId(p2)])
 if GetLocalPlayer()==p1 or GetLocalPlayer()==p2 then
@@ -38330,7 +38705,7 @@ set K32=CO[5]
 endif
 call TFI(K22)
 call TFI(K32)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call SetPlayerState(p1,PLAYER_STATE_RESOURCE_GOLD,IMI[GetPlayerId(p1)])
 if GetLocalPlayer()==p1 then
 call LeaderboardDisplay(ITI,true)
@@ -38369,9 +38744,9 @@ call SuspendTimeOfDay(true)
 set ILI=GetRandomInt(1,2)
 call QRI(bj_FORCE_ALL_PLAYERS,15.00," ")
 if ILI==1 then
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,GetObjectName('n05K')+" "+C0[GetPlayerId(BO[0])]+GetObjectName('n065')+"|r"+" "+GetObjectName('n066'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"从"+" "+C0[GetPlayerId(BO[0])]+"近卫军团"+"|r"+" "+"开始，双方按照1-2-2-2-2-1的顺序选择英雄")
 else
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,GetObjectName('n05K')+" "+C0[GetPlayerId(CO[0])]+GetObjectName('n06C')+"|r"+" "+GetObjectName('n066'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"从"+" "+C0[GetPlayerId(CO[0])]+"天灾军团"+"|r"+" "+"开始，双方按照1-2-2-2-2-1的顺序选择英雄")
 endif
 call QRI(bj_FORCE_ALL_PLAYERS,15.00," ")
 set t=CreateTrigger()
@@ -38421,7 +38796,7 @@ function M42 takes nothing returns boolean
 local trigger t=GetTriggeringTrigger()
 local integer NPI=GetTriggerEvalCount(t)
 local integer GW1=20-(NPI-(NPI/20)*20)
-call LeaderboardSetLabel(O0I,"           "+GetObjectName('n0EZ')+" "+I2S(GW1))
+call LeaderboardSetLabel(O0I,"           "+"剩余时间："+" "+I2S(GW1))
 if NPI>125 then
 call DestroyLeaderboard(O0I)
 call HJ2()
@@ -38463,7 +38838,7 @@ set p1=BO[1]
 else
 set p1=CO[1]
 endif
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call SetPlayerState(p1,PLAYER_STATE_RESOURCE_GOLD,IPI[GetPlayerId(p1)])
 if GetLocalPlayer()==p1 then
 call LeaderboardDisplay(O0I,true)
@@ -38481,8 +38856,8 @@ set p2=BO[2]
 set K22=CO[1]
 endif
 call TFI(K22)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+GetObjectName('n064'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+"有20秒的时间选择一个英雄")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call SetPlayerState(p1,PLAYER_STATE_RESOURCE_GOLD,IPI[GetPlayerId(p1)])
 call SetPlayerState(p2,PLAYER_STATE_RESOURCE_GOLD,IPI[GetPlayerId(p2)])
 if GetLocalPlayer()==p1 or GetLocalPlayer()==p2 then
@@ -38504,8 +38879,8 @@ set K32=BO[2]
 endif
 call TFI(K22)
 call TFI(K32)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+GetObjectName('n064'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+"有20秒的时间选择一个英雄")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call SetPlayerState(p1,PLAYER_STATE_RESOURCE_GOLD,IPI[GetPlayerId(p1)])
 call SetPlayerState(p2,PLAYER_STATE_RESOURCE_GOLD,IPI[GetPlayerId(p2)])
 if GetLocalPlayer()==p1 or GetLocalPlayer()==p2 then
@@ -38527,8 +38902,8 @@ set K32=CO[3]
 endif
 call TFI(K22)
 call TFI(K32)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+GetObjectName('n064'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+"有20秒的时间选择一个英雄")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call SetPlayerState(p1,PLAYER_STATE_RESOURCE_GOLD,IPI[GetPlayerId(p1)])
 call SetPlayerState(p2,PLAYER_STATE_RESOURCE_GOLD,IPI[GetPlayerId(p2)])
 if GetLocalPlayer()==p1 or GetLocalPlayer()==p2 then
@@ -38550,8 +38925,8 @@ set K32=BO[4]
 endif
 call TFI(K22)
 call TFI(K32)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+GetObjectName('n064'))
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+"有20秒的时间选择一个英雄")
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p2)]+(D80[GetPlayerId((p2))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call SetPlayerState(p1,PLAYER_STATE_RESOURCE_GOLD,IPI[GetPlayerId(p1)])
 call SetPlayerState(p2,PLAYER_STATE_RESOURCE_GOLD,IPI[GetPlayerId(p2)])
 if GetLocalPlayer()==p1 or GetLocalPlayer()==p2 then
@@ -38571,7 +38946,7 @@ set K32=CO[5]
 endif
 call TFI(K22)
 call TFI(K32)
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+GetObjectName('n064'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,C0[GetPlayerId(p1)]+(D80[GetPlayerId((p1))])+"|r"+" "+"有20秒的时间选择一个英雄")
 call SetPlayerState(p1,PLAYER_STATE_RESOURCE_GOLD,IPI[GetPlayerId(p1)])
 if GetLocalPlayer()==p1 then
 call LeaderboardDisplay(O0I,true)
@@ -38621,9 +38996,9 @@ call EnableTrigger(DN)
 set IRI=GetRandomInt(1,2)
 call QRI(bj_FORCE_ALL_PLAYERS,15.00," ")
 if IRI==1 then
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,GetObjectName('n09O')+" "+GetObjectName('n05K')+" "+C0[GetPlayerId(BO[0])]+GetObjectName('n065')+"|r"+" "+GetObjectName('n066'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"移除英雄阶段已经结束"+" "+"从"+" "+C0[GetPlayerId(BO[0])]+"近卫军团"+"|r"+" "+"开始，双方按照1-2-2-2-2-1的顺序选择英雄")
 else
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,GetObjectName('n09O')+" "+GetObjectName('n05K')+" "+C0[GetPlayerId(CO[0])]+GetObjectName('n06C')+"|r"+" "+GetObjectName('n066'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"移除英雄阶段已经结束"+" "+"从"+" "+C0[GetPlayerId(CO[0])]+"天灾军团"+"|r"+" "+"开始，双方按照1-2-2-2-2-1的顺序选择英雄")
 endif
 call QRI(bj_FORCE_ALL_PLAYERS,15.00," ")
 call M52()
@@ -38635,7 +39010,7 @@ endfunction
 function M92 takes nothing returns boolean
 local unit SFI=GetSoldUnit()
 local string MA2=C0[GetPlayerId(GetOwningPlayer(GetSoldUnit()))]+(D80[GetPlayerId((GetOwningPlayer(GetSoldUnit())))])+"|r"
-call QRI(bj_FORCE_ALL_PLAYERS,20,MA2+" "+GetObjectName('n09I')+" "+GetUnitName(SFI)+" "+GetObjectName('n09N'))
+call QRI(bj_FORCE_ALL_PLAYERS,20,MA2+" "+"移除了"+" "+GetUnitName(SFI)+" "+"from the available hero pool.")
 call TCI(GetUnitTypeId(GetSoldUnit()))
 call FL1("Ban"+I2S(GetPlayerId(GetOwningPlayer(GetSoldUnit()))),GetUnitTypeId(GetSoldUnit()))
 call RemoveUnit(GetSoldUnit())
@@ -38649,8 +39024,8 @@ local integer handle_id
 local string MC2=C0[GetPlayerId(BO[1])]+(D80[GetPlayerId((BO[1]))])+"|r"
 local string MD2=C0[GetPlayerId(CO[1])]+(D80[GetPlayerId((CO[1]))])+"|r"
 call QRI(bj_FORCE_ALL_PLAYERS,20.00," ")
-call QRI(bj_FORCE_ALL_PLAYERS,20.00,MC2+" "+GetObjectName('n09K'))
-call QRI(bj_FORCE_ALL_PLAYERS,20.00,MD2+" "+GetObjectName('n09K'))
+call QRI(bj_FORCE_ALL_PLAYERS,20.00,MC2+" "+"将有20秒的时间来选择从酒馆内移除任意4个英雄")
+call QRI(bj_FORCE_ALL_PLAYERS,20.00,MD2+" "+"将有20秒的时间来选择从酒馆内移除任意4个英雄")
 call QRI(bj_FORCE_ALL_PLAYERS,20.00," ")
 call FlushTrigger(t)
 call UMI(M82,EVENT_PLAYER_UNIT_SELL)
@@ -38851,7 +39226,7 @@ local unit MY2=K1[GetPlayerId(RVI)]
 call UnitRemoveBuffs(MX2,true,true)
 call UnitRemoveBuffs(MY2,true,true)
 if MX2==null and MY2==null then
-call QRI(bj_FORCE_ALL_PLAYERS,15,C0[GetPlayerId(BO[0])]+(D80[GetPlayerId((RZI))])+" "+GetObjectName('n067')+" "+(D80[GetPlayerId((RVI))])+" "+GetObjectName('n0A0')+"|r")
+call QRI(bj_FORCE_ALL_PLAYERS,15,C0[GetPlayerId(BO[0])]+(D80[GetPlayerId((RZI))])+" "+"和"+" "+(D80[GetPlayerId((RVI))])+" "+"没有选择英雄，因此将无英雄可用"+"|r")
 elseif GetRandomInt(1,2)==1 then
 if(MX2!=null)then
 return GetUnitTypeId(MX2)
@@ -38865,7 +39240,7 @@ else
 return GetUnitTypeId(MX2)
 endif
 endif
-call QRI(bj_FORCE_ALL_PLAYERS,15,C0[GetPlayerId(BO[0])]+(D80[GetPlayerId((RZI))])+" "+GetObjectName('n067')+" "+(D80[GetPlayerId((RVI))])+" "+GetObjectName('n09B'))
+call QRI(bj_FORCE_ALL_PLAYERS,15,C0[GetPlayerId(BO[0])]+(D80[GetPlayerId((RZI))])+" "+"和"+" "+(D80[GetPlayerId((RVI))])+" "+"没有选择英雄，系统将随机分配一位英雄给他们！")
 return TYI()
 endfunction
 function MJ2 takes nothing returns nothing
@@ -38996,8 +39371,8 @@ return false
 endfunction
 function WZ2 takes nothing returns nothing
 local trigger t=CreateTrigger()
-call QRI(P2,10,GetObjectName('n09H'))
-call QRI(P2,10,GetObjectName('n09E'))
+call QRI(P2,10,"你所使用的英雄可能在第60秒后被替换")
+call QRI(P2,10,"在那之前，请不要买物品")
 set E2=true
 call TCI('H00I')
 call TriggerRegisterTimerEvent(t,60-TimerGetElapsed(M),false)
@@ -39101,18 +39476,18 @@ call RemoveLocation(LJ2)
 endfunction
 function N22 takes nothing returns nothing
 set WL=true
-call QRI(bj_FORCE_ALL_PLAYERS,10,GetObjectName('n06K')+" "+GetObjectName('n06L'))
+call QRI(bj_FORCE_ALL_PLAYERS,10,"免死模式已经激活"+" "+"你不需要等待时间即可复活")
 call DisableTrigger(GetTriggeringTrigger())
 endfunction
 function N32 takes nothing returns nothing
 local integer N42=S2I(SubString(GetEventPlayerChatString(),6,StringLength(GetEventPlayerChatString())))
 if N42>YL then
-call PZI(WO,GetObjectName('n03C'))
+call PZI(WO,"数值在10-46之间有效")
 elseif N42<10 then
-call PZI(WO,GetObjectName('n02I'))
+call PZI(WO,"数值在10-46之间有效")
 else
 set YL=N42
-call QRI(bj_FORCE_ALL_PLAYERS,10,GetObjectName('n06X')+" "+I2S(YL)+" "+GetObjectName('n06N'))
+call QRI(bj_FORCE_ALL_PLAYERS,10,"每个队伍在输掉比赛前，共有"+" "+I2S(YL)+" "+"条命")
 call DisableTrigger(GetTriggeringTrigger())
 endif
 endfunction
@@ -39127,8 +39502,8 @@ local trigger N82=CreateTrigger()
 local trigger nd=CreateTrigger()
 set YL=Q9I(DF0,DH0-DG0+1)
 call QRI(bj_FORCE_ALL_PLAYERS,10.00," ")
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n06O')+" -nd "+GetObjectName('n067')+" -lives xx "+GetObjectName('n06Q'))
-call QRI(bj_FORCE_ALL_PLAYERS,10.00,GetObjectName('n060')+" "+I2S(YL))
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"扩展命令："+" -nd "+"和"+" -lives xx "+"在接下来15秒钟之内键入才有效")
+call QRI(bj_FORCE_ALL_PLAYERS,10.00,"目前，死亡模式的团队生命总数为"+" "+I2S(YL))
 call TriggerRegisterTimerEvent(N72,15,false)
 call TriggerAddAction(N72,function N52)
 call SaveTriggerHandle(LY,(GetHandleId(N72)),(170),(nd))
@@ -39249,22 +39624,22 @@ function X12 takes nothing returns nothing
 local integer L42=GetRandomInt(1,4)
 set G2=true
 if(L42==1)then
-call QRI(bj_FORCE_ALL_PLAYERS,20.00,GetObjectName('n0FD'))
+call QRI(bj_FORCE_ALL_PLAYERS,20.00,"系统随机为你选择了随机征召")
 call QRI(bj_FORCE_ALL_PLAYERS,20.00," ")
 call ExecuteFunc("X02")
 endif
 if(L42==2)then
-call QRI(bj_FORCE_ALL_PLAYERS,20.00,GetObjectName('n0FE'))
+call QRI(bj_FORCE_ALL_PLAYERS,20.00,"系统随机为你选择了有限征召")
 call QRI(bj_FORCE_ALL_PLAYERS,20.00," ")
 call ExecuteFunc("XI2")
 endif
 if(L42==3)then
-call QRI(bj_FORCE_ALL_PLAYERS,20.00,GetObjectName('n0FK'))
+call QRI(bj_FORCE_ALL_PLAYERS,20.00,"系统随机为你选择了随机阵容投票")
 call QRI(bj_FORCE_ALL_PLAYERS,20.00," ")
 call ExecuteFunc("WN2")
 endif
 if(L42==4)then
-call QRI(bj_FORCE_ALL_PLAYERS,20.00,GetObjectName('n0FM'))
+call QRI(bj_FORCE_ALL_PLAYERS,20.00,"系统随机为你选择了全阵营随机/全智力")
 call QRI(bj_FORCE_ALL_PLAYERS,20.00," ")
 call ExecuteFunc("WX2")
 call ExecuteFunc("WM2")
@@ -39505,7 +39880,7 @@ local location ZC1
 local location ZD1
 local integer NX2
 set NX2=GetRandomInt(1,2)
-call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,GetObjectName('n0GY'))
+call DisplayTimedTextToPlayer(GetLocalPlayer(),0,0,10,"双方阵营已被随机分配")
 if NX2==1 then
 return
 endif
@@ -39837,7 +40212,7 @@ set Q0=true
 endfunction
 function NQ2 takes nothing returns nothing
 set O3I=false
-call QRI(bj_FORCE_ALL_PLAYERS,10,GetObjectName('n0HA'))
+call QRI(bj_FORCE_ALL_PLAYERS,10,"禁止刷野开启，野怪将不会出现")
 call DisableTrigger(GetTriggeringTrigger())
 endfunction
 function NU2 takes nothing returns nothing
@@ -40430,9 +40805,9 @@ local real SOI=(TimerGetElapsed(M))
 local trigger t
 local integer handle_id
 if(SOI-OTI[id])<180 then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n0MR')+": "+I2S(R2I(180-(SOI-OTI[id]))))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"双英雄模式冷却中"+": "+I2S(R2I(180-(SOI-OTI[id]))))
 elseif T62(id)==false then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,GetObjectName('n0MS'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10,"你的英雄必须位于泉水区域")
 else
 set OTI[id]=SOI
 set t=CreateTrigger()
@@ -40679,7 +41054,7 @@ endfunction
 function R02 takes nothing returns boolean
 if J2 then
 call TVI()
-call QRI(bj_FORCE_ALL_PLAYERS,20.00,C0[GetPlayerId(WO)]+(D80[GetPlayerId((WO))])+"|r"+" "+GetObjectName('n0CM'))
+call QRI(bj_FORCE_ALL_PLAYERS,20.00,C0[GetPlayerId(WO)]+(D80[GetPlayerId((WO))])+"|r"+" "+"默认选择了常规模式，在选择英雄后，系统会返还给你175金钱")
 call QRI(bj_FORCE_ALL_PLAYERS,20.00," ")
 set AL=true
 call VU2()
@@ -40757,17 +41132,17 @@ endif
 return false
 endfunction
 function RA2 takes string s returns nothing
-call QRI(bj_FORCE_ALL_PLAYERS,20.00,"|c00CC0000"+GetObjectName('n0NE')+": |r|c006699CC"+s+"|r")
+call QRI(bj_FORCE_ALL_PLAYERS,20.00,"|c00CC0000"+"孙悟空"+": |r|c006699CC"+s+"|r")
 call StartSound(XF)
 endfunction
 function RB2 takes nothing returns nothing
-call RA2(GetObjectName(('n0NG')))
+call RA2("这是什么花招？？好吧，你赢了，给你货真价实的金箍棒")
 call CreateItem(FT0[XZ0],GetUnitX(A8I),GetUnitY(A8I))
 call ReviveHero(A8I,GetUnitX(A8I),GetUnitY(A8I),false)
 call RemoveUnit(A8I)
 endfunction
 function RC2 takes nothing returns nothing
-call RA2(GetObjectName(('n0NH')))
+call RA2("真是逗！你可以把你的山寨金箍棒拿走了，蟠桃已经被我吃了")
 call SetItemVisible(A4I,true)
 call SetItemPosition(A4I,GetUnitX(A8I),GetUnitY(A8I))
 call RemoveUnit(A8I)
@@ -40866,7 +41241,7 @@ local trigger t=CreateTrigger()
 local integer handle_id=GetHandleId(t)
 call SetUnitInvulnerable(A8I,false)
 call UnitRemoveAbility(A8I,'Abun')
-call RA2(GetObjectName(('n0ND')))
+call RA2("我给你20分钟时间，看看你能不能找到打败我的办法")
 set A3I=true
 call TriggerRegisterTimerEvent(t,0.1,true)
 call TriggerRegisterDeathEvent(t,A8I)
@@ -40876,14 +41251,14 @@ return false
 endfunction
 function RV2 takes nothing returns nothing
 local trigger t=CreateTrigger()
-call RA2(GetObjectName(('n0N8')))
+call RA2("聪明！")
 call SetUnitInvulnerable(A8I,true)
 call TriggerRegisterTimerEvent(t,10,false)
 call TriggerAddCondition(t,Condition(function RZ2))
 set t=null
 endfunction
 function RW2 takes nothing returns nothing
-call RA2(GetObjectName(('n0NF')))
+call RA2("错了！你得专心点")
 if AOI then
 call RV2()
 else
@@ -40917,7 +41292,7 @@ call FlushChildHashtable(LY,(handle_id))
 call FlushTrigger(t)
 return false
 endif
-call RA2(GetObjectName(('n0NA')))
+call RA2("你能找到我的真身吗？")
 call SaveEffectHandle(LY,(GetHandleId(t)),(175),(AddSpecialEffectTarget("Abilities\\Spells\\Human\\InnerFire\\InnerFireTarget.mdl",ACI,"overhead")))
 if r==0 then
 set x0=AFI
@@ -40993,13 +41368,13 @@ return false
 endfunction
 function RJ2 takes nothing returns nothing
 local trigger t=CreateTrigger()
-call RA2(GetObjectName(('n0NB')))
+call RA2("你耍了个花招，干得不错！")
 call TriggerRegisterTimerEvent(t,10,false)
 call TriggerAddCondition(t,Condition(function RY2))
 set t=null
 endfunction
 function RK2 takes nothing returns nothing
-call RA2(GetObjectName(('n0NC')))
+call RA2("太慢了！")
 if AOI then
 call RJ2()
 else
@@ -41101,7 +41476,7 @@ call FlushChildHashtable(LY,(handle_id))
 call FlushTrigger(t)
 return false
 endif
-call RA2(GetObjectName(('n0N9')))
+call RA2("和我比赛看谁先跑到河道另一边，5秒后开始！")
 call TriggerRegisterTimerEvent(t,1,true)
 call SaveEffectHandle(LY,(GetHandleId(t)),(175),(AddSpecialEffectTarget("Abilities\\Spells\\Human\\InnerFire\\InnerFireTarget.mdl",ACI,"overhead")))
 call SaveEffectHandle(LY,(GetHandleId(t)),(176),(AddSpecialEffect("Objects\\InventoryItems\\BattleStandard\\BattleStandard.mdl",2897,-2814)))
@@ -41141,7 +41516,7 @@ call SetUnitInvulnerable(A8I,true)
 call SetHeroLevel(A8I,25,false)
 call PingMinimap(ADI,AEI,4)
 call SetCameraPosition(GetUnitX(A8I),GetUnitY(A8I))
-call RA2(GetObjectName(('n0N7')))
+call RA2("我们来玩玩游戏吧。如果让我开心了我会给你奖励的。")
 call TriggerRegisterTimerEvent(t,20,false)
 call TriggerAddCondition(t,Condition(function PI2))
 set t=CreateTrigger()
@@ -41567,7 +41942,7 @@ function PW2 takes nothing returns boolean
 if GetSpellAbilityId()=='A11N' then
 if(LoadBoolean(LY,(GetHandleId(GetOwningPlayer(GetSpellTargetUnit()))),(139)))and IsUnitAlly(GetSpellTargetUnit(),GetOwningPlayer(GetTriggerUnit()))==true then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n038'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"该目标拒绝某些友方技能")
 endif
 endif
 return false
@@ -42061,7 +42436,7 @@ endfunction
 function QG2 takes nothing returns boolean
 local integer EB2=ARI[GetPlayerId(GetTriggerPlayer())]
 if(GetUnitTypeId(K1[GetPlayerId(GetTriggerPlayer())])=='N01I' or GetUnitTypeId(K1[GetPlayerId(GetTriggerPlayer())])=='N01H' or GetUnitTypeId(K1[GetPlayerId(GetTriggerPlayer())])=='N01T' or GetUnitTypeId(K1[GetPlayerId(GetTriggerPlayer())])=='N01J')and EB2>0 then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetObjectName('n0GQ')+" "+I2S(EB2))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,"地精贪婪："+" "+I2S(EB2))
 endif
 return false
 endfunction
@@ -43916,7 +44291,7 @@ call SetUnitPosition(u,x,y)
 endif
 endif
 if(LoadBoolean(LY,(GetHandleId(u)),(80)))==true then
-call PZI(GetOwningPlayer(AW3),GetObjectName('n036'))
+call PZI(GetOwningPlayer(AW3),"不能传送至正在使用雷电牵引的单位")
 endif
 call FlushChildHashtable(LY,(handle_id))
 call FlushTrigger(t)
@@ -44111,7 +44486,7 @@ if GetSpellAbilityId()=='A28T' then
 if IsUnitEnemy(GetSpellTargetUnit(),GetOwningPlayer(GetTriggerUnit()))==true then
 if IsUnitType(GetSpellTargetUnit(),UNIT_TYPE_HERO)==true or IsUnitIllusion(GetSpellTargetUnit())then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n0K9'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"非法目标")
 endif
 endif
 endif
@@ -45645,7 +46020,7 @@ function E93 takes nothing returns boolean
 if GetSpellAbilityId()=='A14O' then
 if GetUnitState(GetTriggerUnit(),UNIT_STATE_MANA)<(15+0.07*GetUnitState(GetTriggerUnit(),UNIT_STATE_MAX_MANA))then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n0G8'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"魔法不足")
 endif
 endif
 return false
@@ -46545,7 +46920,7 @@ local unit target=GetSpellTargetUnit()
 local integer G33=GetUnitLevel(target)
 if GetOwningPlayer(target)!=BO[0]and GetOwningPlayer(target)!=CO[0]and G33>4 then
 call PJI(SFI)
-call PZI(GetOwningPlayer(SFI),GetObjectName('n0CX'))
+call PZI(GetOwningPlayer(SFI),"那个生物过于强大")
 endif
 set SFI=null
 set target=null
@@ -47059,7 +47434,7 @@ endfunction
 function H13 takes nothing returns nothing
 local integer i=GetPlayerId(GetOwningPlayer(GetTriggerUnit()))
 if CII[i]==null then
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n037'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"未发现幻像法球")
 else
 call SetUnitScale(CII[i],2.5,2.5,2.5)
 call KillUnit(CII[i])
@@ -47137,7 +47512,7 @@ endfunction
 function H63 takes nothing returns nothing
 if GetSpellAbilityId()=='A21E' and IsUnitAlly(GetSpellTargetUnit(),GetOwningPlayer(GetTriggerUnit()))and(LoadBoolean(LY,(GetHandleId(GetOwningPlayer(GetSpellTargetUnit()))),(139)))then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n038'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"该目标拒绝某些友方技能")
 endif
 endfunction
 function XL1 takes nothing returns nothing
@@ -48456,7 +48831,7 @@ function W43 takes nothing returns boolean
 if GetSpellAbilityId()=='A10U' or GetSpellAbilityId()=='A11Y' or GetSpellAbilityId()=='A11Z' then
 if GetSpellTargetUnit()!=null and(LoadBoolean(LY,(GetHandleId(GetOwningPlayer(GetSpellTargetUnit()))),(139)))then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n038'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"该目标拒绝某些友方技能")
 endif
 endif
 return false
@@ -49206,7 +49581,7 @@ endfunction
 function XF3 takes nothing returns boolean
 if(GetSpellAbilityId()=='A01P')and RKI(GetSpellTargetUnit())then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n0LR'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"目标免疫魔法")
 endif
 return false
 endfunction
@@ -49765,7 +50140,7 @@ function YS3 takes nothing returns boolean
 local integer YT3=CTI[GetPlayerId(GetTriggerPlayer())]
 local integer QHI=CRI[GetPlayerId(GetTriggerPlayer())]
 if GetUnitTypeId(K1[GetPlayerId(GetTriggerPlayer())])=='N01V' and QHI>0 then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetObjectName('n0GM')+" "+R2S(I2R(YT3)/I2R(QHI)*100)+"% ("+I2S(YT3)+"/"+I2S(QHI)+")")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,"箭矢准确率："+" "+R2S(I2R(YT3)/I2R(QHI)*100)+"% ("+I2S(YT3)+"/"+I2S(QHI)+")")
 endif
 return false
 endfunction
@@ -50051,7 +50426,7 @@ function J93 takes nothing returns boolean
 if GetSpellAbilityId()==('A0G8')then
 if GetOwningPlayer(GetSpellTargetUnit())==GetOwningPlayer(GetTriggerUnit())then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n0LF'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"不能以自己的单位为目标")
 endif
 endif
 return false
@@ -50685,13 +51060,13 @@ local integer level=GetUnitAbilityLevel(hero,KL3)
 local trigger t=CreateTrigger()
 local integer handle_id=GetHandleId(t)
 if r==2 then
-call UYI(GetObjectName('n0K7'),5,GetTriggerUnit(),0.03,255,0,0,255)
+call UYI("|c00FFFF002x 多重施法！！|r",5,GetTriggerUnit(),0.03,255,0,0,255)
 elseif r==3 then
-call UYI(GetObjectName('n0JT'),5,GetTriggerUnit(),0.03,255,0,0,255)
+call UYI("|cffff80003x 多重施法！！！|r",5,GetTriggerUnit(),0.03,255,0,0,255)
 elseif r==4 then
-call UYI(GetObjectName('n0K8'),5,GetTriggerUnit(),0.03,255,0,0,255)
+call UYI("4x 多重施法！！！！",5,GetTriggerUnit(),0.03,255,0,0,255)
 elseif r==5 then
-call UYI(GetObjectName('n0JO'),5,GetTriggerUnit(),0.03,255,0,0,255)
+call UYI("5x 多重施法！！！！！",5,GetTriggerUnit(),0.03,255,0,0,255)
 endif
 set r=r-1
 call SaveUnitHandle(LY,(handle_id),(17),(target))
@@ -50762,13 +51137,13 @@ local integer level=GetUnitAbilityLevel(hero,KL3)
 local trigger t=CreateTrigger()
 local integer handle_id=GetHandleId(t)
 if r==2 then
-call UYI(GetObjectName('n0K7'),5,GetTriggerUnit(),0.03,255,0,0,255)
+call UYI("|c00FFFF002x 多重施法！！|r",5,GetTriggerUnit(),0.03,255,0,0,255)
 elseif r==3 then
-call UYI(GetObjectName('n0JT'),5,GetTriggerUnit(),0.03,255,0,0,255)
+call UYI("|cffff80003x 多重施法！！！|r",5,GetTriggerUnit(),0.03,255,0,0,255)
 elseif r==4 then
-call UYI(GetObjectName('n0K8'),5,GetTriggerUnit(),0.03,255,0,0,255)
+call UYI("4x 多重施法！！！！",5,GetTriggerUnit(),0.03,255,0,0,255)
 elseif r==5 then
-call UYI(GetObjectName('n0JO'),5,GetTriggerUnit(),0.03,255,0,0,255)
+call UYI("5x 多重施法！！！！！",5,GetTriggerUnit(),0.03,255,0,0,255)
 endif
 set r=r-1
 call SaveUnitHandle(LY,(handle_id),(17),(target))
@@ -50811,11 +51186,11 @@ local string s4
 local string s5
 local string s6
 if D8I[id]>0 then
-set s1=GetObjectName('n0JH')+" "+I2S(D8I[id])
-set s2=GetObjectName('n0JM')+" "+I2S(D4I[id]+D5I[id]+D6I[id]+D7I[id])+" ("+I2S((D4I[id]+D5I[id]+D6I[id]+D7I[id])*100/D8I[id])+"%)"
-set s3=GetObjectName('n0JL')+" "+I2S(D4I[id])+" ("+I2S(100*D4I[id]/D8I[id])+"%)"
-set s4=GetObjectName('n0JK')+" "+I2S(D5I[id])+" ("+I2S(100*D5I[id]/D8I[id])+"%)"
-set s5=GetObjectName('n0JJ')+" "+I2S(D6I[id])+" ("+I2S(100*D6I[id]/D8I[id])+"%)"
+set s1="尝试次数："+" "+I2S(D8I[id])
+set s2="成功次数："+" "+I2S(D4I[id]+D5I[id]+D6I[id]+D7I[id])+" ("+I2S((D4I[id]+D5I[id]+D6I[id]+D7I[id])*100/D8I[id])+"%)"
+set s3="2x 施法："+" "+I2S(D4I[id])+" ("+I2S(100*D4I[id]/D8I[id])+"%)"
+set s4="3x 施法："+" "+I2S(D5I[id])+" ("+I2S(100*D5I[id]/D8I[id])+"%)"
+set s5="4x 施法："+" "+I2S(D6I[id])+" ("+I2S(100*D6I[id]/D8I[id])+"%)"
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,s1)
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,s2)
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,s3)
@@ -50881,13 +51256,13 @@ local unit WH1
 local integer TPI=GetSpellAbilityId()
 local integer TGI=1
 if r==2 then
-call UYI(GetObjectName('n0K7'),5,GetTriggerUnit(),0.03,255,0,0,255)
+call UYI("|c00FFFF002x 多重施法！！|r",5,GetTriggerUnit(),0.03,255,0,0,255)
 elseif r==3 then
-call UYI(GetObjectName('n0JT'),5,GetTriggerUnit(),0.03,255,0,0,255)
+call UYI("|cffff80003x 多重施法！！！|r",5,GetTriggerUnit(),0.03,255,0,0,255)
 elseif r==4 then
-call UYI(GetObjectName('n0K8'),5,GetTriggerUnit(),0.03,255,0,0,255)
+call UYI("4x 多重施法！！！！",5,GetTriggerUnit(),0.03,255,0,0,255)
 elseif r==5 then
-call UYI(GetObjectName('n0JO'),5,GetTriggerUnit(),0.03,255,0,0,255)
+call UYI("5x 多重施法！！！！！",5,GetTriggerUnit(),0.03,255,0,0,255)
 endif
 set r=r-1
 call GroupEnumUnitsInRange(Z51,GetUnitX(PKI),GetUnitY(PKI),600,Condition(function KQ3))
@@ -51230,6 +51605,7 @@ call FlushChildHashtable(LY,(handle_id))
 call FlushTrigger(t)
 elseif target==null or IsUnitDead(target)==true then
 call SaveUnitHandle(LY,(GetHandleId(hero)),(831),(null))
+call RemoveSavedHandle(LY,(GetHandleId(hero)),(831))
 elseif LN3 then
 set QWI=QLI(hero,target)
 if QWI>LT3 and QWI<LS3 then
@@ -52128,7 +52504,7 @@ local integer handle_id=GetHandleId(GetTriggeringTrigger())
 local unit hero=HK
 local real PAI=(LoadReal(LY,(handle_id),(20)))
 call SetHeroInt(hero,GetHeroInt(hero,false)+1,true)
-call UYI("+1 "+GetObjectName('n0JP'),3,hero,0.023,0,255,0,230)
+call UYI("+1 "+"智力",3,hero,0.023,0,255,0,230)
 set hero=null
 endfunction
 function N63 takes nothing returns nothing
@@ -52136,14 +52512,14 @@ local integer handle_id=GetHandleId(GetTriggeringTrigger())
 local unit hero=HK
 local real PAI=(LoadReal(LY,(handle_id),(20)))
 call SetHeroInt(hero,GetHeroInt(hero,false)+2,true)
-call UYI("+2 "+GetObjectName('n0JP'),3,hero,0.023,0,255,0,230)
+call UYI("+2 "+"智力",3,hero,0.023,0,255,0,230)
 set hero=null
 endfunction
 function N73 takes unit hero,unit IFO returns nothing
 if IsUnitType(IFO,UNIT_TYPE_HERO)==true and V51(GetUnitTypeId(IFO))==false and IsUnitIllusion(IFO)==false and(IsUnitInRange(hero,IFO,900)or GetOwningPlayer(hero)==GetOwningPlayer(GetKillingUnit()))and IsUnitDead(hero)==false and IsUnitAlly(hero,GetOwningPlayer(IFO))==false then
 if GetUnitTypeId(hero)=='N01A' then
 set DMI[GetPlayerId(GetOwningPlayer(hero))]=DMI[GetPlayerId(GetOwningPlayer(hero))]+2
-call UYI("-2 "+GetObjectName('n0JP'),3,IFO,0.023,255,0,0,230)
+call UYI("-2 "+"智力",3,IFO,0.023,255,0,0,230)
 call SetHeroInt(IFO,GetHeroInt(IFO,false)-2,true)
 call IJ1(IFO,hero,'h0CP',"N63",450,false)
 endif
@@ -52164,7 +52540,7 @@ endfunction
 function NA3 takes nothing returns boolean
 local integer QHI=DMI[GetPlayerId(GetTriggerPlayer())]
 if GetUnitTypeId(K1[GetPlayerId(GetTriggerPlayer())])=='N01A' and QHI>0 then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetObjectName('n0HM')+" "+I2S(QHI))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,"已偷取的智力总量："+" "+I2S(QHI))
 endif
 return false
 endfunction
@@ -52567,7 +52943,7 @@ set JGO=JGO-1
 call SaveInteger(LY,(GetHandleId(hero)),(829),(JGO))
 call AddSkill(hero,DSI[JGO])
 else
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n0NY'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"无可用次数")
 endif
 call RemoveLocation(point)
 set t=null
@@ -52938,7 +53314,7 @@ set JGO=JGO-1
 call SaveInteger(LY,(GetHandleId(hero)),(828),(JGO))
 call AddSkill(hero,EII[JGO])
 else
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n0NY'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"无可用次数")
 endif
 set hero=null
 set target=null
@@ -53595,7 +53971,7 @@ if CountUnitsInGroup(Z51)!=0 then
 set ZOO=FirstOfGroup(Z51)
 if ZOO!=null and((LoadInteger(LY,(GetHandleId((ZOO))),((4327))))==1)==true then
 call PJI(PKI)
-call PZI(T4I,GetObjectName('n0MN'))
+call PZI(T4I,"熊灵受到伤害时无法重新召唤")
 endif
 endif
 call NSI(Z51)
@@ -54926,7 +55302,7 @@ local group g=NTI()
 set ELI=0
 call GroupEnumUnitsOfPlayer(g,GetTriggerPlayer(),Condition(function QK3))
 if ELI>0 then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetObjectName('n0FC')+": "+I2S(ELI))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,"埋雷数"+": "+I2S(ELI))
 endif
 call NSI(g)
 set g=null
@@ -55446,15 +55822,15 @@ local unit hero=UY3(SFI)
 local unit target=GetSpellTargetUnit()
 if GetSpellTargetItem()!=null and C8O(GetItemTypeId(GetSpellTargetItem()))==false then
 call PJI(SFI)
-call PZI(GetOwningPlayer(SFI),GetObjectName('n0N3'))
+call PZI(GetOwningPlayer(SFI),"必须以神符为目标")
 endif
 set EUI=hero
 if hero==null then
 call PJI(SFI)
-call PZI(GetOwningPlayer(SFI),GetObjectName('n0DA'))
+call PZI(GetOwningPlayer(SFI),"没有可以投掷的单位")
 elseif GetOwningPlayer(target)==GetOwningPlayer(SFI)then
 call PJI(SFI)
-call PZI(GetOwningPlayer(SFI),GetObjectName('n0CY'))
+call PZI(GetOwningPlayer(SFI),"不能投掷你自己的单位")
 endif
 set SFI=null
 set hero=null
@@ -56694,7 +57070,7 @@ endfunction
 function OR4 takes nothing returns nothing
 if(IsTerrainPathable(GetUnitX(GetTriggerUnit()),GetUnitY(GetTriggerUnit()),PATHING_TYPE_WALKABILITY))then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n03B'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"不能在这里使用移形换位")
 endif
 endfunction
 function OP4 takes nothing returns boolean
@@ -58126,7 +58502,7 @@ endfunction
 function D34 takes nothing returns nothing
 if GetUnitAbilityLevel(GetSpellTargetUnit(),'BNdo')>0 then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n03I'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"不能在被末日诅咒的单位上施放无光之盾")
 endif
 endfunction
 function D44 takes nothing returns boolean
@@ -58793,7 +59169,7 @@ function E94 takes nothing returns boolean
 if GetSpellAbilityId()=='A04Y' and IsUnitType(GetTriggerUnit(),UNIT_TYPE_HERO)==true then
 if GetOwningPlayer(GetTriggerUnit())!=GetOwningPlayer(GetSpellTargetUnit())and IsUnitAlly(GetSpellTargetUnit(),GetOwningPlayer(GetTriggerUnit()))and(LoadBoolean(LY,(GetHandleId(GetOwningPlayer(GetSpellTargetUnit()))),(139)))then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n038'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"该目标拒绝某些友方技能")
 endif
 endif
 return false
@@ -60132,7 +60508,7 @@ endfunction
 function FU4 takes nothing returns boolean
 if GetSpellAbilityId()=='A311' and IsUnitType(GetTriggerUnit(),UNIT_TYPE_HERO)==true and GetSpellTargetUnit()!=GetTriggerUnit()and IsUnitAlly(GetSpellTargetUnit(),GetOwningPlayer(GetTriggerUnit()))and(LoadBoolean(LY,(GetHandleId(GetOwningPlayer(GetSpellTargetUnit()))),(139)))then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n038'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"该目标拒绝某些友方技能")
 endif
 return false
 endfunction
@@ -60174,7 +60550,7 @@ set JGO=JGO-1
 call SaveInteger(LY,(GetHandleId(hero)),(830),(JGO))
 call AddSkill(hero,GJI[JGO])
 else
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n0NY'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"无可用次数")
 endif
 set hero=null
 set GI4=null
@@ -61039,7 +61415,7 @@ endfunction
 function HN4 takes nothing returns nothing
 if IsUnitAlly(GetSpellTargetUnit(),GetOwningPlayer(GetTriggerUnit()))and(LoadBoolean(LY,(GetHandleId(GetOwningPlayer(GetSpellTargetUnit()))),(139)))and GetSpellTargetUnit()!=GetTriggerUnit()then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n038'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"该目标拒绝某些友方技能")
 endif
 endfunction
 function HS4 takes nothing returns boolean
@@ -61285,7 +61661,7 @@ local real x=GetLocationX(point)
 local real y=GetLocationY(point)
 if UQI(x,y)==false or(IsPointInRegion(LN,((x)*1.0),((y)*1.0)))then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n03K'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"不能在这里使用真空")
 endif
 call RemoveLocation(point)
 set point=null
@@ -64089,7 +64465,7 @@ set t=CreateTrigger()
 call UMI(t,EVENT_PLAYER_HERO_SKILL)
 call TriggerAddCondition(t,Condition(function K04))
 set t=null
-call QRI(bj_FORCE_ALL_PLAYERS,15.00,GetObjectName('n06G'))
+call QRI(bj_FORCE_ALL_PLAYERS,15.00,"预读祈求者的技能，将造成短暂的延迟")
 call Q3I('A0XO',GetRandomReal(1,25))
 call Q3I('A0WD',GetRandomReal(1,25))
 call Q3I('A0VE',GetRandomReal(1,25))
@@ -65983,7 +66359,7 @@ set g=null
 endfunction
 function SL4 takes unit u,integer d returns nothing
 local texttag t=CreateTextTag()
-call SetTextTagText(t,"+"+I2S(d)+" "+GetObjectName('n0LQ'),0.03)
+call SetTextTagText(t,"+"+I2S(d)+" "+"法力",0.03)
 call SetTextTagPosUnit(t,u,0)
 call SetTextTagColorBJ(t,50,75,255,15)
 call SetTextTagVelocity(t,0,0.035)
@@ -66082,7 +66458,7 @@ endfunction
 function SR4 takes nothing returns boolean
 if(GetSpellAbilityId()=='A095' or GetSpellAbilityId()=='A09W')and RKI(GetSpellTargetUnit())then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n0LR'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"目标免疫魔法")
 endif
 return false
 endfunction
@@ -67742,7 +68118,7 @@ endfunction
 function PE4 takes nothing returns boolean
 if GetSpellAbilityId()=='A0SW' and IsUnitEnemy(GetSpellTargetUnit(),GetOwningPlayer(GetTriggerUnit()))and(IsUnitType(GetSpellTargetUnit(),UNIT_TYPE_HERO)==true or IsUnitIllusion(GetSpellTargetUnit()))then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n0LV'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"无法指定敌方英雄")
 endif
 return false
 endfunction
@@ -68625,7 +69001,7 @@ set UB4=36
 endif
 set UA4=IMaxBJ(IMinBJ(UA4,UB4),0)
 if GetUnitTypeId(SFI)=='Nfir' then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetObjectName('n0KE')+" "+I2S(UA4)+"/"+I2S(UB4))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,"灵魂收集数目："+" "+I2S(UA4)+"/"+I2S(UB4))
 endif
 return false
 endfunction
@@ -69199,12 +69575,12 @@ call FlushChildHashtable(LY,(handle_id))
 call UnitRemoveType(target,UNIT_TYPE_PEON)
 call SetPlayerAbilityAvailable(GetOwningPlayer(hero),'A0R0',true)
 call SetPlayerAbilityAvailable(GetOwningPlayer(hero),'A2MB',false)
-call PZI(GetOwningPlayer(hero),GetObjectName('n03F'))
+call PZI(GetOwningPlayer(hero),"无效的目标，或者目标已死亡")
 elseif hero==null or IsUnitDead(hero)then
 call FlushTrigger(t)
 call FlushChildHashtable(LY,(handle_id))
 call UnitRemoveType(target,UNIT_TYPE_PEON)
-call PZI(GetOwningPlayer(hero),GetObjectName('n03G'))
+call PZI(GetOwningPlayer(hero),"施法英雄不存在或已经死亡")
 call SetPlayerAbilityAvailable(GetOwningPlayer(hero),'A0R0',true)
 call SetPlayerAbilityAvailable(GetOwningPlayer(hero),'A2MB',false)
 elseif GetTriggerEventId()==EVENT_UNIT_SPELL_EFFECT then
@@ -69277,7 +69653,7 @@ if target==null then
 set target=IC5(hero)
 endif
 if target==null then
-call PZI(GetOwningPlayer(hero),GetObjectName('n03H'))
+call PZI(GetOwningPlayer(hero),"附近找不到目标")
 return
 endif
 call SetPlayerAbilityAvailable(GetOwningPlayer(hero),'A0R0',false)
@@ -69310,10 +69686,10 @@ local unit SFI=GetTriggerUnit()
 if target!=null then
 if IsUnitAlly(target,GetOwningPlayer(SFI))==false then
 call PJI(SFI)
-call PZI(GetOwningPlayer(SFI),GetObjectName('n041'))
+call PZI(GetOwningPlayer(SFI),"必须以友方单位或建筑为目标。")
 elseif GetUnitAbilityLevel(SFI,'A0R0')>0 and C92(target)==false then
 call PJI(SFI)
-call PZI(GetOwningPlayer(SFI),GetObjectName('n041'))
+call PZI(GetOwningPlayer(SFI),"必须以友方单位或建筑为目标。")
 endif
 endif
 if target==null then
@@ -69321,7 +69697,7 @@ set target=IC5(SFI)
 endif
 if target==null then
 call PJI(SFI)
-call PZI(GetOwningPlayer(SFI),GetObjectName('n040'))
+call PZI(GetOwningPlayer(SFI),"附近找不到目标")
 endif
 set target=null
 set SFI=null
@@ -70133,7 +70509,7 @@ local integer OQ5=R2I(I2R(OR5)*(0.5+0.5*level))
 if OQ5>OP5 then
 call ModifyHeroStat(0,hero,0,OQ5-OP5)
 call SaveInteger(LY,(handle_id),(673),(OQ5))
-call UYI("+"+I2S(OQ5-OP5)+" "+GetObjectName('n0MJ'),3,hero,0.023,0,255,0,230)
+call UYI("+"+I2S(OQ5-OP5)+" "+"力量",3,hero,0.023,0,255,0,230)
 endif
 set t=null
 set hero=null
@@ -70157,7 +70533,7 @@ return false
 endfunction
 function AI5 takes nothing returns boolean
 if GetUnitTypeId(K1[GetPlayerId(GetTriggerPlayer())])=='U00F' then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetObjectName('n09R')+" "+I2S((LoadInteger(LY,(GetHandleId(K1[GetPlayerId(GetTriggerPlayer())])),(673))))+" "+GetObjectName('n09S'))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,"你从腐肉技能中获得了"+" "+I2S((LoadInteger(LY,(GetHandleId(K1[GetPlayerId(GetTriggerPlayer())])),(673))))+" "+"点力量")
 endif
 return false
 endfunction
@@ -70322,7 +70698,7 @@ function A85 takes nothing returns boolean
 local integer YT3=V0I[GetPlayerId(GetTriggerPlayer())]
 local integer QHI=VII[GetPlayerId(GetTriggerPlayer())]
 if GetUnitTypeId(K1[GetPlayerId(GetTriggerPlayer())])=='U00F' and QHI>0 then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,GetObjectName('n0EL')+" "+R2S(I2R(YT3)/I2R(QHI)*100)+"% ("+I2S(YT3)+"/"+I2S(QHI)+")")
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,10.00,"肉钩准确率"+" "+R2S(I2R(YT3)/I2R(QHI)*100)+"% ("+I2S(YT3)+"/"+I2S(QHI)+")")
 endif
 return false
 endfunction
@@ -70574,7 +70950,7 @@ if GetTriggerEventId()==EVENT_PLAYER_UNIT_SPELL_CAST then
 if(IsUnitType(GetSpellTargetUnit(),UNIT_TYPE_STRUCTURE)==false and RKI(GetSpellTargetUnit())==false)or GetUnitTypeId(GetSpellTargetUnit())=='n0FJ' or GetUnitTypeId(GetSpellTargetUnit())=='n0FI' or GetUnitTypeId(GetSpellTargetUnit())=='n0F6' or GetUnitTypeId(GetSpellTargetUnit())=='n0FH' then
 else
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n0K9'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"非法目标")
 endif
 else
 call AV5()
@@ -72204,7 +72580,7 @@ local unit JXO=(LoadUnitHandle(LY,(GetHandleId(SFI)),(7100+GetHandleId(target)))
 local real QJI
 local real QKI
 if target==null then
-call PZI(GetOwningPlayer(SFI),GetObjectName('n03Z'))
+call PZI(GetOwningPlayer(SFI),"找不到任何鬼影重重产生的分身")
 else
 set QJI=GetUnitX(target)
 set QKI=GetUnitY(target)
@@ -80025,7 +80401,7 @@ endif
 else
 if GetSpellAbilityId()=='A1S8' and GetSpellTargetUnit()!=GetTriggerUnit()and IsUnitAlly(GetSpellTargetUnit(),GetOwningPlayer(GetTriggerUnit()))==true and(LoadBoolean(LY,(GetHandleId(GetOwningPlayer(GetSpellTargetUnit()))),(139)))then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n038'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"该目标拒绝某些友方技能")
 endif
 endif
 return false
@@ -82030,17 +82406,17 @@ call ST5()
 else
 if SK5(GetTriggerUnit(),GetSpellTargetX(),GetSpellTargetY())==false then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n0KX'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"无法重定位于未探索的区域")
 else
 if IsPlayerTeam1(GetOwningPlayer(GetTriggerUnit()))then
 if IsPointInRegion(Y5I,GetSpellTargetX(),GetSpellTargetY())==true then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n03Y'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"你不能传送到那里")
 endif
 else
 if IsPointInRegion(Y4I,GetSpellTargetX(),GetSpellTargetY())==true then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n03Y'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"你不能传送到那里")
 endif
 endif
 endif
@@ -83356,7 +83732,7 @@ endif
 if GetTriggerEventId()!=EVENT_UNIT_SPELL_EFFECT and GetTriggerEventId()!=EVENT_WIDGET_DEATH then
 if NPI==0 then
 call SaveInteger(LY,(handle_id),(34),(1))
-call DisplayTimedTextToPlayer(GetOwningPlayer(hero),0,0,10,"|c00ff0303"+GetObjectName('n0LW')+"|r")
+call DisplayTimedTextToPlayer(GetOwningPlayer(hero),0,0,10,"|c00ff0303"+"你窃取来的技能还能保留20秒"+"|r")
 else
 call RL5(hero)
 call SetPlayerAbilityAvailable(GetOwningPlayer(hero),RN5,false)
@@ -89543,7 +89919,7 @@ set g=NTI()
 call GroupEnumUnitsInRange(g,GetSpellTargetX(),GetSpellTargetY(),240+25,Condition(function DN6))
 if FirstOfGroup(g)==null then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n0N5'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"附近没有巨石")
 endif
 call NSI(g)
 endif
@@ -90113,13 +90489,13 @@ local unit target=GetSpellTargetUnit()
 local group g
 if GetUnitTypeId(target)=='n00L' then
 call PJI(hero)
-call PZI(GetOwningPlayer(hero),GetObjectName('n0K9'))
+call PZI(GetOwningPlayer(hero),"非法目标")
 elseif target==null then
 set g=NTI()
 call GroupEnumUnitsInRange(g,GetSpellTargetX(),GetSpellTargetY(),180+25,Condition(function EX6))
 if FirstOfGroup(g)==null then
 call PJI(hero)
-call PZI(GetOwningPlayer(hero),GetObjectName('n0K9'))
+call PZI(GetOwningPlayer(hero),"非法目标")
 endif
 call NSI(g)
 set g=null
@@ -90226,7 +90602,7 @@ endfunction
 function ER6 takes nothing returns nothing
 if IsUnitAlly(GetSpellTargetUnit(),GetOwningPlayer(GetTriggerUnit()))and(LoadBoolean(LY,(GetHandleId(GetOwningPlayer(GetSpellTargetUnit()))),(139)))and GetSpellTargetUnit()!=GetTriggerUnit()then
 call PJI(GetTriggerUnit())
-call PZI(GetOwningPlayer(GetTriggerUnit()),GetObjectName('n038'))
+call PZI(GetOwningPlayer(GetTriggerUnit()),"该目标拒绝某些友方技能")
 endif
 endfunction
 function EP6 takes nothing returns boolean
