@@ -3038,6 +3038,15 @@ function MUDisableMove takes unit dummy returns nothing
 	call TriggerRegisterUnitEvent(mu_trigger_disable_move, dummy, EVENT_UNIT_ISSUED_POINT_ORDER)
 endfunction
 
+function MUShareVision takes unit dummy returns nothing
+    local integer i = 0
+    loop
+        exitwhen i > 9
+        call UnitShareVision(dummy, Player(i), true)
+        set i = i + 1
+    endloop
+endfunction
+
 //===========================================================================
 //===========================================================================
 //地图初始化
@@ -36921,6 +36930,7 @@ else
 endif
 set QA0[i]=CreateUnit(BO[0],DT0[Q80[i]],x,y,UEI(x,y,QV0,QW0))
 call MUDisableMove(QA0[i])
+call MUShareVision(QA0[i])
 call JC2(x,y)
 if KZ2 then
 call SetUnitColor(QA0[i],GetPlayerColor(CO[5]))
