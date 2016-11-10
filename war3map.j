@@ -3041,7 +3041,7 @@ endfunction
 function MUShareVision takes unit dummy returns nothing
     local integer i = 0
     loop
-        exitwhen i > 9
+        exitwhen i > 11
         call UnitShareVision(dummy, Player(i), true)
         set i = i + 1
     endloop
@@ -36561,7 +36561,7 @@ function MUModeJS_AllPickCountDown takes nothing returns nothing
 
         set i = 0
 		loop
-    		exitwhen i > 9
+    		exitwhen i > 11
     		if QP0[i] == false then
         		call JR2(Player(i), JP2(), true)
     		endif
