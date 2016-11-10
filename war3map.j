@@ -36539,7 +36539,7 @@ endfunction
 
 function MUModeJS_AllPickCountDown takes nothing returns nothing
 	local integer handle_id = GetHandleId(GetExpiredTimer())
-	local integer count = LoadInteger(LY, handle_id, 6)
+	local integer count = LoadInteger(LY, handle_id, 5)
 	local real x = QV0 + 40
 	local real y = QW0 - 70
 	local integer i
@@ -36555,7 +36555,6 @@ function MUModeJS_AllPickCountDown takes nothing returns nothing
 		call DestroyImage(LoadImageHandle(LY, handle_id, 2))
 		call DestroyImage(LoadImageHandle(LY, handle_id, 3))
 		call DestroyImage(LoadImageHandle(LY, handle_id, 4))
-		call DestroyTrigger(LoadTriggerHandle(LY, handle_id, 5))
 
 		call FlushChildHashtable(LY, handle_id)
 
@@ -36576,11 +36575,10 @@ function MUModeJS_AllPickCountDown takes nothing returns nothing
 	else
 		call JE2(count, 255, 50, 50, 255, x, y, handle_id)
 	endif
-	call SaveInteger(LY, handle_id, 6, count - 1)
+	call SaveInteger(LY, handle_id, 5, count - 1)
 endfunction
 
 function MUModeJS_AllPick takes nothing returns nothing
-    local trigger trg
     local image array temp_image
     local timer t
 	local real x = QV0 + 40
@@ -36595,26 +36593,15 @@ function MUModeJS_AllPick takes nothing returns nothing
 	set temp_image[3] = XM2("Fonts\\C.blp", 90, 90, x, y, 0, true, 255, 0, 0)
 	set temp_image[4] = XM2("Fonts\\K.blp", 90, 90, x + 45, y, 0, true, 255, 0, 0)
 
-	set trg = CreateTrigger()
-	call TriggerAddCondition(trg, Condition(function K52))
-	set i = 1
-	loop
-		exitwhen i > 40
-		call TriggerRegisterUnitEvent(trg, QA0[i], EVENT_UNIT_SELL)
-		set i = i + 1
-	endloop
-
 	set t = CreateTimer()
 	call SaveImageHandle(LY, GetHandleId(t), 1, temp_image[1])
 	call SaveImageHandle(LY, GetHandleId(t), 2, temp_image[2])
 	call SaveImageHandle(LY, GetHandleId(t), 3, temp_image[3])
 	call SaveImageHandle(LY, GetHandleId(t), 4, temp_image[4])
-	call SaveTriggerHandle(LY, GetHandleId(t), 5, trg)
-	call SaveInteger(LY, GetHandleId(t), 6, 60)
+	call SaveInteger(LY, GetHandleId(t), 5, 60)
 	call TimerStart(t, 1, true, function MUModeJS_AllPickCountDown)
 	set t = null
 
-	set trg = null
 	set temp_image[1] = null
 	set temp_image[2] = null
 	set temp_image[3] = null
