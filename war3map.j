@@ -36600,6 +36600,8 @@ function MUModeJS_AllPick takes nothing returns nothing
 	call SaveImageHandle(LY, GetHandleId(t), 4, temp_image[4])
 	call SaveInteger(LY, GetHandleId(t), 5, 60)
 	call TimerStart(t, 1, true, function MUModeJS_AllPickCountDown)
+
+	call Z22(60)
 	set t = null
 
 	set temp_image[1] = null
