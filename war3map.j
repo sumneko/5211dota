@@ -36930,6 +36930,7 @@ call TriggerRegisterUnitEvent(U20,QA0[i],EVENT_UNIT_SELL)
 set i=i+1
 endloop
 call TZI()
+call UPI(QV0, QW0, DJ1 + 200)
 call TimerStart(CreateTimer(), 15 - TimerGetElapsed(M), false, function MUModeJS_StepBan)
 set p=null
 endfunction
