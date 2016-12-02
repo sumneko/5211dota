@@ -36540,8 +36540,8 @@ endfunction
 function MUModeJS_AllPickCountDown takes nothing returns nothing
 	local integer handle_id = GetHandleId(GetExpiredTimer())
 	local integer count = LoadInteger(LY, handle_id, 5)
-	local real x = QV0 + 40
-	local real y = QW0 - 70
+	local real x = QV0 + 30
+	local real y = QW0 - 0
 	local integer i
 	if count < 60 then
 		call DestroyImage(LoadImageHandle(LY, handle_id, 158))
@@ -36795,43 +36795,43 @@ call ShowUnit(E50,false)
 call ShowUnit(E60,false)
 set i=1
 loop
-exitwhen i>40
-set TJI=RHI(true,true)
-if K82 then
-set K82=false
-set TJI=91
-elseif K92 then
-set K92=false
-set TJI=51
-elseif KA2 then
-set KA2=false
-set TJI=99
-elseif KB2 then
-set KB2=false
-if GetRandomInt(1,2)==1 then
-set TJI=104
-else
-set TJI=65
-endif
-elseif KC2 then
-set KC2=false
-set TJI=109
-elseif KD2 then
-set KD2=false
-set TJI=15
-elseif KE2 then
-set KE2=false
-set TJI=110
-elseif KF2 then
-set KF2=false
-elseif KG2 then
-set KG2=false
-endif
-if KH2[TJI]==false and((TJI)!=23)then
-set KH2[TJI]=true
-set Q80[i]=TJI
-set i=i+1
-endif
+    exitwhen i>40
+    set TJI=RHI(true,true)
+    if K82 then
+        set K82=false
+        set TJI=91
+    elseif K92 then
+        set K92=false
+        set TJI=51
+    elseif KA2 then
+        set KA2=false
+        set TJI=99
+    elseif KB2 then
+        set KB2=false
+        if GetRandomInt(1,2)==1 then
+            set TJI=104
+        else
+            set TJI=65
+        endif
+    elseif KC2 then
+        set KC2=false
+        set TJI=109
+    elseif KD2 then
+        set KD2=false
+        set TJI=15
+    elseif KE2 then
+        set KE2=false
+        set TJI=110
+    elseif KF2 then
+        set KF2=false
+    elseif KG2 then
+        set KG2=false
+    endif
+    if KH2[TJI]==false then
+        set KH2[TJI]=true
+        set Q80[i]=TJI
+        set i=i+1
+    endif
 endloop
 set Q70[1]=CreateUnit(BO[0],'n0DC',QV0,QW0,0)
 set Q70[2]=CreateUnit(BO[1],'n0DC',QV0,QW0,0)
