@@ -646,7 +646,7 @@ unit YY=null
 unit JY=null
 unit KY=null
 hashtable LY
-string MY=""
+string MY="JSUPSP"
 unit array NY
 unit array SY
 unit array TY
