@@ -37022,6 +37022,8 @@ call MUCreateHeroes()
 
 call TZI()
 call UPI(select_x, select_y, select_radius + 200)
+call FogModifierStart(CreateFogModifierRadius(BO[0], FOG_OF_WAR_VISIBLE, select_x, select_y, select_radius + 300, true, true))
+call FogModifierStart(CreateFogModifierRadius(CO[0], FOG_OF_WAR_VISIBLE, select_x, select_y, select_radius + 300, true, true))
 call TimerStart(CreateTimer(), 15 - TimerGetElapsed(M), false, function MUModeJS_StepBan)
 set p=null
 endfunction
