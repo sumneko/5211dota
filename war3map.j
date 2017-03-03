@@ -646,7 +646,8 @@ unit YY=null
 unit JY=null
 unit KY=null
 hashtable LY
-string MY="JSU2SP"
+// 固定模式
+string MY=""
 unit array NY
 unit array SY
 unit array TY
@@ -1085,11 +1086,11 @@ integer DF0
 integer DG0
 integer DH0
 integer array hero_ids_agi
-integer DV0
+integer hero_id_count_agi
 integer array hero_ids_int
-integer DX0
+integer hero_id_count_int
 integer array hero_ids_str
-integer DJ0
+integer hero_id_count_str
 integer array DK0
 integer DL0
 integer array DM0
@@ -2490,9 +2491,9 @@ boolexpr M2I=null
 	trigger mu_trigger_disable_move = null
 	boolean mu_mode_up = false
 	boolean mu_mode_u2 = false
-	integer array mu_heroes_str
-	integer array mu_heroes_int
-	integer array mu_heroes_agi
+	boolean array mu_hero_picked_str
+	boolean array mu_hero_picked_int
+	boolean array mu_hero_picked_agi
 endglobals
 
 function MUCall takes string script, string void returns nothing
@@ -3551,7 +3552,7 @@ local integer x
 local integer id=GetUnitTypeId(SFI)
 set x=1
 loop
-exitwhen x>DV0
+exitwhen x>hero_id_count_agi
 if id==hero_ids_agi[x]then
 return 2
 endif
@@ -3559,7 +3560,7 @@ set x=x+1
 endloop
 set x=1
 loop
-exitwhen x>DX0
+exitwhen x>hero_id_count_int
 if id==hero_ids_int[x]then
 return 3
 endif
@@ -3567,7 +3568,7 @@ set x=x+1
 endloop
 set x=1
 loop
-exitwhen x>DJ0
+exitwhen x>hero_id_count_str
 if id==hero_ids_str[x]then
 return 1
 endif
@@ -3588,7 +3589,7 @@ function SGI takes integer id returns integer
 local integer x
 set x=1
 loop
-exitwhen x>DV0
+exitwhen x>hero_id_count_agi
 if id==hero_ids_agi[x]then
 return 2
 endif
@@ -3596,7 +3597,7 @@ set x=x+1
 endloop
 set x=1
 loop
-exitwhen x>DX0
+exitwhen x>hero_id_count_int
 if id==hero_ids_int[x]then
 return 3
 endif
@@ -3604,7 +3605,7 @@ set x=x+1
 endloop
 set x=1
 loop
-exitwhen x>DJ0
+exitwhen x>hero_id_count_str
 if id==hero_ids_str[x]then
 return 1
 endif
@@ -4146,7 +4147,7 @@ endfunction
 function R7I takes integer SJI returns boolean
 local integer i=1
 loop
-exitwhen i>DJ0
+exitwhen i>hero_id_count_str
 if hero_ids_str[i]==SJI then
 return true
 endif
@@ -4157,7 +4158,7 @@ endfunction
 function R8I takes integer SJI returns boolean
 local integer i=1
 loop
-exitwhen i>DV0
+exitwhen i>hero_id_count_agi
 if hero_ids_agi[i]==SJI then
 return true
 endif
@@ -4168,7 +4169,7 @@ endfunction
 function R9I takes integer SJI returns boolean
 local integer i=1
 loop
-exitwhen i>DX0
+exitwhen i>hero_id_count_int
 if hero_ids_int[i]==SJI then
 return true
 endif
@@ -10568,7 +10569,7 @@ set hero_ids_agi[32]='H071'
 set hero_ids_agi[33]='E02N'
 set hero_ids_agi[34]='N0M0'
 set hero_ids_agi[35]='N0MK'
-set DV0=35
+set hero_id_count_agi=35
 // 智力英雄
 set hero_ids_int[1]='Npbm'
 set hero_ids_int[2]='Hlgr'
@@ -10607,7 +10608,7 @@ set hero_ids_int[34]='O01F'
 set hero_ids_int[35]='E032'
 set hero_ids_int[36]='E02K'
 set hero_ids_int[37]='N0MU'
-set DX0=37
+set hero_id_count_int=37
 // 力量英雄
 set hero_ids_str[1]='Orkn'
 set hero_ids_str[2]='Emoo'
@@ -10649,7 +10650,7 @@ set hero_ids_str[37]='E02X'
 set hero_ids_str[38]='H0DO'
 set hero_ids_str[39]='N0M7'
 set hero_ids_str[40]='N0MD'
-set DJ0=40
+set hero_id_count_str=40
 set DK0[1]='Orkn'
 set DK0[2]='Emoo'
 set DK0[3]='Emns'
@@ -36733,24 +36734,51 @@ function MUModeJS_StepBan takes nothing returns nothing
 	set temp_image[3] = null
 endfunction
 
-function MUPickHeroes_JSU2_Step takes integer x, integer y, string hero_type returns nothing
-    local integer id
-    local boolean array KH2
+function MUPickHeroes_JSU2_PickStr takes nothing returns integer
+    local integer index = 0
     loop
-        exitwhen x >= y
-        set id = RHI(true, true)
-        if not KH2[id] then
-            set KH2[id] = true
-            set Q80[x] = id
-            set x = x + 1
-        endif
+        set index = GetRandomInt(1, hero_id_count_str)
+        exitwhen not mu_hero_picked_str[index]
     endloop
-    set Q80[y] = -1
+    set mu_hero_picked_str[index] = true
+    return GetUnitPointValueByType(hero_ids_str[index])
 endfunction
 
-function MUPickHeroes_JSU2_InitType takes nothing returns nothing
-    local integer x
-    local integer y
+function MUPickHeroes_JSU2_PickInt takes nothing returns integer
+    local integer index = 0
+    loop
+        set index = GetRandomInt(1, hero_id_count_int)
+        exitwhen not mu_hero_picked_int[index]
+    endloop
+    set mu_hero_picked_int[index] = true
+    return GetUnitPointValueByType(hero_ids_int[index])
+endfunction
+
+function MUPickHeroes_JSU2_PickAgi takes nothing returns integer
+    local integer index = 0
+    loop
+        set index = GetRandomInt(1, hero_id_count_agi)
+        exitwhen not mu_hero_picked_agi[index]
+    endloop
+    set mu_hero_picked_agi[index] = true
+    return GetUnitPointValueByType(hero_ids_agi[index])
+endfunction
+
+function MUPickHeroes_JSU2_Step takes integer x, integer y, string hero_type returns nothing
+    loop
+        exitwhen x >= y
+        if hero_type == "力量" then
+            set Q80[x] = MUPickHeroes_JSU2_PickStr()
+        elseif hero_type == "智力" then
+            set Q80[x] = MUPickHeroes_JSU2_PickInt()
+        elseif hero_type == "敏捷" then
+            set Q80[x] = MUPickHeroes_JSU2_PickAgi()
+        else
+            set Q80[x] = -1
+        endif
+        set x = x + 1
+    endloop
+    set Q80[y] = -1
 endfunction
 
 function MUPickHeroes_JSU2 takes nothing returns nothing
@@ -36761,8 +36789,7 @@ function MUPickHeroes_JSU2 takes nothing returns nothing
     local integer max
     local integer count1
     local integer count2
-
-    call MUPickHeroes_JSU2_InitType()
+    local string array types
 
     set max = 12
     set max = max + 2 //每边2个空位
@@ -36770,13 +36797,17 @@ function MUPickHeroes_JSU2 takes nothing returns nothing
     set count1 = R2I(max * 0.4)
     set count2 = max - count1
 
+    set types[1] = "力量"
+    set types[2] = "敏捷"
+    set types[3] = "智力"
+
     set i = 1
     set x = 1
     set y = 1
     loop
         exitwhen i > 3
         set y = x + count1 / 3
-        call MUPickHeroes_JSU2_Step(x, y, "力量")
+        call MUPickHeroes_JSU2_Step(x, y, types[i])
         set x = y + 1
         set i = i + 1
     endloop
@@ -36785,7 +36816,7 @@ function MUPickHeroes_JSU2 takes nothing returns nothing
     loop
         exitwhen i > 3
         set y = x + count2 / 3
-        call MUPickHeroes_JSU2_Step(x, y, "力量")
+        call MUPickHeroes_JSU2_Step(x, y, types[i])
         set x = y + 1
         set i = i + 1
     endloop
@@ -36832,30 +36863,30 @@ function MUCreateHeroes takes nothing returns nothing
     set i = 1
     loop
         exitwhen Q80[i] == 0
-        if not KZ2 then
-            set KZ2 = true
-        else
-            set KZ2 = false
-        endif
         if i <= count1 then
         	set a = i * 360 / count1 + fix
         	set x = QV0 + (QJ0 - 50) * Cos(a * bj_DEGTORAD)
         	set y = QW0 + (QJ0 - 50) * Sin(a * bj_DEGTORAD)
         else
-        	set a = i * 360 / count2 + fix
+        	set a = (i - count1) * 360 / count2 + fix
         	set x = QV0 + (QJ0 + 75) * Cos(a * bj_DEGTORAD)
         	set y = QW0 + (QJ0 + 75) * Sin(a * bj_DEGTORAD)
         endif
-        set QA0[i] = CreateUnit(BO[0], DT0[Q80[i]], x, y, UEI(x, y, QV0, QW0))
-        call MUDisableMove(QA0[i])
-        call MUShareVision(QA0[i])
-        call JC2(x, y)
-        if KZ2 then
-            call SetUnitColor(QA0[i], GetPlayerColor(CO[5]))
+        if Q80[i] == -1 then
+            set QA0[i] = CreateUnit(BO[0], 'e00E', x, y, UEI(x, y, QV0, QW0))
         else
-            call SetUnitColor(QA0[i], GetPlayerColor(CO[4]))
+            set KZ2 = not KZ2
+            set QA0[i] = CreateUnit(BO[0], DT0[Q80[i]], x, y, UEI(x, y, QV0, QW0))
+            call MUDisableMove(QA0[i])
+            call MUShareVision(QA0[i])
+            call JC2(x, y)
+            if KZ2 then
+                call SetUnitColor(QA0[i], GetPlayerColor(CO[5]))
+            else
+                call SetUnitColor(QA0[i], GetPlayerColor(CO[4]))
+            endif
+            call TriggerRegisterUnitEvent(U20, QA0[i], EVENT_UNIT_SELL)
         endif
-        call TriggerRegisterUnitEvent(U20, QA0[i], EVENT_UNIT_SELL)
         set i = i + 1
     endloop
 endfunction
@@ -37683,11 +37714,11 @@ endfunction
 function LD2 takes integer LE2 returns integer
 local integer R4O
 if LE2==1 then
-set R4O=GetUnitPointValueByType(hero_ids_agi[GetRandomInt(1,DV0)])
+set R4O=GetUnitPointValueByType(hero_ids_agi[GetRandomInt(1,hero_id_count_agi)])
 elseif LE2==2 then
-set R4O=GetUnitPointValueByType(hero_ids_int[GetRandomInt(1,DX0)])
+set R4O=GetUnitPointValueByType(hero_ids_int[GetRandomInt(1,hero_id_count_int)])
 elseif LE2==3 then
-set R4O=GetUnitPointValueByType(hero_ids_str[GetRandomInt(1,DJ0)])
+set R4O=GetUnitPointValueByType(hero_ids_str[GetRandomInt(1,hero_id_count_str)])
 endif
 return R4O
 endfunction
@@ -38529,11 +38560,11 @@ return false
 endfunction
 function LT2 takes integer i returns integer
 if i==1 then
-return RQI(hero_ids_str[GetRandomInt(1,DJ0)])
+return RQI(hero_ids_str[GetRandomInt(1,hero_id_count_str)])
 elseif i==2 then
-return RQI(hero_ids_agi[GetRandomInt(1,DV0)])
+return RQI(hero_ids_agi[GetRandomInt(1,hero_id_count_agi)])
 elseif i==3 then
-return RQI(hero_ids_int[GetRandomInt(1,DX0)])
+return RQI(hero_ids_int[GetRandomInt(1,hero_id_count_int)])
 elseif i==4 then
 return RQI(DM0[GetRandomInt(1,DN0)])
 elseif i==5 then
@@ -40207,14 +40238,14 @@ local integer loop_start
 local integer loop_end
 set H2=true
 set loop_start=1
-set loop_end=DJ0
+set loop_end=hero_id_count_str
 loop
 exitwhen loop_start>loop_end
 call TCI(hero_ids_str[loop_start])
 set loop_start=loop_start+1
 endloop
 set loop_start=1
-set loop_end=DX0
+set loop_end=hero_id_count_int
 loop
 exitwhen loop_start>loop_end
 call TCI(hero_ids_int[loop_start])
@@ -40298,14 +40329,14 @@ local integer loop_start
 local integer loop_end
 set V2=true
 set loop_start=1
-set loop_end=DJ0
+set loop_end=hero_id_count_str
 loop
 exitwhen loop_start>loop_end
 call TCI(hero_ids_str[loop_start])
 set loop_start=loop_start+1
 endloop
 set loop_start=1
-set loop_end=DV0
+set loop_end=hero_id_count_agi
 loop
 exitwhen loop_start>loop_end
 call TCI(hero_ids_agi[loop_start])
@@ -40317,14 +40348,14 @@ local integer loop_start
 local integer loop_end
 set Z2=true
 set loop_start=1
-set loop_end=DV0
+set loop_end=hero_id_count_agi
 loop
 exitwhen loop_start>loop_end
 call TCI(hero_ids_agi[loop_start])
 set loop_start=loop_start+1
 endloop
 set loop_start=1
-set loop_end=DX0
+set loop_end=hero_id_count_int
 loop
 exitwhen loop_start>loop_end
 call TCI(hero_ids_int[loop_start])
