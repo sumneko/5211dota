@@ -1770,11 +1770,11 @@ real array QF0
 real array QG0
 real array QH0
 real array QZ0
-real QV0=-7030
-real QW0=6966
+real select_x=-7030
+real select_y=6966
 real QX0=-7000
 real QY0=6875
-constant real QJ0=400
+constant real select_radius=400
 constant real QK0=75
 constant real QL0=125
 player QM0=null
@@ -34208,8 +34208,8 @@ call ShowImage(i,false)
 call DestroyImage(i)
 endfunction
 function Y02 takes integer YI2 returns nothing
-local real x=QV0+40
-local real y=QW0-50
+local real x=select_x+40
+local real y=select_y-50
 local integer Y12=255
 local integer YO2=0
 local integer Y22=0
@@ -35983,9 +35983,9 @@ call JT2(p1)
 call PEI(p1,"Sound\\Interface\\Rescue.wav")
 if IsPlayerTeam1(p1)then
 if GetLocalPlayer()==p1 then
-call PingMinimapEx(QV0,QW0,5,255,255,255,false)
+call PingMinimapEx(select_x,select_y,5,255,255,255,false)
 endif
-set dummy=CreateUnit(p1,'n02A',QV0-250,QW0,0)
+set dummy=CreateUnit(p1,'n02A',select_x-250,select_y,0)
 call UnitApplyTimedLife(dummy,'BTLF',20)
 call UnitAddAbility(dummy,'Aloc')
 set U30[GetPlayerId(p1)]=dummy
@@ -36002,7 +36002,7 @@ call JT2(p1)
 if GetLocalPlayer()==p1 then
 call PingMinimapEx(QX0,QY0,5,255,255,255,false)
 endif
-set dummy=CreateUnit(p1,'n02A',QV0-250,QW0,0)
+set dummy=CreateUnit(p1,'n02A',select_x-250,select_y,0)
 call SetUnitVertexColor(dummy,255,255,255,175)
 call UnitApplyTimedLife(dummy,'BTLF',20)
 call UnitAddAbility(dummy,'Aloc')
@@ -36021,9 +36021,9 @@ call JT2(p2)
 call PEI(p2,"Sound\\Interface\\Rescue.wav")
 if IsPlayerTeam1(p2)then
 if GetLocalPlayer()==p2 then
-call PingMinimapEx(QV0,QW0,5,255,255,255,false)
+call PingMinimapEx(select_x,select_y,5,255,255,255,false)
 endif
-set dummy=CreateUnit(p2,'n02A',QV0+250,QW0,0)
+set dummy=CreateUnit(p2,'n02A',select_x+250,select_y,0)
 call UnitApplyTimedLife(dummy,'BTLF',20)
 call UnitAddAbility(dummy,'Aloc')
 set U30[GetPlayerId(p2)]=dummy
@@ -36039,7 +36039,7 @@ else
 if GetLocalPlayer()==p2 then
 call PingMinimapEx(QX0,QY0,5,255,255,255,false)
 endif
-set dummy=CreateUnit(p2,'n02A',QV0+250,QW0,0)
+set dummy=CreateUnit(p2,'n02A',select_x+250,select_y,0)
 call UnitApplyTimedLife(dummy,'BTLF',20)
 call UnitAddAbility(dummy,'Aloc')
 set U40[GetPlayerId(p2)]=dummy
@@ -36459,52 +36459,52 @@ set Q80[i]=TJI
 set i=i+1
 endif
 endloop
-set Q70[1]=CreateUnit(BO[0],'n0DC',QV0,QW0,0)
-set Q70[2]=CreateUnit(BO[1],'n0DC',QV0,QW0,0)
-set Q70[3]=CreateUnit(BO[2],'n0DC',QV0,QW0,0)
-set Q70[4]=CreateUnit(BO[3],'n0DC',QV0,QW0,0)
-set Q70[5]=CreateUnit(BO[4],'n0DC',QV0,QW0,0)
-set Q70[6]=CreateUnit(BO[5],'n0DC',QV0,QW0,0)
+set Q70[1]=CreateUnit(BO[0],'n0DC',select_x,select_y,0)
+set Q70[2]=CreateUnit(BO[1],'n0DC',select_x,select_y,0)
+set Q70[3]=CreateUnit(BO[2],'n0DC',select_x,select_y,0)
+set Q70[4]=CreateUnit(BO[3],'n0DC',select_x,select_y,0)
+set Q70[5]=CreateUnit(BO[4],'n0DC',select_x,select_y,0)
+set Q70[6]=CreateUnit(BO[5],'n0DC',select_x,select_y,0)
 set Q70[7]=CreateUnit(CO[0],'n0DC',QX0,QY0,0)
 set Q70[8]=CreateUnit(CO[1],'n0DC',QX0,QY0,0)
 set Q70[9]=CreateUnit(CO[2],'n0DC',QX0,QY0,0)
 set Q70[10]=CreateUnit(CO[3],'n0DC',QX0,QY0,0)
 set Q70[11]=CreateUnit(CO[4],'n0DC',QX0,QY0,0)
 set Q70[12]=CreateUnit(CO[5],'n0DC',QX0,QY0,0)
-call PanCameraToTimedForPlayer(BO[1],QV0,QW0,0)
-call PanCameraToTimedForPlayer(BO[2],QV0,QW0,0)
-call PanCameraToTimedForPlayer(BO[3],QV0,QW0,0)
-call PanCameraToTimedForPlayer(BO[4],QV0,QW0,0)
-call PanCameraToTimedForPlayer(BO[5],QV0,QW0,0)
-call PanCameraToTimedForPlayer(CO[1],QV0,QW0,0)
-call PanCameraToTimedForPlayer(CO[2],QV0,QW0,0)
-call PanCameraToTimedForPlayer(CO[3],QV0,QW0,0)
-call PanCameraToTimedForPlayer(CO[4],QV0,QW0,0)
-call PanCameraToTimedForPlayer(CO[5],QV0,QW0,0)
-set QQ0=QV0
-set QU0=QW0
+call PanCameraToTimedForPlayer(BO[1],select_x,select_y,0)
+call PanCameraToTimedForPlayer(BO[2],select_x,select_y,0)
+call PanCameraToTimedForPlayer(BO[3],select_x,select_y,0)
+call PanCameraToTimedForPlayer(BO[4],select_x,select_y,0)
+call PanCameraToTimedForPlayer(BO[5],select_x,select_y,0)
+call PanCameraToTimedForPlayer(CO[1],select_x,select_y,0)
+call PanCameraToTimedForPlayer(CO[2],select_x,select_y,0)
+call PanCameraToTimedForPlayer(CO[3],select_x,select_y,0)
+call PanCameraToTimedForPlayer(CO[4],select_x,select_y,0)
+call PanCameraToTimedForPlayer(CO[5],select_x,select_y,0)
+set QQ0=select_x
+set QU0=select_y
 set U00=QX0
 set UI0=QY0
-set QB0[1]=QV0+QK0*(-2)
-set QC0[1]=QW0+QL0
-set QB0[2]=QV0+QK0*(-1)
-set QC0[2]=QW0+QL0
-set QB0[3]=QV0+QK0*(0)
-set QC0[3]=QW0+QL0
-set QB0[4]=QV0+QK0*(1)
-set QC0[4]=QW0+QL0
-set QB0[5]=QV0+QK0*(2)
-set QC0[5]=QW0+QL0
-set QD0[1]=QV0+QK0*(-2)
-set QE0[1]=QW0-QL0
-set QD0[2]=QV0+QK0*(-1)
-set QE0[2]=QW0-QL0
-set QD0[3]=QV0+QK0*(0)
-set QE0[3]=QW0-QL0
-set QD0[4]=QV0+QK0*(1)
-set QE0[4]=QW0-QL0
-set QD0[5]=QV0+QK0*(2)
-set QE0[5]=QW0-QL0
+set QB0[1]=select_x+QK0*(-2)
+set QC0[1]=select_y+QL0
+set QB0[2]=select_x+QK0*(-1)
+set QC0[2]=select_y+QL0
+set QB0[3]=select_x+QK0*(0)
+set QC0[3]=select_y+QL0
+set QB0[4]=select_x+QK0*(1)
+set QC0[4]=select_y+QL0
+set QB0[5]=select_x+QK0*(2)
+set QC0[5]=select_y+QL0
+set QD0[1]=select_x+QK0*(-2)
+set QE0[1]=select_y-QL0
+set QD0[2]=select_x+QK0*(-1)
+set QE0[2]=select_y-QL0
+set QD0[3]=select_x+QK0*(0)
+set QE0[3]=select_y-QL0
+set QD0[4]=select_x+QK0*(1)
+set QE0[4]=select_y-QL0
+set QD0[5]=select_x+QK0*(2)
+set QE0[5]=select_y-QL0
 set QF0[1]=QX0+QK0*(-2)
 set QG0[1]=QY0+QL0
 set QF0[2]=QX0+QK0*(-1)
@@ -36525,7 +36525,7 @@ set QH0[4]=QX0+QK0*(1)
 set QZ0[4]=QY0-QL0
 set QH0[5]=QX0+QK0*(2)
 set QZ0[5]=QY0-QL0
-set DJ1=QJ0
+set DJ1=select_radius
 set i=1
 loop
 exitwhen i>24
@@ -36535,9 +36535,9 @@ else
 set KZ2=false
 endif
 set a=i/I2R(24)*360.0
-set x=QV0+DJ1*Cos(a*bj_DEGTORAD)
-set y=QW0+DJ1*Sin(a*bj_DEGTORAD)
-set QA0[i]=CreateUnit(BO[0],DT0[Q80[i]],x,y,UEI(x,y,QV0,QW0))
+set x=select_x+DJ1*Cos(a*bj_DEGTORAD)
+set y=select_y+DJ1*Sin(a*bj_DEGTORAD)
+set QA0[i]=CreateUnit(BO[0],DT0[Q80[i]],x,y,UEI(x,y,select_x,select_y))
 call MUDisableMove(QA0[i])
 call JC2(x,y)
 if KZ2 then
@@ -36556,8 +36556,8 @@ endfunction
 function MUModeJS_AllPickCountDown takes nothing returns nothing
 	local integer handle_id = GetHandleId(GetExpiredTimer())
 	local integer count = LoadInteger(LY, handle_id, 5)
-	local real x = QV0 + 30
-	local real y = QW0 - 0
+	local real x = select_x + 30
+	local real y = select_y - 0
 	local integer i
 	if count < 60 then
 		call DestroyImage(LoadImageHandle(LY, handle_id, 158))
@@ -36597,8 +36597,8 @@ endfunction
 function MUModeJS_AllPick takes nothing returns nothing
     local image array temp_image
     local timer t
-	local real x = QV0 + 40
-	local real y = QW0 + 70
+	local real x = select_x + 40
+	local real y = select_y + 70
 	local integer i
 
     call DestroyTimer(GetExpiredTimer())
@@ -36634,8 +36634,8 @@ endfunction
 function MUModeJS_BanCountDown takes nothing returns nothing
 	local integer handle_id = GetHandleId(GetExpiredTimer())
 	local integer count = LoadInteger(LY, handle_id, 5)
-	local real x = QV0 + 40
-	local real y = QW0 - 70
+	local real x = select_x + 40
+	local real y = select_y - 70
 	if count < 20 then
 		call DestroyImage(LoadImageHandle(LY, handle_id, 158))
 		call DestroyImage(LoadImageHandle(LY, handle_id, 159))
@@ -36691,8 +36691,8 @@ endfunction
 
 function MUModeJS_StepBan takes nothing returns nothing
 	local image array temp_image
-	local real x = QV0 + 40
-	local real y = QW0 + 70
+	local real x = select_x + 40
+	local real y = select_y + 70
 	local trigger trg
 	local integer i
 	local timer t
@@ -36865,18 +36865,18 @@ function MUCreateHeroes takes nothing returns nothing
         exitwhen Q80[i] == 0
         if i <= count1 then
         	set a = i * 360 / count1 + fix
-        	set x = QV0 + (QJ0 - 50) * Cos(a * bj_DEGTORAD)
-        	set y = QW0 + (QJ0 - 50) * Sin(a * bj_DEGTORAD)
+        	set x = select_x + (select_radius - 50) * Cos(a * bj_DEGTORAD)
+        	set y = select_y + (select_radius - 50) * Sin(a * bj_DEGTORAD)
         else
         	set a = (i - count1) * 360 / count2 + fix
-        	set x = QV0 + (QJ0 + 75) * Cos(a * bj_DEGTORAD)
-        	set y = QW0 + (QJ0 + 75) * Sin(a * bj_DEGTORAD)
+        	set x = select_x + (select_radius + 75) * Cos(a * bj_DEGTORAD)
+        	set y = select_y + (select_radius + 75) * Sin(a * bj_DEGTORAD)
         endif
         if Q80[i] == -1 then
-            set QA0[i] = CreateUnit(BO[0], 'e00E', x, y, UEI(x, y, QV0, QW0))
+            set QA0[i] = CreateUnit(BO[0], 'e00E', x, y, UEI(x, y, select_x, select_y))
         else
             set KZ2 = not KZ2
-            set QA0[i] = CreateUnit(BO[0], DT0[Q80[i]], x, y, UEI(x, y, QV0, QW0))
+            set QA0[i] = CreateUnit(BO[0], DT0[Q80[i]], x, y, UEI(x, y, select_x, select_y))
             call MUDisableMove(QA0[i])
             call MUShareVision(QA0[i])
             call JC2(x, y)
@@ -36894,7 +36894,7 @@ endfunction
 //============竞赛模式============
 function MUModeJS takes nothing returns nothing
 local player p
-set QW0 = QW0 - 100 // 把选人中心位置往下挪100
+set select_y = select_y - 100 // 把选人中心位置往下挪100
 set RU0=false
 set U20=CreateTrigger()
 call TriggerAddCondition(U20,Condition(function K52))
@@ -36947,52 +36947,52 @@ call ShowUnit(E30,false)
 call ShowUnit(E40,false)
 call ShowUnit(E50,false)
 call ShowUnit(E60,false)
-set Q70[1]=CreateUnit(BO[0],'n0DC',QV0,QW0,0)
-set Q70[2]=CreateUnit(BO[1],'n0DC',QV0,QW0,0)
-set Q70[3]=CreateUnit(BO[2],'n0DC',QV0,QW0,0)
-set Q70[4]=CreateUnit(BO[3],'n0DC',QV0,QW0,0)
-set Q70[5]=CreateUnit(BO[4],'n0DC',QV0,QW0,0)
-set Q70[6]=CreateUnit(BO[5],'n0DC',QV0,QW0,0)
+set Q70[1]=CreateUnit(BO[0],'n0DC',select_x,select_y,0)
+set Q70[2]=CreateUnit(BO[1],'n0DC',select_x,select_y,0)
+set Q70[3]=CreateUnit(BO[2],'n0DC',select_x,select_y,0)
+set Q70[4]=CreateUnit(BO[3],'n0DC',select_x,select_y,0)
+set Q70[5]=CreateUnit(BO[4],'n0DC',select_x,select_y,0)
+set Q70[6]=CreateUnit(BO[5],'n0DC',select_x,select_y,0)
 set Q70[7]=CreateUnit(CO[0],'n0DC',QX0,QY0,0)
 set Q70[8]=CreateUnit(CO[1],'n0DC',QX0,QY0,0)
 set Q70[9]=CreateUnit(CO[2],'n0DC',QX0,QY0,0)
 set Q70[10]=CreateUnit(CO[3],'n0DC',QX0,QY0,0)
 set Q70[11]=CreateUnit(CO[4],'n0DC',QX0,QY0,0)
 set Q70[12]=CreateUnit(CO[5],'n0DC',QX0,QY0,0)
-call PanCameraToTimedForPlayer(BO[1],QV0,QW0,0)
-call PanCameraToTimedForPlayer(BO[2],QV0,QW0,0)
-call PanCameraToTimedForPlayer(BO[3],QV0,QW0,0)
-call PanCameraToTimedForPlayer(BO[4],QV0,QW0,0)
-call PanCameraToTimedForPlayer(BO[5],QV0,QW0,0)
-call PanCameraToTimedForPlayer(CO[1],QV0,QW0,0)
-call PanCameraToTimedForPlayer(CO[2],QV0,QW0,0)
-call PanCameraToTimedForPlayer(CO[3],QV0,QW0,0)
-call PanCameraToTimedForPlayer(CO[4],QV0,QW0,0)
-call PanCameraToTimedForPlayer(CO[5],QV0,QW0,0)
-set QQ0=QV0
-set QU0=QW0
+call PanCameraToTimedForPlayer(BO[1],select_x,select_y,0)
+call PanCameraToTimedForPlayer(BO[2],select_x,select_y,0)
+call PanCameraToTimedForPlayer(BO[3],select_x,select_y,0)
+call PanCameraToTimedForPlayer(BO[4],select_x,select_y,0)
+call PanCameraToTimedForPlayer(BO[5],select_x,select_y,0)
+call PanCameraToTimedForPlayer(CO[1],select_x,select_y,0)
+call PanCameraToTimedForPlayer(CO[2],select_x,select_y,0)
+call PanCameraToTimedForPlayer(CO[3],select_x,select_y,0)
+call PanCameraToTimedForPlayer(CO[4],select_x,select_y,0)
+call PanCameraToTimedForPlayer(CO[5],select_x,select_y,0)
+set QQ0=select_x
+set QU0=select_y
 set U00=QX0
 set UI0=QY0
-set QB0[1]=QV0+QK0*(-2)
-set QC0[1]=QW0+QL0
-set QB0[2]=QV0+QK0*(-1)
-set QC0[2]=QW0+QL0
-set QB0[3]=QV0+QK0*(0)
-set QC0[3]=QW0+QL0
-set QB0[4]=QV0+QK0*(1)
-set QC0[4]=QW0+QL0
-set QB0[5]=QV0+QK0*(2)
-set QC0[5]=QW0+QL0
-set QD0[1]=QV0+QK0*(-2)
-set QE0[1]=QW0-QL0
-set QD0[2]=QV0+QK0*(-1)
-set QE0[2]=QW0-QL0
-set QD0[3]=QV0+QK0*(0)
-set QE0[3]=QW0-QL0
-set QD0[4]=QV0+QK0*(1)
-set QE0[4]=QW0-QL0
-set QD0[5]=QV0+QK0*(2)
-set QE0[5]=QW0-QL0
+set QB0[1]=select_x+QK0*(-2)
+set QC0[1]=select_y+QL0
+set QB0[2]=select_x+QK0*(-1)
+set QC0[2]=select_y+QL0
+set QB0[3]=select_x+QK0*(0)
+set QC0[3]=select_y+QL0
+set QB0[4]=select_x+QK0*(1)
+set QC0[4]=select_y+QL0
+set QB0[5]=select_x+QK0*(2)
+set QC0[5]=select_y+QL0
+set QD0[1]=select_x+QK0*(-2)
+set QE0[1]=select_y-QL0
+set QD0[2]=select_x+QK0*(-1)
+set QE0[2]=select_y-QL0
+set QD0[3]=select_x+QK0*(0)
+set QE0[3]=select_y-QL0
+set QD0[4]=select_x+QK0*(1)
+set QE0[4]=select_y-QL0
+set QD0[5]=select_x+QK0*(2)
+set QE0[5]=select_y-QL0
 set QF0[1]=QX0+QK0*(-2)
 set QG0[1]=QY0+QL0
 set QF0[2]=QX0+QK0*(-1)
@@ -37021,7 +37021,7 @@ endif
 call MUCreateHeroes()
 
 call TZI()
-call UPI(QV0, QW0, QJ0 + 200)
+call UPI(select_x, select_y, select_radius + 200)
 call TimerStart(CreateTimer(), 15 - TimerGetElapsed(M), false, function MUModeJS_StepBan)
 set p=null
 endfunction
