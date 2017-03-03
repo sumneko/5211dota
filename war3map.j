@@ -36813,7 +36813,7 @@ endfunction
 
 function MUPickHeroes_JSU2_Show takes nothing returns nothing
     local string str = "Doodads\\Cinematic\\GlowingRunes\\GlowingRunes0.mdl"
-    local string int = "Doodads\\Cinematic\\GlowingRunes\\GlowingRunes7.mdl"
+    local string int = "Doodads\\Cinematic\\GlowingRunes\\GlowingRunes4.mdl"
     local string agi = "Doodads\\Cinematic\\GlowingRunes\\GlowingRunes6.mdl"
 
     call MUPickHeroes_JSU2_Line(30, 280, 550, 90, int)
