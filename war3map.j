@@ -36732,6 +36732,7 @@ endfunction
 
 function MUPickHeroes_JSU2_Step takes integer x, integer y, string hero_type returns nothing
     local integer id
+    local boolean array KH2
     loop
         exitwhen x >= y
         set id = RHI(true, true)
@@ -36747,7 +36748,6 @@ endfunction
 function MUPickHeroes_JSU2 takes nothing returns nothing
     local integer i
     local integer TJI
-    local boolean array KH2
     local integer x
     local integer y
     local integer max
