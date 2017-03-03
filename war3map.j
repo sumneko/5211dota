@@ -36781,6 +36781,58 @@ function MUPickHeroes_JSU2_Step takes integer x, integer y, string hero_type ret
     set Q80[y] = -1
 endfunction
 
+function MUPickHeroes_JSU2_Circle takes real a, real b, real d, real z, string eff returns nothing
+    local real x
+    local real y
+    loop
+        exitwhen b > a
+        set b = b + 360
+    endloop
+    set a = a + z
+    set b = b - z
+    loop
+        exitwhen a > b
+        set x = select_x + d * Cos(a * bj_DEGTORAD)
+        set y = select_y + d * Sin(a * bj_DEGTORAD)
+        call AddSpecialEffect(eff, x, y)
+        set a = a + z
+    endloop
+endfunction
+
+function MUPickHeroes_JSU2_Line takes real a, real r, real d, real z, string eff returns nothing
+    local real x
+    local real y
+    loop
+        exitwhen r > d
+        set x = select_x + r * Cos(a * bj_DEGTORAD)
+        set y = select_y + r * Sin(a * bj_DEGTORAD)
+        call AddSpecialEffect(eff, x, y)
+        set r = r + z
+    endloop
+endfunction
+
+function MUPickHeroes_JSU2_Show takes nothing returns nothing
+    local string str = "Doodads\\Cinematic\\GlowingRunes\\GlowingRunes0.mdl"
+    local string int = "Doodads\\Cinematic\\GlowingRunes\\GlowingRunes7.mdl"
+    local string agi = "Doodads\\Cinematic\\GlowingRunes\\GlowingRunes6.mdl"
+
+    call MUPickHeroes_JSU2_Line(30, 280, 550, 90, int)
+    call MUPickHeroes_JSU2_Circle(30, 150, 280, 20, int)
+    call MUPickHeroes_JSU2_Circle(30, 150, 550, 10, int)
+    call MUPickHeroes_JSU2_Line(150, 280, 550, 90, int)
+
+    call MUPickHeroes_JSU2_Line(150, 280, 550, 90, agi)
+    call MUPickHeroes_JSU2_Circle(150, 270, 280, 20, agi)
+    call MUPickHeroes_JSU2_Circle(150, 270, 550, 10, agi)
+    call MUPickHeroes_JSU2_Line(270, 280, 550, 90, agi)
+
+    call MUPickHeroes_JSU2_Line(270, 280, 550, 90, str)
+    call MUPickHeroes_JSU2_Circle(270, 30, 280, 20, str)
+    call MUPickHeroes_JSU2_Circle(270, 30, 550, 10, str)
+    call MUPickHeroes_JSU2_Line(30, 280, 550, 90, str)
+
+endfunction
+
 function MUPickHeroes_JSU2 takes nothing returns nothing
     local integer i
     local integer TJI
@@ -36790,6 +36842,8 @@ function MUPickHeroes_JSU2 takes nothing returns nothing
     local integer count1
     local integer count2
     local string array types
+
+    call MUPickHeroes_JSU2_Show()
 
     set max = 12
     set max = max + 2 //每边2个空位
