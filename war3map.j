@@ -36843,6 +36843,8 @@ function MUPickHeroes_JSU2 takes nothing returns nothing
     local integer count2
     local string array types
 
+	call QRI(bj_FORCE_ALL_PLAYERS, 15.00, "|cffff4444红色|r区域为|cffff4444力量英雄|r，|cff8888ff蓝色|r区域为|cff8888ff智力英雄|r，|cff11ff11绿色|r区域为|cff11ff11敏捷英雄|r。请|cffff4444BAN|r/|cff11ff11PICK|r！")
+
     call MUPickHeroes_JSU2_Show()
 
     set max = 12
