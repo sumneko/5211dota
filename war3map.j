@@ -646,7 +646,7 @@ unit YY=null
 unit JY=null
 unit KY=null
 hashtable LY
-string MY="JSUPSP"
+string MY="JSU2SP"
 unit array NY
 unit array SY
 unit array TY
@@ -2489,6 +2489,10 @@ boolexpr M2I=null
 	string mu_lua_string = null
 	trigger mu_trigger_disable_move = null
 	boolean mu_mode_up = false
+	boolean mu_mode_u2 = false
+	integer array mu_heroes_str
+	integer array mu_heroes_int
+	integer array mu_heroes_agi
 endglobals
 
 function MUCall takes string script, string void returns nothing
@@ -33549,7 +33553,7 @@ local integer i=0
 loop
 exitwhen(i==FQ1)
 set W72=StringCase(SubString(W32,i,i+1),false)
-if not(W72==StringCase(W72,true))then
+if not(W72==StringCase(W72,true)) or W72 == "0" or S2I(W72)!=0 then
 set A92=A92+W72
 endif
 set i=i+1
@@ -33612,6 +33616,7 @@ local boolean UB
 local boolean TT
 local boolean mode_js
 local boolean mode_up
+local boolean mode_u2
 set WA2[1]="allpick"
 set WB2[1]="ap"
 set WA2[2]="allrandom"
@@ -33702,7 +33707,9 @@ set WA2[44] = "js"
 set WB2[44] = "js"
 set WA2[45] = "up"
 set WB2[45] = "up"
-set WD2=45
+set WA2[46] = "u2"
+set WB2[46] = "u2"
+set WD2=46
 set x=-1
 loop
 exitwhen x==FQ1-1
@@ -33796,6 +33803,7 @@ set UB=WC2[42]
 set TT=WC2[43]
 set mode_js = WC2[44]
 set mode_up = WC2[45]
+set mode_u2 = WC2[46]
 if DC2!=""or W02(W92)then
 return
 endif
@@ -33948,6 +33956,9 @@ endif
 if mode_up then
 call W12("魔改|r(|cffff0303UP|r)")
 endif
+if mode_u2 then
+call W12("改二|r(|cffff0303U2|r)")
+endif
 if CD then
 call W12("随机队长模式|r(|cffff0303CD|r)")
 endif
@@ -34091,8 +34102,9 @@ call PMI("WP2",LM)
 call PMI("WQ2",XL)
 call PMI("WU2",CM)
 call PMI("X02",RD)
-call PMI("MUModeJS",mode_js)
 call PMI("MUModeUP",mode_up)
+call PMI("MUModeU2",mode_u2)
+call PMI("MUModeJS",mode_js)
 call PMI("XI2",SD)
 call PMI("X12",MR)
 call PMI("XO2",ID)
@@ -36634,7 +36646,7 @@ function MUModeJS_BanCountDown takes nothing returns nothing
 		call DestroyTrigger(LoadTriggerHandle(LY, handle_id, 4))
 
 		call FlushChildHashtable(LY, handle_id)
-		if mu_mode_up then
+		if mu_mode_up or mu_mode_u2 then
     		call MUModeJS_AllPickReady()
     	else
 		    call K72()
@@ -36697,7 +36709,7 @@ function MUModeJS_StepBan takes nothing returns nothing
 	call TriggerAddCondition(trg, Condition(function MUModeJS_BanHero))
 	set i = 1
 	loop
-		exitwhen i > 40
+		exitwhen QA0[i] == null
 		call TriggerRegisterUnitEvent(trg, QA0[i], EVENT_UNIT_SELL)
 		set i = i + 1
 	endloop
@@ -36718,28 +36730,126 @@ function MUModeJS_StepBan takes nothing returns nothing
 	set temp_image[3] = null
 endfunction
 
+function MUPickHeroes_JSU2_Step takes integer x, integer y, string hero_type returns nothing
+    local integer id
+    loop
+        exitwhen x >= y
+        set id = RHI(true, true)
+        if not KH2[id] then
+            set KH2[id] = true
+            set Q80[x] = id
+            set x = x + 1
+        endif
+    endloop
+    set Q80[y] = -1
+endfunction
+
+function MUPickHeroes_JSU2 takes nothing returns nothing
+    local integer i
+    local integer TJI
+    local boolean array KH2
+    local integer x
+    local integer y
+    local integer max
+    local integer count1
+    local integer count2
+
+    set max = 36
+    set count1 = R2I(max * 0.4)
+    set count2 = max - count1
+
+    set i = 1
+    set x = 1
+    set y = 1
+    loop
+        exitwhen i > 3
+        set y = x + count1 / 3
+        call MUPickHeroes_JSU2_Step(x, y, "力量")
+        set x = y + 1
+        set i = i + 1
+    endloop
+
+    set i = 1
+    loop
+        exitwhen i > 3
+        set y = x + count2 / 3
+        call MUPickHeroes_JSU2_Step(x, y, "力量")
+        set x = y + 1
+        set i = i + 1
+    endloop
+endfunction
+
+function MUPickHeroes_JS takes nothing returns nothing
+    local integer i
+    local integer TJI
+    local boolean array KH2
+    set i=1
+    loop
+        exitwhen i>40
+        set TJI=RHI(true,true)
+        if KH2[TJI]==false then
+            set KH2[TJI]=true
+            set Q80[i]=TJI
+            set i=i+1
+        endif
+    endloop
+endfunction
+
+function MUCreateHeroes takes nothing returns nothing
+    local integer i
+    local real x
+    local real y
+    local real a
+    local boolean KZ2 = false
+    local integer max
+    local integer count1
+    local integer count2
+
+    set i = 1
+    set max = 0
+    loop
+        exitwhen Q80[i] == 0
+        set max = i
+        set i = i + 1
+    endloop
+
+    set count1 = R2I(max * 0.4)
+    set count2 = max - count1
+
+    set i = 1
+    loop
+        exitwhen Q80[i] == 0
+        if not KZ2 then
+            set KZ2 = true
+        else
+            set KZ2 = false
+        endif
+        if i <= count1 then
+        	set a = i * 360 / count1
+        	set x = QV0 + (QJ0 - 50) * Cos(a * bj_DEGTORAD)
+        	set y = QW0 + (QJ0 - 50) * Sin(a * bj_DEGTORAD)
+        else
+        	set a = i * 360 / count2
+        	set x = QV0 + (QJ0 + 75) * Cos(a * bj_DEGTORAD)
+        	set y = QW0 + (QJ0 + 75) * Sin(a * bj_DEGTORAD)
+        endif
+        set QA0[i] = CreateUnit(BO[0], DT0[Q80[i]], x, y, UEI(x, y, QV0, QW0))
+        call MUDisableMove(QA0[i])
+        call MUShareVision(QA0[i])
+        call JC2(x, y)
+        if KZ2 then
+            call SetUnitColor(QA0[i], GetPlayerColor(CO[5]))
+        else
+            call SetUnitColor(QA0[i], GetPlayerColor(CO[4]))
+        endif
+        call TriggerRegisterUnitEvent(U20, QA0[i], EVENT_UNIT_SELL)
+        set i = i + 1
+    endloop
+endfunction
+
 //============竞赛模式============
 function MUModeJS takes nothing returns nothing
-local integer i=1
-local real x
-local real y
-local real a
-local integer r
-local integer TJI
-local boolean K82=false
-local boolean K92=false
-local boolean KA2=false
-local boolean KB2=false
-local boolean KC2=false
-local boolean KD2=false
-local boolean KE2=false
-local boolean KF2=false
-local boolean KG2=false
-local boolean array KH2
 local player p
-local real DJ1
-local boolean KZ2=false
-local real z
 set QW0 = QW0 - 100 // 把选人中心位置往下挪100
 set RU0=false
 set U20=CreateTrigger()
@@ -36793,46 +36903,6 @@ call ShowUnit(E30,false)
 call ShowUnit(E40,false)
 call ShowUnit(E50,false)
 call ShowUnit(E60,false)
-set i=1
-loop
-    exitwhen i>40
-    set TJI=RHI(true,true)
-    if K82 then
-        set K82=false
-        set TJI=91
-    elseif K92 then
-        set K92=false
-        set TJI=51
-    elseif KA2 then
-        set KA2=false
-        set TJI=99
-    elseif KB2 then
-        set KB2=false
-        if GetRandomInt(1,2)==1 then
-            set TJI=104
-        else
-            set TJI=65
-        endif
-    elseif KC2 then
-        set KC2=false
-        set TJI=109
-    elseif KD2 then
-        set KD2=false
-        set TJI=15
-    elseif KE2 then
-        set KE2=false
-        set TJI=110
-    elseif KF2 then
-        set KF2=false
-    elseif KG2 then
-        set KG2=false
-    endif
-    if KH2[TJI]==false then
-        set KH2[TJI]=true
-        set Q80[i]=TJI
-        set i=i+1
-    endif
-endloop
 set Q70[1]=CreateUnit(BO[0],'n0DC',QV0,QW0,0)
 set Q70[2]=CreateUnit(BO[1],'n0DC',QV0,QW0,0)
 set Q70[3]=CreateUnit(BO[2],'n0DC',QV0,QW0,0)
@@ -36899,44 +36969,25 @@ set QH0[4]=QX0+QK0*(1)
 set QZ0[4]=QY0-QL0
 set QH0[5]=QX0+QK0*(2)
 set QZ0[5]=QY0-QL0
-set DJ1=QJ0
-set i=1
-loop
-exitwhen i>40
-if KZ2==false then
-set KZ2=true
+if mu_mode_u2 then
+    call MUPickHeroes_JSU2()
 else
-set KZ2=false
+    call MUPickHeroes_JS()
 endif
-if i > 15 then
-	set a=i/I2R(25)*360.0
-	set x = QV0 + (DJ1 + 75) * Cos(a * bj_DEGTORAD)
-	set y = QW0 + (DJ1 + 75) * Sin(a * bj_DEGTORAD)
-else
-	set a=i/I2R(15)*360.0
-	set x = QV0 + (DJ1 - 50) * Cos(a * bj_DEGTORAD)
-	set y = QW0 + (DJ1 - 50) * Sin(a * bj_DEGTORAD)
-endif
-set QA0[i]=CreateUnit(BO[0],DT0[Q80[i]],x,y,UEI(x,y,QV0,QW0))
-call MUDisableMove(QA0[i])
-call MUShareVision(QA0[i])
-call JC2(x,y)
-if KZ2 then
-call SetUnitColor(QA0[i],GetPlayerColor(CO[5]))
-else
-call SetUnitColor(QA0[i],GetPlayerColor(CO[4]))
-endif
-call TriggerRegisterUnitEvent(U20,QA0[i],EVENT_UNIT_SELL)
-set i=i+1
-endloop
+call MUCreateHeroes()
+
 call TZI()
-call UPI(QV0, QW0, DJ1 + 200)
+call UPI(QV0, QW0, QJ0 + 200)
 call TimerStart(CreateTimer(), 15 - TimerGetElapsed(M), false, function MUModeJS_StepBan)
 set p=null
 endfunction
 
 function MUModeUP takes nothing returns nothing
     set mu_mode_up = true
+endfunction
+
+function MUModeU2 takes nothing returns nothing
+    set mu_mode_u2 = true
 endfunction
 
 function KV2 takes nothing returns boolean
