@@ -1084,11 +1084,11 @@ integer DE0
 integer DF0
 integer DG0
 integer DH0
-integer array DZ0
+integer array hero_ids_agi
 integer DV0
-integer array DW0
+integer array hero_ids_int
 integer DX0
-integer array DY0
+integer array hero_ids_str
 integer DJ0
 integer array DK0
 integer DL0
@@ -3552,7 +3552,7 @@ local integer id=GetUnitTypeId(SFI)
 set x=1
 loop
 exitwhen x>DV0
-if id==DZ0[x]then
+if id==hero_ids_agi[x]then
 return 2
 endif
 set x=x+1
@@ -3560,7 +3560,7 @@ endloop
 set x=1
 loop
 exitwhen x>DX0
-if id==DW0[x]then
+if id==hero_ids_int[x]then
 return 3
 endif
 set x=x+1
@@ -3568,7 +3568,7 @@ endloop
 set x=1
 loop
 exitwhen x>DJ0
-if id==DY0[x]then
+if id==hero_ids_str[x]then
 return 1
 endif
 set x=x+1
@@ -3589,7 +3589,7 @@ local integer x
 set x=1
 loop
 exitwhen x>DV0
-if id==DZ0[x]then
+if id==hero_ids_agi[x]then
 return 2
 endif
 set x=x+1
@@ -3597,7 +3597,7 @@ endloop
 set x=1
 loop
 exitwhen x>DX0
-if id==DW0[x]then
+if id==hero_ids_int[x]then
 return 3
 endif
 set x=x+1
@@ -3605,7 +3605,7 @@ endloop
 set x=1
 loop
 exitwhen x>DJ0
-if id==DY0[x]then
+if id==hero_ids_str[x]then
 return 1
 endif
 set x=x+1
@@ -4147,7 +4147,7 @@ function R7I takes integer SJI returns boolean
 local integer i=1
 loop
 exitwhen i>DJ0
-if DY0[i]==SJI then
+if hero_ids_str[i]==SJI then
 return true
 endif
 set i=i+1
@@ -4158,7 +4158,7 @@ function R8I takes integer SJI returns boolean
 local integer i=1
 loop
 exitwhen i>DV0
-if DZ0[i]==SJI then
+if hero_ids_agi[i]==SJI then
 return true
 endif
 set i=i+1
@@ -4169,7 +4169,7 @@ function R9I takes integer SJI returns boolean
 local integer i=1
 loop
 exitwhen i>DX0
-if DW0[i]==SJI then
+if hero_ids_int[i]==SJI then
 return true
 endif
 set i=i+1
@@ -10532,120 +10532,123 @@ set DU0[i]="Try to space out your webs with least 2 seconds of walking distance 
 set E00[i]="With the damage and lifesteal from Insatiable Hunger, sometimes it is best to get items that will prevent you from being disabled, such as a Black King Bar."
 set i=i+1
 set DH0=112
-set DZ0[1]='Nbrn'
-set DZ0[2]='Edem'
-set DZ0[3]='N016'
-set DZ0[4]='Nbbc'
-set DZ0[5]='Naka'
-set DZ0[6]='O00P'
-set DZ0[7]='Usyl'
-set DZ0[8]='E005'
-set DZ0[9]='N01O'
-set DZ0[10]='HC92'
-set DZ0[11]='Hvwd'
-set DZ0[12]='HC49'
-set DZ0[13]='Huth'
-set DZ0[14]='Ogrh'
-set DZ0[15]='U006'
-set DZ0[16]='EC57'
-set DZ0[17]='Eevi'
-set DZ0[18]='Ubal'
-set DZ0[19]='E004'
-set DZ0[20]='EC77'
-set DZ0[21]='Hvsh'
-set DZ0[22]='Nfir'
-set DZ0[23]='E002'
-set DZ0[24]='EC45'
-set DZ0[25]='Ewar'
-set DZ0[26]='U000'
-set DZ0[27]='H00V'
-set DZ0[28]='E01B'
-set DZ0[29]='N01V'
-set DZ0[30]='H00I'
-set DZ0[31]='E01Y'
-set DZ0[32]='H071'
-set DZ0[33]='E02N'
-set DZ0[34]='N0M0'
-set DZ0[35]='N0MK'
+// 敏捷英雄
+set hero_ids_agi[1]='Nbrn'
+set hero_ids_agi[2]='Edem'
+set hero_ids_agi[3]='N016'
+set hero_ids_agi[4]='Nbbc'
+set hero_ids_agi[5]='Naka'
+set hero_ids_agi[6]='O00P'
+set hero_ids_agi[7]='Usyl'
+set hero_ids_agi[8]='E005'
+set hero_ids_agi[9]='N01O'
+set hero_ids_agi[10]='HC92'
+set hero_ids_agi[11]='Hvwd'
+set hero_ids_agi[12]='HC49'
+set hero_ids_agi[13]='Huth'
+set hero_ids_agi[14]='Ogrh'
+set hero_ids_agi[15]='U006'
+set hero_ids_agi[16]='EC57'
+set hero_ids_agi[17]='Eevi'
+set hero_ids_agi[18]='Ubal'
+set hero_ids_agi[19]='E004'
+set hero_ids_agi[20]='EC77'
+set hero_ids_agi[21]='Hvsh'
+set hero_ids_agi[22]='Nfir'
+set hero_ids_agi[23]='E002'
+set hero_ids_agi[24]='EC45'
+set hero_ids_agi[25]='Ewar'
+set hero_ids_agi[26]='U000'
+set hero_ids_agi[27]='H00V'
+set hero_ids_agi[28]='E01B'
+set hero_ids_agi[29]='N01V'
+set hero_ids_agi[30]='H00I'
+set hero_ids_agi[31]='E01Y'
+set hero_ids_agi[32]='H071'
+set hero_ids_agi[33]='E02N'
+set hero_ids_agi[34]='N0M0'
+set hero_ids_agi[35]='N0MK'
 set DV0=35
-set DW0[1]='Npbm'
-set DW0[2]='Hlgr'
-set DW0[3]='Harf'
-set DW0[4]='H000'
-set DW0[5]='H001'
-set DW0[6]='Hamg'
-set DW0[7]='H008'
-set DW0[8]='Ucrl'
-set DW0[9]='Otch'
-set DW0[10]='NC00'
-set DW0[11]='Udre'
-set DW0[12]='UC11'
-set DW0[13]='Ofar'
-set DW0[14]='U00F'
-set DW0[15]='U00K'
-set DW0[16]='O00J'
-set DW0[17]='Udea'
-set DW0[18]='Opgh'
-set DW0[19]='U00A'
-set DW0[20]='U00C'
-set DW0[21]='UC91'
-set DW0[22]='UC42'
-set DW0[23]='U008'
-set DW0[24]='H00D'
-set DW0[25]='N01I'
-set DW0[26]='H00Q'
-set DW0[27]='N00R'
-set DW0[28]='H00T'
-set DW0[29]='H06S'
-set DW0[30]='H00R'
-set DW0[31]='O015'
-set DW0[32]='E02I'
-set DW0[33]='E02F'
-set DW0[34]='O01F'
-set DW0[35]='E032'
-set DW0[36]='E02K'
-set DW0[37]='N0MU'
+// 智力英雄
+set hero_ids_int[1]='Npbm'
+set hero_ids_int[2]='Hlgr'
+set hero_ids_int[3]='Harf'
+set hero_ids_int[4]='H000'
+set hero_ids_int[5]='H001'
+set hero_ids_int[6]='Hamg'
+set hero_ids_int[7]='H008'
+set hero_ids_int[8]='Ucrl'
+set hero_ids_int[9]='Otch'
+set hero_ids_int[10]='NC00'
+set hero_ids_int[11]='Udre'
+set hero_ids_int[12]='UC11'
+set hero_ids_int[13]='Ofar'
+set hero_ids_int[14]='U00F'
+set hero_ids_int[15]='U00K'
+set hero_ids_int[16]='O00J'
+set hero_ids_int[17]='Udea'
+set hero_ids_int[18]='Opgh'
+set hero_ids_int[19]='U00A'
+set hero_ids_int[20]='U00C'
+set hero_ids_int[21]='UC91'
+set hero_ids_int[22]='UC42'
+set hero_ids_int[23]='U008'
+set hero_ids_int[24]='H00D'
+set hero_ids_int[25]='N01I'
+set hero_ids_int[26]='H00Q'
+set hero_ids_int[27]='N00R'
+set hero_ids_int[28]='H00T'
+set hero_ids_int[29]='H06S'
+set hero_ids_int[30]='H00R'
+set hero_ids_int[31]='O015'
+set hero_ids_int[32]='E02I'
+set hero_ids_int[33]='E02F'
+set hero_ids_int[34]='O01F'
+set hero_ids_int[35]='E032'
+set hero_ids_int[36]='E02K'
+set hero_ids_int[37]='N0MU'
 set DX0=37
-set DY0[1]='Orkn'
-set DY0[2]='Emoo'
-set DY0[3]='Emns'
-set DY0[4]='H004'
-set DY0[5]='Hjai'
-set DY0[6]='Uktl'
-set DY0[7]='Hmbr'
-set DY0[8]='H00K'
-set DY0[9]='Ntin'
-set DY0[10]='Hmkg'
-set DY0[11]='Hblm'
-set DY0[12]='N01A'
-set DY0[13]='H00A'
-set DY0[14]='Ulic'
-set DY0[15]='Ekee'
-set DY0[16]='UC76'
-set DY0[17]='UC18'
-set DY0[18]='UC01'
-set DY0[19]='UC60'
-set DY0[20]='H00H'
-set DY0[21]='Oshd'
-set DY0[22]='U00E'
-set DY0[23]='E01A'
-set DY0[24]='U00P'
-set DY0[25]='E00P'
-set DY0[26]='E01C'
-set DY0[27]='N01W'
-set DY0[28]='H00N'
-set DY0[29]='N0EG'
-set DY0[30]='H00S'
-set DY0[31]='N00B'
-set DY0[32]='H00U'
-set DY0[33]='O016'
-set DY0[34]=DC0[97]
-set DY0[35]='E02H'
-set DY0[36]='E02J'
-set DY0[37]='E02X'
-set DY0[38]='H0DO'
-set DY0[39]='N0M7'
-set DY0[40]='N0MD'
+// 力量英雄
+set hero_ids_str[1]='Orkn'
+set hero_ids_str[2]='Emoo'
+set hero_ids_str[3]='Emns'
+set hero_ids_str[4]='H004'
+set hero_ids_str[5]='Hjai'
+set hero_ids_str[6]='Uktl'
+set hero_ids_str[7]='Hmbr'
+set hero_ids_str[8]='H00K'
+set hero_ids_str[9]='Ntin'
+set hero_ids_str[10]='Hmkg'
+set hero_ids_str[11]='Hblm'
+set hero_ids_str[12]='N01A'
+set hero_ids_str[13]='H00A'
+set hero_ids_str[14]='Ulic'
+set hero_ids_str[15]='Ekee'
+set hero_ids_str[16]='UC76'
+set hero_ids_str[17]='UC18'
+set hero_ids_str[18]='UC01'
+set hero_ids_str[19]='UC60'
+set hero_ids_str[20]='H00H'
+set hero_ids_str[21]='Oshd'
+set hero_ids_str[22]='U00E'
+set hero_ids_str[23]='E01A'
+set hero_ids_str[24]='U00P'
+set hero_ids_str[25]='E00P'
+set hero_ids_str[26]='E01C'
+set hero_ids_str[27]='N01W'
+set hero_ids_str[28]='H00N'
+set hero_ids_str[29]='N0EG'
+set hero_ids_str[30]='H00S'
+set hero_ids_str[31]='N00B'
+set hero_ids_str[32]='H00U'
+set hero_ids_str[33]='O016'
+set hero_ids_str[34]=DC0[97]
+set hero_ids_str[35]='E02H'
+set hero_ids_str[36]='E02J'
+set hero_ids_str[37]='E02X'
+set hero_ids_str[38]='H0DO'
+set hero_ids_str[39]='N0M7'
+set hero_ids_str[40]='N0MD'
 set DJ0=40
 set DK0[1]='Orkn'
 set DK0[2]='Emoo'
@@ -36745,6 +36748,11 @@ function MUPickHeroes_JSU2_Step takes integer x, integer y, string hero_type ret
     set Q80[y] = -1
 endfunction
 
+function MUPickHeroes_JSU2_InitType takes nothing returns nothing
+    local integer x
+    local integer y
+endfunction
+
 function MUPickHeroes_JSU2 takes nothing returns nothing
     local integer i
     local integer TJI
@@ -36753,6 +36761,8 @@ function MUPickHeroes_JSU2 takes nothing returns nothing
     local integer max
     local integer count1
     local integer count2
+
+    call MUPickHeroes_JSU2_InitType()
 
     set max = 12
     set max = max + 2 //每边2个空位
@@ -37673,11 +37683,11 @@ endfunction
 function LD2 takes integer LE2 returns integer
 local integer R4O
 if LE2==1 then
-set R4O=GetUnitPointValueByType(DZ0[GetRandomInt(1,DV0)])
+set R4O=GetUnitPointValueByType(hero_ids_agi[GetRandomInt(1,DV0)])
 elseif LE2==2 then
-set R4O=GetUnitPointValueByType(DW0[GetRandomInt(1,DX0)])
+set R4O=GetUnitPointValueByType(hero_ids_int[GetRandomInt(1,DX0)])
 elseif LE2==3 then
-set R4O=GetUnitPointValueByType(DY0[GetRandomInt(1,DJ0)])
+set R4O=GetUnitPointValueByType(hero_ids_str[GetRandomInt(1,DJ0)])
 endif
 return R4O
 endfunction
@@ -38519,11 +38529,11 @@ return false
 endfunction
 function LT2 takes integer i returns integer
 if i==1 then
-return RQI(DY0[GetRandomInt(1,DJ0)])
+return RQI(hero_ids_str[GetRandomInt(1,DJ0)])
 elseif i==2 then
-return RQI(DZ0[GetRandomInt(1,DV0)])
+return RQI(hero_ids_agi[GetRandomInt(1,DV0)])
 elseif i==3 then
-return RQI(DW0[GetRandomInt(1,DX0)])
+return RQI(hero_ids_int[GetRandomInt(1,DX0)])
 elseif i==4 then
 return RQI(DM0[GetRandomInt(1,DN0)])
 elseif i==5 then
@@ -40200,14 +40210,14 @@ set loop_start=1
 set loop_end=DJ0
 loop
 exitwhen loop_start>loop_end
-call TCI(DY0[loop_start])
+call TCI(hero_ids_str[loop_start])
 set loop_start=loop_start+1
 endloop
 set loop_start=1
 set loop_end=DX0
 loop
 exitwhen loop_start>loop_end
-call TCI(DW0[loop_start])
+call TCI(hero_ids_int[loop_start])
 set loop_start=loop_start+1
 endloop
 endfunction
@@ -40291,14 +40301,14 @@ set loop_start=1
 set loop_end=DJ0
 loop
 exitwhen loop_start>loop_end
-call TCI(DY0[loop_start])
+call TCI(hero_ids_str[loop_start])
 set loop_start=loop_start+1
 endloop
 set loop_start=1
 set loop_end=DV0
 loop
 exitwhen loop_start>loop_end
-call TCI(DZ0[loop_start])
+call TCI(hero_ids_agi[loop_start])
 set loop_start=loop_start+1
 endloop
 endfunction
@@ -40310,14 +40320,14 @@ set loop_start=1
 set loop_end=DV0
 loop
 exitwhen loop_start>loop_end
-call TCI(DZ0[loop_start])
+call TCI(hero_ids_agi[loop_start])
 set loop_start=loop_start+1
 endloop
 set loop_start=1
 set loop_end=DX0
 loop
 exitwhen loop_start>loop_end
-call TCI(DW0[loop_start])
+call TCI(hero_ids_int[loop_start])
 set loop_start=loop_start+1
 endloop
 endfunction
