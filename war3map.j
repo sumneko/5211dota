@@ -3897,20 +3897,20 @@ endif
 endif
 endfunction
 function TFI takes player T4I returns nothing
-local integer TGI=DE0
-local integer THI=DF0
+local integer loop_start=DE0
+local integer loop_end=DF0
 if TK then
 loop
-exitwhen TGI>THI
-call SetPlayerTechMaxAllowed(T4I,DC0[TGI],0)
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call SetPlayerTechMaxAllowed(T4I,DC0[loop_start],0)
+set loop_start=loop_start+1
 endloop
-set TGI=DG0
-set THI=DH0
+set loop_start=DG0
+set loop_end=DH0
 loop
-exitwhen TGI>THI
-call SetPlayerTechMaxAllowed(T4I,DC0[TGI],0)
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call SetPlayerTechMaxAllowed(T4I,DC0[loop_start],0)
+set loop_start=loop_start+1
 endloop
 endif
 endfunction
@@ -3955,25 +3955,25 @@ function IsEnemyCreepCond takes nothing returns boolean
 return IsUnitAlly(GetFilterUnit(),GetOwningPlayer(XO))and GetUnitState(GetFilterUnit(),UNIT_STATE_LIFE)>0 and(GetOwningPlayer(GetFilterUnit())==BO[0])or(GetOwningPlayer(GetFilterUnit())==CO[0])
 endfunction
 function TWI takes nothing returns nothing
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 local integer TXI=0
 set HO=DE0
-set TGI=DE0
-set THI=DF0
+set loop_start=DE0
+set loop_end=DF0
 loop
-exitwhen TGI>THI
+exitwhen loop_start>loop_end
 set TXI=TXI+1
-set VO[TXI]=TGI
-set TGI=TGI+1
+set VO[TXI]=loop_start
+set loop_start=loop_start+1
 endloop
-set TGI=DG0
-set THI=DH0
+set loop_start=DG0
+set loop_end=DH0
 loop
-exitwhen TGI>THI
+exitwhen loop_start>loop_end
 set TXI=TXI+1
-set VO[TXI]=TGI
-set TGI=TGI+1
+set VO[TXI]=loop_start
+set loop_start=loop_start+1
 endloop
 set ZO=TXI
 endfunction
@@ -4365,20 +4365,20 @@ function RSI takes real d returns boolean
 return 2<d and d<3000
 endfunction
 function RTI takes nothing returns nothing
-local integer TGI=1
+local integer loop_start=1
 set WO=BO[1]
 loop
-exitwhen T3I(WO)or TGI>5
-set TGI=TGI+1
-set WO=BO[TGI]
+exitwhen T3I(WO)or loop_start>5
+set loop_start=loop_start+1
+set WO=BO[loop_start]
 endloop
 if T3I(WO)==false then
 set WO=CO[1]
-set TGI=1
+set loop_start=1
 loop
-exitwhen T3I(WO)or TGI>5
-set TGI=TGI+1
-set WO=CO[TGI]
+exitwhen T3I(WO)or loop_start>5
+set loop_start=loop_start+1
+set WO=CO[loop_start]
 endloop
 endif
 endfunction
@@ -8750,8 +8750,8 @@ set DA0[GetPlayerId(CO[5])]=42
 set DB0[GetPlayerId(CO[5])]=4
 endfunction
 function Z11 takes nothing returns nothing
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 local integer i
 set C0[GetPlayerId(BO[0])]="|c00ff0303"
 set C0[GetPlayerId(BO[1])]="|c000042ff"
@@ -8777,17 +8777,17 @@ call SetPlayerColor(CO[2],PLAYER_COLOR_LIGHT_GRAY)
 call SetPlayerColor(CO[3],PLAYER_COLOR_LIGHT_BLUE)
 call SetPlayerColor(CO[4],PLAYER_COLOR_AQUA)
 call SetPlayerColor(CO[5],PLAYER_COLOR_BROWN)
-set TGI=1
-set THI=5
+set loop_start=1
+set loop_end=5
 loop
-if GetPlayerSlotState(BO[TGI])==PLAYER_SLOT_STATE_EMPTY then
-call SetPlayerName(BO[TGI],"玩家"+" "+I2S(TGI))
+if GetPlayerSlotState(BO[loop_start])==PLAYER_SLOT_STATE_EMPTY then
+call SetPlayerName(BO[loop_start],"玩家"+" "+I2S(loop_start))
 endif
-if GetPlayerSlotState(CO[TGI])==PLAYER_SLOT_STATE_EMPTY then
-call SetPlayerName(CO[TGI],"玩家"+" "+I2S(5+TGI))
+if GetPlayerSlotState(CO[loop_start])==PLAYER_SLOT_STATE_EMPTY then
+call SetPlayerName(CO[loop_start],"玩家"+" "+I2S(5+loop_start))
 endif
-set TGI=TGI+1
-exitwhen TGI>THI
+set loop_start=loop_start+1
+exitwhen loop_start>loop_end
 endloop
 endfunction
 function ZO1 takes nothing returns nothing
@@ -8942,8 +8942,8 @@ endfunction
 function Z91 takes nothing returns nothing
 local integer ZA1
 local integer ZB1
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 local integer x=0
 local integer y=0
 local integer i
@@ -9059,19 +9059,19 @@ endif
 call Z11()
 set ZB1=TAI(OO)
 set ZA1=TAI(AO)
-set TGI=1
-set THI=5
+set loop_start=1
+set loop_end=5
 loop
-exitwhen TGI>THI
-if(T3I(BO[TGI]))then
-call SetPlayerState(BO[TGI],PLAYER_STATE_RESOURCE_GOLD,(4375/ZB1))
-call SetPlayerState(BO[TGI],PLAYER_STATE_RESOURCE_LUMBER,0)
+exitwhen loop_start>loop_end
+if(T3I(BO[loop_start]))then
+call SetPlayerState(BO[loop_start],PLAYER_STATE_RESOURCE_GOLD,(4375/ZB1))
+call SetPlayerState(BO[loop_start],PLAYER_STATE_RESOURCE_LUMBER,0)
 endif
-if(T3I(CO[TGI]))then
-call SetPlayerState(CO[TGI],PLAYER_STATE_RESOURCE_GOLD,(4375/ZA1))
-call SetPlayerState(CO[TGI],PLAYER_STATE_RESOURCE_LUMBER,0)
+if(T3I(CO[loop_start]))then
+call SetPlayerState(CO[loop_start],PLAYER_STATE_RESOURCE_GOLD,(4375/ZA1))
+call SetPlayerState(CO[loop_start],PLAYER_STATE_RESOURCE_LUMBER,0)
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 call SetPlayerHandicapXP(BO[1],1)
 call SetPlayerHandicapXP(BO[2],1)
@@ -11178,7 +11178,7 @@ function VZ1 takes nothing returns boolean
 local trigger t=GetTriggeringTrigger()
 local integer handle_id=GetHandleId(t)
 local player VV1=(LoadPlayerHandle(LY,(handle_id),(78)))
-local integer TGI=1
+local integer loop_start=1
 local integer VW1
 local integer ROI=GetPlayerState(VV1,PLAYER_STATE_RESOURCE_GOLD)
 if RX0[GetPlayerId(VV1)]==false and JL==true then
@@ -11200,19 +11200,19 @@ set VW1=T8I(AO)
 endif
 if IsPlayerTeam1(VV1)then
 loop
-exitwhen TGI>5
-if T3I(BO[TGI])then
-call SetPlayerState(BO[TGI],PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(BO[TGI],PLAYER_STATE_RESOURCE_GOLD)+ROI/VW1)
+exitwhen loop_start>5
+if T3I(BO[loop_start])then
+call SetPlayerState(BO[loop_start],PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(BO[loop_start],PLAYER_STATE_RESOURCE_GOLD)+ROI/VW1)
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 else
 loop
-exitwhen TGI>5
-if T3I(CO[TGI])then
-call SetPlayerState(CO[TGI],PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(CO[TGI],PLAYER_STATE_RESOURCE_GOLD)+ROI/VW1)
+exitwhen loop_start>5
+if T3I(CO[loop_start])then
+call SetPlayerState(CO[loop_start],PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(CO[loop_start],PLAYER_STATE_RESOURCE_GOLD)+ROI/VW1)
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 endif
 endif
@@ -11234,8 +11234,8 @@ endfunction
 function VJ1 takes nothing returns nothing
 local integer ZB1=T8I(OO)
 local integer ZA1=T8I(AO)
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 local string GW1
 local string DD0
 local unit SFI=K1[GetPlayerId(GetTriggerPlayer())]
@@ -11253,28 +11253,28 @@ if Q2==false then
 set K3[GetPlayerId(GetTriggerPlayer())]="|c00555555"+GW1+"|r"
 call QRI(bj_FORCE_ALL_PLAYERS,25.00,C0[GetPlayerId(GetTriggerPlayer())]+(D80[GetPlayerId((GetTriggerPlayer()))])+" ("+DD0+")|r|c00ff0303 "+"离开了游戏"+"|r")
 if(IsPlayerTeam1(GetTriggerPlayer())==true)then
-set TGI=1
-set THI=5
+set loop_start=1
+set loop_end=5
 loop
-exitwhen TGI>THI
-if(BO[TGI]!=GetTriggerPlayer())then
-if(T3I(BO[TGI])==true)then
-call SetPlayerAllianceStateBJ(GetTriggerPlayer(),BO[TGI],4)
+exitwhen loop_start>loop_end
+if(BO[loop_start]!=GetTriggerPlayer())then
+if(T3I(BO[loop_start])==true)then
+call SetPlayerAllianceStateBJ(GetTriggerPlayer(),BO[loop_start],4)
 endif
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 else
-set TGI=1
-set THI=5
+set loop_start=1
+set loop_end=5
 loop
-exitwhen TGI>THI
-if(CO[TGI]!=GetTriggerPlayer())then
-if(T3I(CO[TGI])==true)then
-call SetPlayerAllianceStateBJ(GetTriggerPlayer(),CO[TGI],4)
+exitwhen loop_start>loop_end
+if(CO[loop_start]!=GetTriggerPlayer())then
+if(T3I(CO[loop_start])==true)then
+call SetPlayerAllianceStateBJ(GetTriggerPlayer(),CO[loop_start],4)
 endif
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 endif
 if IsPlayerTeam1(GetTriggerPlayer())or IsPlayerTeam2(GetTriggerPlayer())then
@@ -13631,7 +13631,7 @@ call SaveInteger(LY,(handle_id),(89),(IQO))
 set t=null
 endfunction
 function O0O takes player AB1,integer AC1 returns nothing
-local integer TGI=1
+local integer loop_start=1
 local integer VW1
 if IsPlayerTeam1(AB1)then
 set VW1=T8I(OO)
@@ -13640,23 +13640,23 @@ set VW1=T8I(AO)
 endif
 if IsPlayerTeam1(AB1)then
 loop
-exitwhen TGI>5
-if T3I(BO[TGI])then
-set EL0[GetPlayerId(BO[TGI])]=EL0[GetPlayerId(BO[TGI])]+AC1/VW1
-set EK0[GetPlayerId(BO[TGI])]=EK0[GetPlayerId(BO[TGI])]+AC1/VW1
-call AA1(BO[TGI],AC1/VW1,K1[GetPlayerId(BO[TGI])])
+exitwhen loop_start>5
+if T3I(BO[loop_start])then
+set EL0[GetPlayerId(BO[loop_start])]=EL0[GetPlayerId(BO[loop_start])]+AC1/VW1
+set EK0[GetPlayerId(BO[loop_start])]=EK0[GetPlayerId(BO[loop_start])]+AC1/VW1
+call AA1(BO[loop_start],AC1/VW1,K1[GetPlayerId(BO[loop_start])])
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 else
 loop
-exitwhen TGI>5
-if T3I(CO[TGI])then
-set EL0[GetPlayerId(CO[TGI])]=EL0[GetPlayerId(CO[TGI])]+AC1/VW1
-set EK0[GetPlayerId(CO[TGI])]=EK0[GetPlayerId(CO[TGI])]+AC1/VW1
-call AA1(CO[TGI],AC1/VW1,K1[GetPlayerId(CO[TGI])])
+exitwhen loop_start>5
+if T3I(CO[loop_start])then
+set EL0[GetPlayerId(CO[loop_start])]=EL0[GetPlayerId(CO[loop_start])]+AC1/VW1
+set EK0[GetPlayerId(CO[loop_start])]=EK0[GetPlayerId(CO[loop_start])]+AC1/VW1
+call AA1(CO[loop_start],AC1/VW1,K1[GetPlayerId(CO[loop_start])])
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 endif
 endfunction
@@ -24827,8 +24827,8 @@ call SSO(bj_lastCreatedGroup,3)
 endif
 endfunction
 function P7O takes nothing returns nothing
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 local integer P8O
 local integer P9O
 local integer i
@@ -24853,29 +24853,29 @@ if IN==false then
 set L1=S90
 set M1=SA0
 endif
-set TGI=1
-set THI=5
+set loop_start=1
+set loop_end=5
 set P8O=1
 loop
-exitwhen TGI>THI
-set p=BO[TGI]
+exitwhen loop_start>loop_end
+set p=BO[loop_start]
 if T5I(p)then
 set N1[P8O]=p
 set P8O=P8O+1
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
-set TGI=1
-set THI=5
+set loop_start=1
+set loop_end=5
 set P8O=1
 loop
-exitwhen TGI>THI
-set p=CO[TGI]
+exitwhen loop_start>loop_end
+set p=CO[loop_start]
 if T5I(p)then
 set S1[P8O]=p
 set P8O=P8O+1
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 if S60==1 then
 set M0=CreateMultiboardBJ(7+6,3+SA0+S90," ")
@@ -24894,77 +24894,77 @@ call N5I(M0,4,3+S90,SB0+"0|r")
 call N5I(M0,5,3+S90,SD0+"0|r")
 call NEI(M0,1,2,(TSI(SubString(C0[GetPlayerId((BO[0]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((BO[0]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((BO[0]))],8,10)))/255.0*100,0)
 call NEI(M0,1,3+S90,(TSI(SubString(C0[GetPlayerId((CO[0]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((CO[0]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((CO[0]))],8,10)))/255.0*100,0)
-set TGI=1
-set THI=3+SA0+S90
+set loop_start=1
+set loop_end=3+SA0+S90
 loop
-exitwhen TGI>THI
-call NVI(M0,1,TGI,10.8)
-call NVI(M0,2,TGI,2)
-call NVI(M0,3,TGI,2)
-call NVI(M0,4,TGI,1.3)
-call NVI(M0,5,TGI,1.3)
-call NVI(M0,6,TGI,1.3)
-call NVI(M0,7,TGI,2.5)
-call NVI(M0,8,TGI,0.01)
-call NVI(M0,9,TGI,0.01)
-call NVI(M0,10,TGI,0.01)
-call NVI(M0,11,TGI,0.01)
-call NVI(M0,12,TGI,0.01)
-call NVI(M0,13,TGI,0.01)
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call NVI(M0,1,loop_start,10.8)
+call NVI(M0,2,loop_start,2)
+call NVI(M0,3,loop_start,2)
+call NVI(M0,4,loop_start,1.3)
+call NVI(M0,5,loop_start,1.3)
+call NVI(M0,6,loop_start,1.3)
+call NVI(M0,7,loop_start,2.5)
+call NVI(M0,8,loop_start,0.01)
+call NVI(M0,9,loop_start,0.01)
+call NVI(M0,10,loop_start,0.01)
+call NVI(M0,11,loop_start,0.01)
+call NVI(M0,12,loop_start,0.01)
+call NVI(M0,13,loop_start,0.01)
+set loop_start=loop_start+1
 endloop
-set TGI=1
-set THI=7+6
+set loop_start=1
+set loop_end=7+6
 loop
-exitwhen TGI>THI
+exitwhen loop_start>loop_end
 set P8O=1
 set P9O=3+SA0+S90
 loop
 exitwhen P8O>P9O
-call NBI(M0,TGI,P8O,true,false)
+call NBI(M0,loop_start,P8O,true,false)
 set P8O=P8O+1
 endloop
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
-set TGI=1
-set THI=S90
+set loop_start=1
+set loop_end=S90
 loop
-exitwhen TGI>THI
-call NBI(M0,1,TGI+2,true,true)
-call NEI(M0,7,TGI+2,255,204,0,0)
-set S40[GetPlayerId(N1[TGI])]=1-1
-set S50[GetPlayerId(N1[TGI])]=TGI+2-1
-call N5I(M0,1,TGI+2,(D80[GetPlayerId((N1[TGI]))]))
-if T3I(N1[TGI])then
-call NEI(M0,1,TGI+2,(TSI(SubString(C0[GetPlayerId((N1[TGI]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((N1[TGI]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((N1[TGI]))],8,10)))/255.0*100,0)
-call NEI(M0,2,TGI+2,(TSI(SubString(C0[GetPlayerId((N1[TGI]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((N1[TGI]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((N1[TGI]))],8,10)))/255.0*100,0)
+exitwhen loop_start>loop_end
+call NBI(M0,1,loop_start+2,true,true)
+call NEI(M0,7,loop_start+2,255,204,0,0)
+set S40[GetPlayerId(N1[loop_start])]=1-1
+set S50[GetPlayerId(N1[loop_start])]=loop_start+2-1
+call N5I(M0,1,loop_start+2,(D80[GetPlayerId((N1[loop_start]))]))
+if T3I(N1[loop_start])then
+call NEI(M0,1,loop_start+2,(TSI(SubString(C0[GetPlayerId((N1[loop_start]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((N1[loop_start]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((N1[loop_start]))],8,10)))/255.0*100,0)
+call NEI(M0,2,loop_start+2,(TSI(SubString(C0[GetPlayerId((N1[loop_start]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((N1[loop_start]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((N1[loop_start]))],8,10)))/255.0*100,0)
 else
-call N5I(M0,1,TGI+2,"|c00333333"+(D80[GetPlayerId((N1[TGI]))])+"|r")
+call N5I(M0,1,loop_start+2,"|c00333333"+(D80[GetPlayerId((N1[loop_start]))])+"|r")
 endif
-call N5I(M0,4,(TGI+2),SB0+"0|r")
-call N5I(M0,5,(TGI+2),SD0+"0|r")
-call N5I(M0,6,(TGI+2),SE0+"0|r")
-set TGI=TGI+1
+call N5I(M0,4,(loop_start+2),SB0+"0|r")
+call N5I(M0,5,(loop_start+2),SD0+"0|r")
+call N5I(M0,6,(loop_start+2),SE0+"0|r")
+set loop_start=loop_start+1
 endloop
-set TGI=1
-set THI=SA0
+set loop_start=1
+set loop_end=SA0
 loop
-exitwhen TGI>THI
-call NBI(M0,1,TGI+3+S90,true,true)
-call NEI(M0,7,TGI+3+S90,255,204,0,0)
-set S40[GetPlayerId(S1[TGI])]=1-1
-set S50[GetPlayerId(S1[TGI])]=TGI+3+S90-1
-call N5I(M0,1,TGI+3+S90,(D80[GetPlayerId((S1[TGI]))]))
-if T3I(S1[TGI])then
-call NEI(M0,1,TGI+3+S90,(TSI(SubString(C0[GetPlayerId((S1[TGI]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((S1[TGI]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((S1[TGI]))],8,10)))/255.0*100,0)
-call NEI(M0,2,TGI+3+S90,(TSI(SubString(C0[GetPlayerId((S1[TGI]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((S1[TGI]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((S1[TGI]))],8,10)))/255.0*100,0)
+exitwhen loop_start>loop_end
+call NBI(M0,1,loop_start+3+S90,true,true)
+call NEI(M0,7,loop_start+3+S90,255,204,0,0)
+set S40[GetPlayerId(S1[loop_start])]=1-1
+set S50[GetPlayerId(S1[loop_start])]=loop_start+3+S90-1
+call N5I(M0,1,loop_start+3+S90,(D80[GetPlayerId((S1[loop_start]))]))
+if T3I(S1[loop_start])then
+call NEI(M0,1,loop_start+3+S90,(TSI(SubString(C0[GetPlayerId((S1[loop_start]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((S1[loop_start]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((S1[loop_start]))],8,10)))/255.0*100,0)
+call NEI(M0,2,loop_start+3+S90,(TSI(SubString(C0[GetPlayerId((S1[loop_start]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((S1[loop_start]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((S1[loop_start]))],8,10)))/255.0*100,0)
 else
-call N5I(M0,1,TGI+3+S90,"|c00333333"+(D80[GetPlayerId((S1[TGI]))])+"|r")
+call N5I(M0,1,loop_start+3+S90,"|c00333333"+(D80[GetPlayerId((S1[loop_start]))])+"|r")
 endif
-call N5I(M0,4,(TGI+3+S90),SB0+"0|r")
-call N5I(M0,5,(TGI+3+S90),SD0+"0|r")
-call N5I(M0,6,(TGI+3+S90),SE0+"0|r")
-set TGI=TGI+1
+call N5I(M0,4,(loop_start+3+S90),SB0+"0|r")
+call N5I(M0,5,(loop_start+3+S90),SD0+"0|r")
+call N5I(M0,6,(loop_start+3+S90),SE0+"0|r")
+set loop_start=loop_start+1
 endloop
 set S70=1
 set S80=3+SA0+S90-2
@@ -24979,29 +24979,29 @@ call TriggerExecute(CH)
 endif
 endfunction
 function PAO takes nothing returns nothing
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 call N5I(M0,4,2,SB0+I2S(I[GetPlayerId(BO[0])])+"|r")
 call N5I(M0,5,2,SD0+I2S(O[GetPlayerId(BO[0])])+"|r")
 call N5I(M0,4,3+S90,SB0+I2S(I[GetPlayerId(CO[0])])+"|r")
 call N5I(M0,5,3+S90,SD0+I2S(O[GetPlayerId(CO[0])])+"|r")
-set TGI=1
-set THI=S90
+set loop_start=1
+set loop_end=S90
 loop
-exitwhen TGI>THI
-call N5I(M0,4,(TGI+2),SB0+I2S(I[GetPlayerId(N1[TGI])])+"|r")
-call N5I(M0,5,(TGI+2),SD0+I2S(O[GetPlayerId(N1[TGI])])+"|r")
-call N5I(M0,6,(TGI+2),SE0+I2S(D[GetPlayerId(N1[TGI])])+"|r")
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call N5I(M0,4,(loop_start+2),SB0+I2S(I[GetPlayerId(N1[loop_start])])+"|r")
+call N5I(M0,5,(loop_start+2),SD0+I2S(O[GetPlayerId(N1[loop_start])])+"|r")
+call N5I(M0,6,(loop_start+2),SE0+I2S(D[GetPlayerId(N1[loop_start])])+"|r")
+set loop_start=loop_start+1
 endloop
-set TGI=1
-set THI=SA0
+set loop_start=1
+set loop_end=SA0
 loop
-exitwhen TGI>THI
-call N5I(M0,4,(TGI+3+S90),SB0+I2S(I[GetPlayerId(S1[TGI])])+"|r")
-call N5I(M0,5,(TGI+3+S90),SD0+I2S(O[GetPlayerId(S1[TGI])])+"|r")
-call N5I(M0,6,(TGI+3+S90),SE0+I2S(D[GetPlayerId(S1[TGI])])+"|r")
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call N5I(M0,4,(loop_start+3+S90),SB0+I2S(I[GetPlayerId(S1[loop_start])])+"|r")
+call N5I(M0,5,(loop_start+3+S90),SD0+I2S(O[GetPlayerId(S1[loop_start])])+"|r")
+call N5I(M0,6,(loop_start+3+S90),SE0+I2S(D[GetPlayerId(S1[loop_start])])+"|r")
+set loop_start=loop_start+1
 endloop
 endfunction
 function PCO takes nothing returns boolean
@@ -25061,8 +25061,8 @@ return"UI\\Widgets\\Console\\Undead\\undead-inventory-slotfiller.blp"
 endif
 endfunction
 function PXO takes nothing returns nothing
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 local string GW1
 local real QHI
 local string s1=" "
@@ -25182,12 +25182,12 @@ endif
 if P20[GetPlayerId(GetLocalPlayer())]==false then
 call SetWaterBaseColor(0,0,255,255)
 endif
-set TGI=1
-set THI=S90
+set loop_start=1
+set loop_end=S90
 loop
-exitwhen TGI>THI
-call N9I(M0,1,TGI+2,SAI(K1[GetPlayerId(N1[TGI])]))
-call N5I(M0,3,TGI+2,"|c00838B8B"+I2S(GetHeroLevel(K1[GetPlayerId(N1[TGI])]))+"|r")
+exitwhen loop_start>loop_end
+call N9I(M0,1,loop_start+2,SAI(K1[GetPlayerId(N1[loop_start])]))
+call N5I(M0,3,loop_start+2,"|c00838B8B"+I2S(GetHeroLevel(K1[GetPlayerId(N1[loop_start])]))+"|r")
 if RQ0[GetPlayerId(GetLocalPlayer())]then
 call NVI(M0,7,1,3)
 call NVI(M0,8,1,2.8)
@@ -25196,19 +25196,19 @@ call NVI(M0,10,1,0.8)
 call NVI(M0,11,1,0.8)
 call NVI(M0,12,1,0.8)
 call NVI(M0,13,1,0.1)
-call NVI(M0,7,TGI+2,3)
-call NVI(M0,8,TGI+2,1.1)
-call NVI(M0,9,TGI+2,1.1)
-call NVI(M0,10,TGI+2,1.1)
-call NVI(M0,11,TGI+2,1.1)
-call NVI(M0,12,TGI+2,1.1)
-call NVI(M0,13,TGI+2,0.1)
-call NBI(M0,8,TGI+2,false,true)
-call NBI(M0,9,TGI+2,false,true)
-call NBI(M0,10,TGI+2,false,true)
-call NBI(M0,11,TGI+2,false,true)
-call NBI(M0,12,TGI+2,false,true)
-call NBI(M0,13,TGI+2,false,true)
+call NVI(M0,7,loop_start+2,3)
+call NVI(M0,8,loop_start+2,1.1)
+call NVI(M0,9,loop_start+2,1.1)
+call NVI(M0,10,loop_start+2,1.1)
+call NVI(M0,11,loop_start+2,1.1)
+call NVI(M0,12,loop_start+2,1.1)
+call NVI(M0,13,loop_start+2,0.1)
+call NBI(M0,8,loop_start+2,false,true)
+call NBI(M0,9,loop_start+2,false,true)
+call NBI(M0,10,loop_start+2,false,true)
+call NBI(M0,11,loop_start+2,false,true)
+call NBI(M0,12,loop_start+2,false,true)
+call NBI(M0,13,loop_start+2,false,true)
 call N5I(M0,8,1,"Items")
 else
 call NVI(M0,7,1,2)
@@ -25218,62 +25218,62 @@ call NVI(M0,10,1,0.1)
 call NVI(M0,11,1,0.1)
 call NVI(M0,12,1,0.1)
 call NVI(M0,13,1,0.1)
-call NVI(M0,7,TGI+2,2.5)
-call NVI(M0,8,TGI+2,0.1)
-call NVI(M0,9,TGI+2,0.1)
-call NVI(M0,10,TGI+2,0.1)
-call NVI(M0,11,TGI+2,0.1)
-call NVI(M0,12,TGI+2,0.1)
-call NVI(M0,13,TGI+2,0.1)
-call NBI(M0,8,TGI+2,false,false)
-call NBI(M0,9,TGI+2,false,false)
-call NBI(M0,10,TGI+2,false,false)
-call NBI(M0,11,TGI+2,false,false)
-call NBI(M0,12,TGI+2,false,false)
-call NBI(M0,13,TGI+2,false,false)
+call NVI(M0,7,loop_start+2,2.5)
+call NVI(M0,8,loop_start+2,0.1)
+call NVI(M0,9,loop_start+2,0.1)
+call NVI(M0,10,loop_start+2,0.1)
+call NVI(M0,11,loop_start+2,0.1)
+call NVI(M0,12,loop_start+2,0.1)
+call NVI(M0,13,loop_start+2,0.1)
+call NBI(M0,8,loop_start+2,false,false)
+call NBI(M0,9,loop_start+2,false,false)
+call NBI(M0,10,loop_start+2,false,false)
+call NBI(M0,11,loop_start+2,false,false)
+call NBI(M0,12,loop_start+2,false,false)
+call NBI(M0,13,loop_start+2,false,false)
 call N5I(M0,8,1," ")
 endif
-call N9I(M0,8,TGI+2,PVO(N1[TGI],1))
-call N9I(M0,9,TGI+2,PVO(N1[TGI],2))
-call N9I(M0,10,TGI+2,PVO(N1[TGI],3))
-call N9I(M0,11,TGI+2,PVO(N1[TGI],4))
-call N9I(M0,12,TGI+2,PVO(N1[TGI],5))
-call N9I(M0,13,TGI+2,PVO(N1[TGI],6))
-if(SVI(K1[GetPlayerId(N1[TGI])])and K1[GetPlayerId(N1[TGI])]!=null and TimerGetRemaining(F0[GetPlayerId(N1[TGI])])>0)then
-if IsPlayerAlly(GetLocalPlayer(),N1[TGI])then
-set PUO=SF0+" ("+(I2S(R2I(TimerGetRemaining(F0[GetPlayerId(N1[TGI])]))))+")|r"
+call N9I(M0,8,loop_start+2,PVO(N1[loop_start],1))
+call N9I(M0,9,loop_start+2,PVO(N1[loop_start],2))
+call N9I(M0,10,loop_start+2,PVO(N1[loop_start],3))
+call N9I(M0,11,loop_start+2,PVO(N1[loop_start],4))
+call N9I(M0,12,loop_start+2,PVO(N1[loop_start],5))
+call N9I(M0,13,loop_start+2,PVO(N1[loop_start],6))
+if(SVI(K1[GetPlayerId(N1[loop_start])])and K1[GetPlayerId(N1[loop_start])]!=null and TimerGetRemaining(F0[GetPlayerId(N1[loop_start])])>0)then
+if IsPlayerAlly(GetLocalPlayer(),N1[loop_start])then
+set PUO=SF0+" ("+(I2S(R2I(TimerGetRemaining(F0[GetPlayerId(N1[loop_start])]))))+")|r"
 else
-set PUO=SC0+" ("+(I2S(R2I(TimerGetRemaining(F0[GetPlayerId(N1[TGI])]))))+")|r"
+set PUO=SC0+" ("+(I2S(R2I(TimerGetRemaining(F0[GetPlayerId(N1[loop_start])]))))+")|r"
 endif
 else
 set PUO="  "
 endif
-if EF0[GetPlayerId(N1[TGI])]then
-call N5I(M0,1,TGI+2,"|c00333333"+(D80[GetPlayerId((N1[TGI]))])+"|r"+PUO)
+if EF0[GetPlayerId(N1[loop_start])]then
+call N5I(M0,1,loop_start+2,"|c00333333"+(D80[GetPlayerId((N1[loop_start]))])+"|r"+PUO)
 else
-call N5I(M0,1,TGI+2,(D80[GetPlayerId((N1[TGI]))])+PUO)
+call N5I(M0,1,loop_start+2,(D80[GetPlayerId((N1[loop_start]))])+PUO)
 endif
-set PNO=(TimerGetRemaining(EJ0[GetPlayerId((N1[TGI]))]))
+set PNO=(TimerGetRemaining(EJ0[GetPlayerId((N1[loop_start]))]))
 if PNO>0 then
 set s=I2S(R2I(PNO))
 else
 set s=" "
 endif
-if IsPlayerAlly(GetLocalPlayer(),N1[TGI])==false then
-call N5I(M0,7,TGI+2," ")
+if IsPlayerAlly(GetLocalPlayer(),N1[loop_start])==false then
+call N5I(M0,7,loop_start+2," ")
 set s=" "
 else
-call N5I(M0,7,TGI+2,"|cffffcc00"+I2S(R2I(GetPlayerState(N1[TGI],PLAYER_STATE_RESOURCE_GOLD)))+"|r")
+call N5I(M0,7,loop_start+2,"|cffffcc00"+I2S(R2I(GetPlayerState(N1[loop_start],PLAYER_STATE_RESOURCE_GOLD)))+"|r")
 endif
-call N5I(M0,2,TGI+2,s)
-set TGI=TGI+1
+call N5I(M0,2,loop_start+2,s)
+set loop_start=loop_start+1
 endloop
-set TGI=1
-set THI=SA0
+set loop_start=1
+set loop_end=SA0
 loop
-exitwhen TGI>THI
-call N9I(M0,1,TGI+3+S90,SAI(K1[GetPlayerId(S1[TGI])]))
-call N5I(M0,3,TGI+3+S90,"|c00838B8B"+I2S(GetHeroLevel(K1[GetPlayerId(S1[TGI])]))+"|r")
+exitwhen loop_start>loop_end
+call N9I(M0,1,loop_start+3+S90,SAI(K1[GetPlayerId(S1[loop_start])]))
+call N5I(M0,3,loop_start+3+S90,"|c00838B8B"+I2S(GetHeroLevel(K1[GetPlayerId(S1[loop_start])]))+"|r")
 if RQ0[GetPlayerId(GetLocalPlayer())]then
 call NVI(M0,7,1,3)
 call NVI(M0,8,1,2.8)
@@ -25282,19 +25282,19 @@ call NVI(M0,10,1,0.8)
 call NVI(M0,11,1,0.8)
 call NVI(M0,12,1,0.8)
 call NVI(M0,13,1,0.1)
-call NVI(M0,7,TGI+3+S90,3)
-call NVI(M0,8,TGI+3+S90,1.1)
-call NVI(M0,9,TGI+3+S90,1.1)
-call NVI(M0,10,TGI+3+S90,1.1)
-call NVI(M0,11,TGI+3+S90,1.1)
-call NVI(M0,12,TGI+3+S90,1.1)
-call NVI(M0,13,TGI+3+S90,0.1)
-call NBI(M0,8,TGI+3+S90,false,true)
-call NBI(M0,9,TGI+3+S90,false,true)
-call NBI(M0,10,TGI+3+S90,false,true)
-call NBI(M0,11,TGI+3+S90,false,true)
-call NBI(M0,12,TGI+3+S90,false,true)
-call NBI(M0,13,TGI+3+S90,false,true)
+call NVI(M0,7,loop_start+3+S90,3)
+call NVI(M0,8,loop_start+3+S90,1.1)
+call NVI(M0,9,loop_start+3+S90,1.1)
+call NVI(M0,10,loop_start+3+S90,1.1)
+call NVI(M0,11,loop_start+3+S90,1.1)
+call NVI(M0,12,loop_start+3+S90,1.1)
+call NVI(M0,13,loop_start+3+S90,0.1)
+call NBI(M0,8,loop_start+3+S90,false,true)
+call NBI(M0,9,loop_start+3+S90,false,true)
+call NBI(M0,10,loop_start+3+S90,false,true)
+call NBI(M0,11,loop_start+3+S90,false,true)
+call NBI(M0,12,loop_start+3+S90,false,true)
+call NBI(M0,13,loop_start+3+S90,false,true)
 call N5I(M0,8,1,"Items")
 else
 call NVI(M0,7,1,2)
@@ -25304,55 +25304,55 @@ call NVI(M0,10,1,0.1)
 call NVI(M0,11,1,0.1)
 call NVI(M0,12,1,0.1)
 call NVI(M0,13,1,0.1)
-call NVI(M0,7,TGI+3+S90,2.5)
-call NVI(M0,8,TGI+3+S90,0.1)
-call NVI(M0,9,TGI+3+S90,0.1)
-call NVI(M0,10,TGI+3+S90,0.1)
-call NVI(M0,11,TGI+3+S90,0.1)
-call NVI(M0,12,TGI+3+S90,0.1)
-call NVI(M0,13,TGI+3+S90,0.1)
-call NBI(M0,8,TGI+3+S90,false,false)
-call NBI(M0,9,TGI+3+S90,false,false)
-call NBI(M0,10,TGI+3+S90,false,false)
-call NBI(M0,11,TGI+3+S90,false,false)
-call NBI(M0,12,TGI+3+S90,false,false)
-call NBI(M0,13,TGI+3+S90,false,false)
+call NVI(M0,7,loop_start+3+S90,2.5)
+call NVI(M0,8,loop_start+3+S90,0.1)
+call NVI(M0,9,loop_start+3+S90,0.1)
+call NVI(M0,10,loop_start+3+S90,0.1)
+call NVI(M0,11,loop_start+3+S90,0.1)
+call NVI(M0,12,loop_start+3+S90,0.1)
+call NVI(M0,13,loop_start+3+S90,0.1)
+call NBI(M0,8,loop_start+3+S90,false,false)
+call NBI(M0,9,loop_start+3+S90,false,false)
+call NBI(M0,10,loop_start+3+S90,false,false)
+call NBI(M0,11,loop_start+3+S90,false,false)
+call NBI(M0,12,loop_start+3+S90,false,false)
+call NBI(M0,13,loop_start+3+S90,false,false)
 call N5I(M0,8,1," ")
 endif
-call N9I(M0,8,TGI+3+S90,PVO(S1[TGI],1))
-call N9I(M0,9,TGI+3+S90,PVO(S1[TGI],2))
-call N9I(M0,10,TGI+3+S90,PVO(S1[TGI],3))
-call N9I(M0,11,TGI+3+S90,PVO(S1[TGI],4))
-call N9I(M0,12,TGI+3+S90,PVO(S1[TGI],5))
-call N9I(M0,13,TGI+3+S90,PVO(S1[TGI],6))
-if(SVI(K1[GetPlayerId(S1[TGI])])and K1[GetPlayerId(S1[TGI])]!=null and TimerGetRemaining(F0[GetPlayerId(S1[TGI])])>0)then
-if IsPlayerAlly(GetLocalPlayer(),S1[TGI])then
-set PUO=SF0+" ("+(I2S(R2I(TimerGetRemaining(F0[GetPlayerId(S1[TGI])]))))+")|r"
+call N9I(M0,8,loop_start+3+S90,PVO(S1[loop_start],1))
+call N9I(M0,9,loop_start+3+S90,PVO(S1[loop_start],2))
+call N9I(M0,10,loop_start+3+S90,PVO(S1[loop_start],3))
+call N9I(M0,11,loop_start+3+S90,PVO(S1[loop_start],4))
+call N9I(M0,12,loop_start+3+S90,PVO(S1[loop_start],5))
+call N9I(M0,13,loop_start+3+S90,PVO(S1[loop_start],6))
+if(SVI(K1[GetPlayerId(S1[loop_start])])and K1[GetPlayerId(S1[loop_start])]!=null and TimerGetRemaining(F0[GetPlayerId(S1[loop_start])])>0)then
+if IsPlayerAlly(GetLocalPlayer(),S1[loop_start])then
+set PUO=SF0+" ("+(I2S(R2I(TimerGetRemaining(F0[GetPlayerId(S1[loop_start])]))))+")|r"
 else
-set PUO=SC0+" ("+(I2S(R2I(TimerGetRemaining(F0[GetPlayerId(S1[TGI])]))))+")|r"
+set PUO=SC0+" ("+(I2S(R2I(TimerGetRemaining(F0[GetPlayerId(S1[loop_start])]))))+")|r"
 endif
 else
 set PUO="  "
 endif
-if EF0[GetPlayerId(S1[TGI])]then
-call N5I(M0,1,TGI+3+S90,"|c00333333"+(D80[GetPlayerId((S1[TGI]))])+"|r"+PUO)
+if EF0[GetPlayerId(S1[loop_start])]then
+call N5I(M0,1,loop_start+3+S90,"|c00333333"+(D80[GetPlayerId((S1[loop_start]))])+"|r"+PUO)
 else
-call N5I(M0,1,TGI+3+S90,(D80[GetPlayerId((S1[TGI]))])+PUO)
+call N5I(M0,1,loop_start+3+S90,(D80[GetPlayerId((S1[loop_start]))])+PUO)
 endif
-set PNO=(TimerGetRemaining(EJ0[GetPlayerId((S1[TGI]))]))
+set PNO=(TimerGetRemaining(EJ0[GetPlayerId((S1[loop_start]))]))
 if PNO>0 then
 set s=I2S(R2I(PNO))
 else
 set s=" "
 endif
-if IsPlayerAlly(GetLocalPlayer(),S1[TGI])==false then
-call N5I(M0,7,TGI+3+S90," ")
+if IsPlayerAlly(GetLocalPlayer(),S1[loop_start])==false then
+call N5I(M0,7,loop_start+3+S90," ")
 set s=" "
 else
-call N5I(M0,7,TGI+3+S90,"|cffffcc00"+I2S(R2I(GetPlayerState(S1[TGI],PLAYER_STATE_RESOURCE_GOLD)))+"|r")
+call N5I(M0,7,loop_start+3+S90,"|cffffcc00"+I2S(R2I(GetPlayerState(S1[loop_start],PLAYER_STATE_RESOURCE_GOLD)))+"|r")
 endif
-call N5I(M0,2,TGI+3+S90,s)
-set TGI=TGI+1
+call N5I(M0,2,loop_start+3+S90,s)
+set loop_start=loop_start+1
 endloop
 endfunction
 function Trig_CS_Board_Actions takes nothing returns nothing
@@ -30838,8 +30838,8 @@ local integer RCI
 local location RDI
 local unit RepickedUnit
 local integer TJI
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 local unit GB2
 local location ZC1=GetRectCenter(N4)
 local location ZD1=GetRectCenter(S4)
@@ -30881,13 +30881,13 @@ set K1[GetPlayerId(GetTriggerPlayer())]=null
 if K0 or J2 then
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,0,60,GetObjectName('N05Y'))
 if K0 then
-set TGI=DE0
-set THI=DH0
+set loop_start=DE0
+set loop_end=DH0
 endif
 if IsPlayerTeam1(T4I)then
 if J2 then
-set TGI=DE0
-set THI=DF0
+set loop_start=DE0
+set loop_end=DF0
 call CreateUnitAtLoc(T4I,'n00C',ZC1,bj_UNIT_FACING)
 else
 call CreateUnitAtLoc(T4I,'n00C',ZC1,bj_UNIT_FACING)
@@ -30896,8 +30896,8 @@ endif
 call PanCameraToTimedLocForPlayer(T4I,ZC1,0)
 else
 if J2 then
-set TGI=DG0
-set THI=DH0
+set loop_start=DG0
+set loop_end=DH0
 call CreateUnitAtLoc(T4I,'n00C',ZD1,bj_UNIT_FACING)
 else
 call CreateUnitAtLoc(T4I,'n00C',ZC1,bj_UNIT_FACING)
@@ -30906,11 +30906,11 @@ endif
 call PanCameraToTimedLocForPlayer(T4I,ZD1,0)
 endif
 loop
-exitwhen TGI>THI
-if R[TGI]==false then
-call SetPlayerTechMaxAllowed(T4I,DC0[TGI],1)
+exitwhen loop_start>loop_end
+if R[loop_start]==false then
+call SetPlayerTechMaxAllowed(T4I,DC0[loop_start],1)
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 call RemoveLocation(ZC1)
 call RemoveLocation(ZD1)
@@ -31383,20 +31383,20 @@ call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,45,"|cff99ccff"+"输入"+"
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,45," ")
 endfunction
 function GT2 takes player MDI returns boolean
-local integer TGI=1
+local integer loop_start=1
 local integer GR2=0
 loop
-exitwhen TGI>5
+exitwhen loop_start>5
 if IsPlayerTeam1(MDI)then
-if K1[GetPlayerId(BO[TGI])]!=null and BO[TGI]!=MDI and GetHeroLevel(K1[GetPlayerId(BO[TGI])])==1 then
+if K1[GetPlayerId(BO[loop_start])]!=null and BO[loop_start]!=MDI and GetHeroLevel(K1[GetPlayerId(BO[loop_start])])==1 then
 set GR2=GR2+1
 endif
 else
-if K1[GetPlayerId(CO[TGI])]!=null and CO[TGI]!=MDI and GetHeroLevel(K1[GetPlayerId(CO[TGI])])==1 then
+if K1[GetPlayerId(CO[loop_start])]!=null and CO[loop_start]!=MDI and GetHeroLevel(K1[GetPlayerId(CO[loop_start])])==1 then
 set GR2=GR2+1
 endif
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 if GR2>0 then
 return true
@@ -31444,34 +31444,34 @@ function GQ2 takes nothing returns boolean
 return GetSpellAbilityId()=='A0FI'
 endfunction
 function GU2 takes integer IB1,unit H02,unit HI2 returns nothing
-local integer TGI=1
-local integer THI=GetUnitAbilityLevel(H02,IB1)
+local integer loop_start=1
+local integer loop_end=GetUnitAbilityLevel(H02,IB1)
 loop
-exitwhen TGI>THI
+exitwhen loop_start>loop_end
 call SelectHeroSkill(HI2,IB1)
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 endfunction
 function H12 takes nothing returns nothing
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 local unit HO2
 local location BFO=GetUnitLoc(GetTriggerUnit())
 set HO2=CreateUnitAtLoc(GetOwningPlayer(GetTriggerUnit()),GetUnitTypeId(GetTriggerUnit()),BFO,bj_UNIT_FACING)
 call SetHeroXP(HO2,GetHeroXP(GetTriggerUnit()),false)
-set TGI=1
-set THI=GetUnitAbilityLevel(GetTriggerUnit(),'Aamk')
+set loop_start=1
+set loop_end=GetUnitAbilityLevel(GetTriggerUnit(),'Aamk')
 loop
-exitwhen TGI>THI
+exitwhen loop_start>loop_end
 call SelectHeroSkill(bj_lastCreatedUnit,'Aamk')
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
-set TGI=0
-set THI=5
+set loop_start=0
+set loop_end=5
 loop
-exitwhen TGI>THI
-call UnitAddItem(HO2,UnitItemInSlot(GetTriggerUnit(),TGI))
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call UnitAddItem(HO2,UnitItemInSlot(GetTriggerUnit(),loop_start))
+set loop_start=loop_start+1
 endloop
 if(GetUnitTypeId(GetTriggerUnit())=='Eevi')then
 call GU2('A04L',GetTriggerUnit(),HO2)
@@ -31608,27 +31608,27 @@ endif
 return" "
 endfunction
 function ER2 takes nothing returns nothing
-local integer TGI=1
-local integer THI=5
+local integer loop_start=1
+local integer loop_end=5
 local integer MLI
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,20," ")
 if(IsPlayerTeam2(GetTriggerPlayer())==true)then
 loop
-exitwhen TGI>THI
-set MLI=GetPlayerId(BO[TGI])
+exitwhen loop_start>loop_end
+set MLI=GetPlayerId(BO[loop_start])
 if(K1[MLI]!=null)then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,20,C0[MLI]+(D80[GetPlayerId((BO[TGI]))])+"|r "+"控制"+" "+GetUnitName(K1[MLI])+" ("+"等级"+" "+I2S(GetUnitLevel(K1[MLI]))+")"+H82(BO[TGI]))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,20,C0[MLI]+(D80[GetPlayerId((BO[loop_start]))])+"|r "+"控制"+" "+GetUnitName(K1[MLI])+" ("+"等级"+" "+I2S(GetUnitLevel(K1[MLI]))+")"+H82(BO[loop_start]))
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 else
 loop
-exitwhen TGI>THI
-set MLI=GetPlayerId(CO[TGI])
+exitwhen loop_start>loop_end
+set MLI=GetPlayerId(CO[loop_start])
 if(K1[MLI]!=null)then
-call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,20,C0[MLI]+(D80[GetPlayerId((CO[TGI]))])+"|r "+"控制"+" "+GetUnitName(K1[MLI])+" ("+"等级"+" "+I2S(GetUnitLevel(K1[MLI]))+")"+H82(CO[TGI]))
+call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,20,C0[MLI]+(D80[GetPlayerId((CO[loop_start]))])+"|r "+"控制"+" "+GetUnitName(K1[MLI])+" ("+"等级"+" "+I2S(GetUnitLevel(K1[MLI]))+")"+H82(CO[loop_start]))
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 endif
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,20," ")
@@ -32680,31 +32680,31 @@ set s=FS1(s,"$c1","|c006699CC")
 return s
 endfunction
 function VI2 takes player p returns nothing
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 if(IsPlayerTeam1(p)==true)then
-set TGI=1
-set THI=5
+set loop_start=1
+set loop_end=5
 loop
-exitwhen TGI>THI
-if(BO[TGI]!=p)then
-if(T3I(BO[TGI])==true)then
-call SetPlayerAllianceStateBJ(p,BO[TGI],4)
+exitwhen loop_start>loop_end
+if(BO[loop_start]!=p)then
+if(T3I(BO[loop_start])==true)then
+call SetPlayerAllianceStateBJ(p,BO[loop_start],4)
 endif
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 else
-set TGI=1
-set THI=5
+set loop_start=1
+set loop_end=5
 loop
-exitwhen TGI>THI
-if(CO[TGI]!=p)then
-if(T3I(CO[TGI])==true)then
-call SetPlayerAllianceStateBJ(p,CO[TGI],4)
+exitwhen loop_start>loop_end
+if(CO[loop_start]!=p)then
+if(T3I(CO[loop_start])==true)then
+call SetPlayerAllianceStateBJ(p,CO[loop_start],4)
 endif
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 endif
 endfunction
@@ -37839,8 +37839,8 @@ local location ZC1=GetRectCenter(O4)
 local location ZD1=GetRectCenter(S3)
 local location LY2=GetRectCenter(O4)
 local location LJ2=GetRectCenter(S3)
-local integer TGI=1
-local integer THI=5
+local integer loop_start=1
+local integer loop_end=5
 local integer TJI
 local trigger t
 set Y0=true
@@ -39409,7 +39409,7 @@ call RemoveUnit(GetEnumUnit())
 endif
 endfunction
 function MK2 takes nothing returns boolean
-local integer TGI
+local integer loop_start
 local group ML2=NTI()
 local unit MM2
 local location LY2=GetRectCenter(O4)
@@ -39427,24 +39427,24 @@ local group Z51=NTI()
 call GroupEnumUnitsInRect(Z51,GetWorldBounds(),Condition(function N1I))
 call ForGroup(Z51,function MJ2)
 call NSI(Z51)
-set TGI=1
+set loop_start=1
 set x=1
 set y=1
 loop
-exitwhen TGI>5
-if(T3I(BO[TGI]))then
-call MZ2(K1[GetPlayerId(BO[TGI])])
-call GroupAddUnit(ML2,K1[GetPlayerId(BO[TGI])])
-set MS2[x]=BO[TGI]
+exitwhen loop_start>5
+if(T3I(BO[loop_start]))then
+call MZ2(K1[GetPlayerId(BO[loop_start])])
+call GroupAddUnit(ML2,K1[GetPlayerId(BO[loop_start])])
+set MS2[x]=BO[loop_start]
 set x=x+1
 endif
-if(T3I(CO[TGI]))then
-call MZ2(K1[GetPlayerId(CO[TGI])])
-call GroupAddUnit(ML2,K1[GetPlayerId(CO[TGI])])
-set MT2[y]=CO[TGI]
+if(T3I(CO[loop_start]))then
+call MZ2(K1[GetPlayerId(CO[loop_start])])
+call GroupAddUnit(ML2,K1[GetPlayerId(CO[loop_start])])
+set MT2[y]=CO[loop_start]
 set y=y+1
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 set x=1
 loop
@@ -39547,8 +39547,8 @@ local location ZC1=GetRectCenter(F4)
 local location ZD1=GetRectCenter(E4)
 local location LY2=GetRectCenter(O4)
 local location LJ2=GetRectCenter(S3)
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 local integer TJI
 if not F2 then
 call TZI()
@@ -39587,43 +39587,43 @@ call RemoveLocation(LJ2)
 return
 endif
 set A3=false
-set TGI=1
-set THI=5
+set loop_start=1
+set loop_end=5
 loop
-exitwhen TGI>THI
-set K1[GetPlayerId(BO[TGI])]=null
-if(T3I(BO[TGI]))then
+exitwhen loop_start>loop_end
+set K1[GetPlayerId(BO[loop_start])]=null
+if(T3I(BO[loop_start]))then
 loop
 set TJI=GetRandomInt(DE0,DF0)
 if(R[TJI]==false)then
 if not F2 then
 set R[TJI]=true
 endif
-set K1[GetPlayerId(BO[TGI])]=CreateUnitAtLoc(BO[TGI],DC0[TJI],ZC1,bj_UNIT_FACING)
+set K1[GetPlayerId(BO[loop_start])]=CreateUnitAtLoc(BO[loop_start],DC0[TJI],ZC1,bj_UNIT_FACING)
 endif
-exitwhen(K1[GetPlayerId(BO[TGI])]!=null)
+exitwhen(K1[GetPlayerId(BO[loop_start])]!=null)
 endloop
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
-set TGI=1
-set THI=5
+set loop_start=1
+set loop_end=5
 loop
-exitwhen TGI>THI
-set K1[GetPlayerId(CO[TGI])]=null
-if(T3I(CO[TGI]))then
+exitwhen loop_start>loop_end
+set K1[GetPlayerId(CO[loop_start])]=null
+if(T3I(CO[loop_start]))then
 loop
 set TJI=GetRandomInt(DG0,DH0)
 if(R[TJI]==false)then
 if not F2 then
 set R[TJI]=true
 endif
-set K1[GetPlayerId(CO[TGI])]=CreateUnitAtLoc(CO[TGI],DC0[TJI],ZD1,bj_UNIT_FACING)
+set K1[GetPlayerId(CO[loop_start])]=CreateUnitAtLoc(CO[loop_start],DC0[TJI],ZD1,bj_UNIT_FACING)
 endif
-exitwhen(K1[GetPlayerId(CO[TGI])]!=null)
+exitwhen(K1[GetPlayerId(CO[loop_start])]!=null)
 endloop
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 set A3=true
 call RemoveLocation(ZC1)
@@ -39672,8 +39672,8 @@ call TriggerAddAction(N82,function N32)
 endfunction
 function N92 takes nothing returns nothing
 local integer NA2=(LoadInteger(LY,(GetHandleId(GetTriggeringTrigger())),(173)))
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 local integer TJI
 local integer O91
 local location ZC1=GetRectCenter(N4)
@@ -39682,17 +39682,17 @@ if Q2 then
 return
 endif
 if IsPlayerTeam1(Player(NA2))then
-set TGI=DE0
-set THI=DF0
+set loop_start=DE0
+set loop_end=DF0
 set O91=0
 else
-set TGI=DG0
-set THI=DH0
+set loop_start=DG0
+set loop_end=DH0
 set O91=1
 endif
 if K0 then
-set TGI=DE0
-set THI=DH0
+set loop_start=DE0
+set loop_end=DH0
 if IsPlayerTeam1(Player(NA2))then
 call CreateUnitAtLoc(Player(NA2),'n00C',ZC1,bj_UNIT_FACING)
 call CreateUnitAtLoc(Player(NA2),'n00C',ZD1,bj_UNIT_FACING)
@@ -39701,8 +39701,8 @@ call CreateUnitAtLoc(Player(NA2),'n00C',ZC1,bj_UNIT_FACING)
 call CreateUnitAtLoc(Player(NA2),'n00C',ZD1,bj_UNIT_FACING)
 endif
 else
-set TGI=DE0
-set THI=DH0
+set loop_start=DE0
+set loop_end=DH0
 if IsPlayerTeam1(Player(NA2))then
 call CreateUnitAtLoc(Player(NA2),'n00C',ZC1,bj_UNIT_FACING)
 else
@@ -39711,11 +39711,11 @@ endif
 endif
 if not Y0 then
 loop
-exitwhen TGI>THI
-if R[TGI]==false then
-call SetPlayerTechMaxAllowed(Player(NA2),DC0[TGI],1)
+exitwhen loop_start>loop_end
+if R[loop_start]==false then
+call SetPlayerTechMaxAllowed(Player(NA2),DC0[loop_start],1)
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 if(GetPlayerState(Player(NA2),PLAYER_STATE_RESOURCE_GOLD)<250)then
 call SetPlayerState(Player(NA2),PLAYER_STATE_RESOURCE_GOLD,250)
@@ -39811,7 +39811,7 @@ function WE2 takes nothing returns nothing
 local integer ZB1=T8I(OO)
 local integer ZA1=T8I(AO)
 local integer QHI=ZB1+ZA1
-local integer TGI
+local integer loop_start
 local integer NF2
 local integer x
 local integer y
@@ -39865,29 +39865,29 @@ set NG2[9]=null
 set NG2[10]=null
 set z=1
 set w=1
-set TGI=1
+set loop_start=1
 loop
-exitwhen TGI>5
-if(T3I(BO[TGI]))then
-set NG2[w]=BO[TGI]
+exitwhen loop_start>5
+if(T3I(BO[loop_start]))then
+set NG2[w]=BO[loop_start]
 set w=w+1
 else
-set NH2[z]=BO[TGI]
+set NH2[z]=BO[loop_start]
 set z=z+1
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
-set TGI=1
+set loop_start=1
 loop
-exitwhen TGI>5
-if(T3I(CO[TGI]))then
-set NG2[w]=CO[TGI]
+exitwhen loop_start>5
+if(T3I(CO[loop_start]))then
+set NG2[w]=CO[loop_start]
 set w=w+1
 else
-set NH2[z]=CO[TGI]
+set NH2[z]=CO[loop_start]
 set z=z+1
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 set BO[1]=null
 set BO[2]=null
@@ -39899,47 +39899,47 @@ set CO[2]=null
 set CO[3]=null
 set CO[4]=null
 set CO[5]=null
-set TGI=1
+set loop_start=1
 loop
-exitwhen TGI>(QHI/2)
+exitwhen loop_start>(QHI/2)
 set NF2=GetRandomInt(1,QHI)
 if(NG2[NF2]!=null)then
-set BO[TGI]=NG2[NF2]
+set BO[loop_start]=NG2[NF2]
 set NG2[NF2]=null
-set TGI=TGI+1
+set loop_start=loop_start+1
 endif
 endloop
-set x=TGI
-set TGI=1
+set x=loop_start
+set loop_start=1
 loop
-exitwhen TGI>QHI-x+1
+exitwhen loop_start>QHI-x+1
 set NF2=GetRandomInt(1,QHI)
 if(NG2[NF2]!=null)then
-set CO[TGI]=NG2[NF2]
+set CO[loop_start]=NG2[NF2]
 set NG2[NF2]=null
-set TGI=TGI+1
+set loop_start=loop_start+1
 endif
 endloop
-set z=TGI
-set TGI=x
+set z=loop_start
+set loop_start=x
 set y=1
 loop
-exitwhen TGI>5
-set BO[TGI]=NH2[y]
+exitwhen loop_start>5
+set BO[loop_start]=NH2[y]
 set y=y+1
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
-set TGI=z
+set loop_start=z
 loop
-exitwhen TGI>5
-set CO[TGI]=NH2[y]
+exitwhen loop_start>5
+set CO[loop_start]=NH2[y]
 set y=y+1
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
-set TGI=0
+set loop_start=0
 loop
-exitwhen TGI>5
-set TGI=TGI+1
+exitwhen loop_start>5
+set loop_start=loop_start+1
 endloop
 call SetPlayerTeam(BO[0],0)
 call SetPlayerTeam(BO[1],0)
@@ -39987,18 +39987,18 @@ call ExecuteFunc("ZO1")
 call P7O()
 set ZB1=T8I(OO)
 set ZA1=T8I(AO)
-set TGI=1
+set loop_start=1
 loop
-exitwhen TGI>5
-if(T3I(BO[TGI]))then
-call SetPlayerStateBJ(BO[TGI],PLAYER_STATE_RESOURCE_GOLD,(4375/ZB1))
-call SetPlayerStateBJ(BO[TGI],PLAYER_STATE_RESOURCE_LUMBER,0)
+exitwhen loop_start>5
+if(T3I(BO[loop_start]))then
+call SetPlayerStateBJ(BO[loop_start],PLAYER_STATE_RESOURCE_GOLD,(4375/ZB1))
+call SetPlayerStateBJ(BO[loop_start],PLAYER_STATE_RESOURCE_LUMBER,0)
 endif
-if(T3I(CO[TGI]))then
-call SetPlayerStateBJ(CO[TGI],PLAYER_STATE_RESOURCE_GOLD,(4375/ZA1))
-call SetPlayerStateBJ(CO[TGI],PLAYER_STATE_RESOURCE_LUMBER,0)
+if(T3I(CO[loop_start]))then
+call SetPlayerStateBJ(CO[loop_start],PLAYER_STATE_RESOURCE_GOLD,(4375/ZA1))
+call SetPlayerStateBJ(CO[loop_start],PLAYER_STATE_RESOURCE_LUMBER,0)
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 if C2 then
 set x=0
@@ -40021,7 +40021,7 @@ function WF2 takes nothing returns nothing
 local integer ZB1=T8I(OO)
 local integer ZA1=T8I(AO)
 local integer QHI=ZB1+ZA1
-local integer TGI
+local integer loop_start
 local integer NF2
 local integer x
 local integer y
@@ -40138,18 +40138,18 @@ call ForceAddPlayer(AO,CO[5])
 call ExecuteFunc("ZO1")
 set ZB1=T8I(OO)
 set ZA1=T8I(AO)
-set TGI=1
+set loop_start=1
 loop
-exitwhen TGI>5
-if(T3I(BO[TGI]))then
-call SetPlayerStateBJ(BO[TGI],PLAYER_STATE_RESOURCE_GOLD,(4375/ZB1))
-call SetPlayerStateBJ(BO[TGI],PLAYER_STATE_RESOURCE_LUMBER,0)
+exitwhen loop_start>5
+if(T3I(BO[loop_start]))then
+call SetPlayerStateBJ(BO[loop_start],PLAYER_STATE_RESOURCE_GOLD,(4375/ZB1))
+call SetPlayerStateBJ(BO[loop_start],PLAYER_STATE_RESOURCE_LUMBER,0)
 endif
-if(T3I(CO[TGI]))then
-call SetPlayerStateBJ(CO[TGI],PLAYER_STATE_RESOURCE_GOLD,(4375/ZA1))
-call SetPlayerStateBJ(CO[TGI],PLAYER_STATE_RESOURCE_LUMBER,0)
+if(T3I(CO[loop_start]))then
+call SetPlayerStateBJ(CO[loop_start],PLAYER_STATE_RESOURCE_GOLD,(4375/ZA1))
+call SetPlayerStateBJ(CO[loop_start],PLAYER_STATE_RESOURCE_LUMBER,0)
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 call PanCameraToTimedLocForPlayer(BO[1],LY2,0)
 call PanCameraToTimedLocForPlayer(BO[2],LY2,0)
@@ -40190,22 +40190,22 @@ set ZC1=null
 set ZD1=null
 endfunction
 function WW2 takes nothing returns nothing
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 set H2=true
-set TGI=1
-set THI=DJ0
+set loop_start=1
+set loop_end=DJ0
 loop
-exitwhen TGI>THI
-call TCI(DY0[TGI])
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call TCI(DY0[loop_start])
+set loop_start=loop_start+1
 endloop
-set TGI=1
-set THI=DX0
+set loop_start=1
+set loop_end=DX0
 loop
-exitwhen TGI>THI
-call TCI(DW0[TGI])
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call TCI(DW0[loop_start])
+set loop_start=loop_start+1
 endloop
 endfunction
 function NJ2 takes nothing returns boolean
@@ -40281,65 +40281,65 @@ call TriggerRegisterEnterRegion(t,r,Condition(function N1I))
 call TriggerAddAction(t,function NK2)
 endfunction
 function WY2 takes nothing returns nothing
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 set V2=true
-set TGI=1
-set THI=DJ0
+set loop_start=1
+set loop_end=DJ0
 loop
-exitwhen TGI>THI
-call TCI(DY0[TGI])
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call TCI(DY0[loop_start])
+set loop_start=loop_start+1
 endloop
-set TGI=1
-set THI=DV0
+set loop_start=1
+set loop_end=DV0
 loop
-exitwhen TGI>THI
-call TCI(DZ0[TGI])
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call TCI(DZ0[loop_start])
+set loop_start=loop_start+1
 endloop
 endfunction
 function WX2 takes nothing returns nothing
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 set Z2=true
-set TGI=1
-set THI=DV0
+set loop_start=1
+set loop_end=DV0
 loop
-exitwhen TGI>THI
-call TCI(DZ0[TGI])
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call TCI(DZ0[loop_start])
+set loop_start=loop_start+1
 endloop
-set TGI=1
-set THI=DX0
+set loop_start=1
+set loop_end=DX0
 loop
-exitwhen TGI>THI
-call TCI(DW0[TGI])
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call TCI(DW0[loop_start])
+set loop_start=loop_start+1
 endloop
 endfunction
 function WK2 takes nothing returns nothing
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 set O1I=true
-set TGI=1
-set THI=DL0
+set loop_start=1
+set loop_end=DL0
 loop
-exitwhen TGI>THI
-call TCI(DK0[TGI])
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call TCI(DK0[loop_start])
+set loop_start=loop_start+1
 endloop
 endfunction
 function WJ2 takes nothing returns nothing
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 set OOI=true
-set TGI=1
-set THI=DN0
+set loop_start=1
+set loop_end=DN0
 loop
-exitwhen TGI>THI
-call TCI(DM0[TGI])
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call TCI(DM0[loop_start])
+set loop_start=loop_start+1
 endloop
 endfunction
 function XO2 takes nothing returns nothing
@@ -47627,8 +47627,8 @@ call MUSetUnitY(GetEnumUnit(),COI)
 endfunction
 function H43 takes nothing returns nothing
 local destructable array dx
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 local fogmodifier H53
 local unit dummy=GetTriggerUnit()
 local unit target=GetSpellTargetUnit()
@@ -47649,12 +47649,12 @@ if IsUnitAlly(dummy,GetOwningPlayer(target))==true or CanResistSkill(GetSpellTar
 set GK=dummy
 call GroupEnumUnitsInRange(g,x,y,150,Condition(function CA1))
 call O71(CreateFogModifierRadiusLocBJ(true,GetOwningPlayer(dummy),FOG_OF_WAR_VISIBLE,AM3,1000.00),2.25+0.75*GetUnitAbilityLevel(dummy,'A21E'))
-set TGI=1
-set THI=8
+set loop_start=1
+set loop_end=8
 loop
-exitwhen TGI>THI
-call OA1(CreateDestructableLoc('B005',M7I(AM3,150.00,(I2R(TGI)*45.00)),GetRandomReal(0,360),1,0),2.25+0.75*GetUnitAbilityLevel(dummy,'A21E'))
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call OA1(CreateDestructableLoc('B005',M7I(AM3,150.00,(I2R(loop_start)*45.00)),GetRandomReal(0,360),1,0),2.25+0.75*GetUnitAbilityLevel(dummy,'A21E'))
+set loop_start=loop_start+1
 endloop
 endif
 call RemoveLocation(AM3)
@@ -51411,7 +51411,7 @@ local group Z51=NTI()
 local unit dummy
 local unit WH1
 local integer TPI=GetSpellAbilityId()
-local integer TGI=1
+local integer loop_start=1
 if r==2 then
 call UYI("|c00FFFF002x 多重施法！！|r",5,GetTriggerUnit(),0.03,255,0,0,255)
 elseif r==3 then
@@ -51427,8 +51427,8 @@ if PKI!=GetSpellTargetUnit()then
 call GroupAddUnit(Z51,PKI)
 endif
 loop
-exitwhen TGI>level
-set TGI=TGI+1
+exitwhen loop_start>level
+set loop_start=loop_start+1
 set dummy=CreateUnit(GetOwningPlayer(PKI),'e00C',GetUnitX(PKI),GetUnitY(PKI),270)
 call AddSkill(dummy,TPI)
 call SetUnitAbilityLevel(dummy,TPI,GetUnitAbilityLevel(PKI,TPI))
@@ -55539,8 +55539,8 @@ local unit QU3
 local integer UI3
 local unit WH1
 local integer U13
-local integer TGI
-local integer THI
+local integer loop_start
+local integer loop_end
 local trigger t=CreateTrigger()
 local unit SFI=K1[GetPlayerId(GetOwningPlayer(GetTriggerUnit()))]
 local integer level=GetUnitAbilityLevel(SFI,'A05J')
@@ -55555,17 +55555,17 @@ call SaveUnitHandle(LY,(handle_id),(1600+QP3),(GetTriggerUnit()))
 set QQ3=CountUnitsInGroup(Z51)
 if(QQ3>20)then
 set UI3=99999
-set TGI=1
-set THI=QP3
+set loop_start=1
+set loop_end=QP3
 loop
-exitwhen TGI>THI
-set WH1=(LoadUnitHandle(LY,(handle_id),(1600+TGI)))
-set U13=R2I(TimerGetRemaining((LoadTimerHandle(LY,(handle_id),(1500+TGI)))))
+exitwhen loop_start>loop_end
+set WH1=(LoadUnitHandle(LY,(handle_id),(1600+loop_start)))
+set U13=R2I(TimerGetRemaining((LoadTimerHandle(LY,(handle_id),(1500+loop_start)))))
 if(GetUnitState(WH1,UNIT_STATE_LIFE)>0 and U13<UI3)then
 set QU3=WH1
 set UI3=U13
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 call ExplodeUnitBJ(QU3)
 endif
@@ -55683,8 +55683,8 @@ set SFI=null
 set HLO=null
 endfunction
 function U83 takes nothing returns nothing
-local integer TGI=0
-local integer THI=5
+local integer loop_start=0
+local integer loop_end=5
 local integer array U93
 local player array UA3
 local integer E81
@@ -55699,27 +55699,27 @@ set U93[4]=0
 set U93[5]=0
 call MUDisableItemTrigger()
 loop
-exitwhen TGI>THI
-set E81=F01(UnitItemInSlot(GetTriggerUnit(),TGI))
+exitwhen loop_start>loop_end
+set E81=F01(UnitItemInSlot(GetTriggerUnit(),loop_start))
 if E81==VZ0 or E81==VV0 or E81==VW0 or E81==VX0 or E81==VY0 or E81==VJ0 or E81==V80 or E81==W00 or E81==WI0 or E81==W10 or E81==ZS0 or E81==WH0 or E81==WX0 or E81==X90 then
-set U93[TGI]=GetItemTypeId(UnitItemInSlot(GetTriggerUnit(),TGI))
-set UA3[TGI]=GetItemPlayer(UnitItemInSlot(GetTriggerUnit(),TGI))
-call RemoveItem(UnitItemInSlot(GetTriggerUnit(),TGI))
+set U93[loop_start]=GetItemTypeId(UnitItemInSlot(GetTriggerUnit(),loop_start))
+set UA3[loop_start]=GetItemPlayer(UnitItemInSlot(GetTriggerUnit(),loop_start))
+call RemoveItem(UnitItemInSlot(GetTriggerUnit(),loop_start))
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 call UnitResetCooldown(GetTriggerUnit())
-set TGI=0
-set THI=5
+set loop_start=0
+set loop_end=5
 loop
-exitwhen TGI>THI
-if U93[TGI]>0 then
-set FH1=CreateItem(U93[TGI],0,0)
-call SetItemPlayer(FH1,UA3[TGI],false)
+exitwhen loop_start>loop_end
+if U93[loop_start]>0 then
+set FH1=CreateItem(U93[loop_start],0,0)
+call SetItemPlayer(FH1,UA3[loop_start],false)
 call SetItemUserData(FH1,1)
 call UnitAddItem(GetTriggerUnit(),FH1)
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 call MUEnableItemTrigger()
 set FH1=null
@@ -65849,12 +65849,12 @@ call SelectHeroSkill(W81,N64)
 endif
 endfunction
 function N74 takes integer IB1,unit H02,unit HI2 returns nothing
-local integer TGI=1
-local integer THI=GetUnitAbilityLevel(H02,IB1)
+local integer loop_start=1
+local integer loop_end=GetUnitAbilityLevel(H02,IB1)
 loop
-exitwhen TGI>THI
+exitwhen loop_start>loop_end
 call SelectHeroSkill(HI2,IB1)
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 endfunction
 function N84 takes unit MV4,unit N94 returns nothing
@@ -68933,7 +68933,7 @@ endfunction
 function QN4 takes unit PKI,integer QS4 returns nothing
 local integer QT4=QS4
 local integer QR4
-local integer THI
+local integer loop_end
 local location BFO=GetUnitLoc(GetTriggerUnit())
 local location OM3
 local integer level=GetUnitAbilityLevelSwapped('A29J',GetTriggerUnit())
@@ -68942,9 +68942,9 @@ return
 endif
 set QT4=QT4/2
 set QR4=1
-set THI=QT4
+set loop_end=QT4
 loop
-exitwhen QR4>THI
+exitwhen QR4>loop_end
 set OM3=M7I(BFO,50.00,(I2R(QR4)*(360/QT4)))
 call CreateNUnitsAtLoc(1,'e00C',GetOwningPlayer(PKI),BFO,bj_UNIT_FACING)
 call UnitAddAbility(bj_lastCreatedUnit,'A0HG')
@@ -72408,23 +72408,23 @@ local timer t=GetExpiredTimer()
 local integer handle_id=GetHandleId(t)
 local unit SFI=(LoadUnitHandle(LY,(handle_id),(14)))
 local real DC1=(LoadReal(LY,(handle_id),(57)))
-local integer TGI=0
+local integer loop_start=0
 loop
-exitwhen TGI>5
-if CL5(SFI,TGI)then
+exitwhen loop_start>5
+if CL5(SFI,loop_start)then
 if GetUnitAbilityLevel(SFI,('B047'))==0 then
-call SetItemDropOnDeath(UnitItemInSlot(SFI,TGI),true)
-if GetItemTypeId(UnitItemInSlot(SFI,TGI))=='oflg' then
-call SetItemDroppable(UnitItemInSlot(SFI,TGI),true)
+call SetItemDropOnDeath(UnitItemInSlot(SFI,loop_start),true)
+if GetItemTypeId(UnitItemInSlot(SFI,loop_start))=='oflg' then
+call SetItemDroppable(UnitItemInSlot(SFI,loop_start),true)
 endif
 else
-call SetItemDropOnDeath(UnitItemInSlot(SFI,TGI),false)
-if GetItemTypeId(UnitItemInSlot(SFI,TGI))=='oflg' then
-call SetItemDroppable(UnitItemInSlot(SFI,TGI),false)
+call SetItemDropOnDeath(UnitItemInSlot(SFI,loop_start),false)
+if GetItemTypeId(UnitItemInSlot(SFI,loop_start))=='oflg' then
+call SetItemDroppable(UnitItemInSlot(SFI,loop_start),false)
 endif
 endif
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 set DC1=DC1+0.2
 call SaveReal(LY,(handle_id),(57),((DC1)*1.0))
@@ -72437,16 +72437,16 @@ if DC1>30 then
 call PauseTimer(t)
 call FlushChildHashtable(LY,(handle_id))
 call SetUnitPathing(SFI,true)
-set TGI=0
+set loop_start=0
 loop
-exitwhen TGI>5
-if CL5(SFI,TGI)then
-call SetItemDropOnDeath(UnitItemInSlot(SFI,TGI),true)
-if GetItemTypeId(UnitItemInSlot(SFI,TGI))=='oflg' then
-call SetItemDroppable(UnitItemInSlot(SFI,TGI),true)
+exitwhen loop_start>5
+if CL5(SFI,loop_start)then
+call SetItemDropOnDeath(UnitItemInSlot(SFI,loop_start),true)
+if GetItemTypeId(UnitItemInSlot(SFI,loop_start))=='oflg' then
+call SetItemDroppable(UnitItemInSlot(SFI,loop_start),true)
 endif
 endif
-set TGI=TGI+1
+set loop_start=loop_start+1
 endloop
 endif
 endfunction
@@ -76266,15 +76266,15 @@ function VV5 takes nothing returns nothing
 local trigger t=GetTriggeringTrigger()
 local unit PKI=(LoadUnitHandle(LY,(GetHandleId(t)),(221)))
 local integer handle_id=GetHandleId(PKI)
-local integer TGI=1
-local integer THI=10
+local integer loop_start=1
+local integer loop_end=10
 loop
-exitwhen TGI>THI
-call SaveReal(LY,(handle_id),(7300+(TGI-1)),(((LoadReal(LY,(handle_id),(7300+(TGI)))))*1.0))
-call SaveReal(LY,(handle_id),(7350+(TGI-1)),(((LoadReal(LY,(handle_id),(7350+(TGI)))))*1.0))
-call SaveReal(LY,(handle_id),(7200+(TGI-1)),(((LoadReal(LY,(handle_id),(7200+(TGI)))))*1.0))
-call SaveReal(LY,(handle_id),(7250+(TGI-1)),(((LoadReal(LY,(handle_id),(7250+(TGI)))))*1.0))
-set TGI=TGI+1
+exitwhen loop_start>loop_end
+call SaveReal(LY,(handle_id),(7300+(loop_start-1)),(((LoadReal(LY,(handle_id),(7300+(loop_start)))))*1.0))
+call SaveReal(LY,(handle_id),(7350+(loop_start-1)),(((LoadReal(LY,(handle_id),(7350+(loop_start)))))*1.0))
+call SaveReal(LY,(handle_id),(7200+(loop_start-1)),(((LoadReal(LY,(handle_id),(7200+(loop_start)))))*1.0))
+call SaveReal(LY,(handle_id),(7250+(loop_start-1)),(((LoadReal(LY,(handle_id),(7250+(loop_start)))))*1.0))
+set loop_start=loop_start+1
 endloop
 call SaveReal(LY,(handle_id),(7300+10),((GetUnitX(PKI))*1.0))
 call SaveReal(LY,(handle_id),(7350+10),((GetUnitY(PKI))*1.0))
