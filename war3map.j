@@ -36754,7 +36754,9 @@ function MUPickHeroes_JSU2 takes nothing returns nothing
     local integer count1
     local integer count2
 
-    set max = 36
+    set max = 12
+    set max = max + 2 //每边2个空位
+    set max = max * 3 //一共有3个边
     set count1 = R2I(max * 0.4)
     set count2 = max - count1
 
@@ -36804,6 +36806,7 @@ function MUCreateHeroes takes nothing returns nothing
     local integer max
     local integer count1
     local integer count2
+    local real fix = 30
 
     set i = 1
     set max = 0
@@ -36825,11 +36828,11 @@ function MUCreateHeroes takes nothing returns nothing
             set KZ2 = false
         endif
         if i <= count1 then
-        	set a = i * 360 / count1
+        	set a = i * 360 / count1 + fix
         	set x = QV0 + (QJ0 - 50) * Cos(a * bj_DEGTORAD)
         	set y = QW0 + (QJ0 - 50) * Sin(a * bj_DEGTORAD)
         else
-        	set a = i * 360 / count2
+        	set a = i * 360 / count2 + fix
         	set x = QV0 + (QJ0 + 75) * Cos(a * bj_DEGTORAD)
         	set y = QW0 + (QJ0 + 75) * Sin(a * bj_DEGTORAD)
         endif
