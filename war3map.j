@@ -10570,87 +10570,87 @@ set hero_ids_agi[33]='E02N'
 set hero_ids_agi[34]='N0M0'
 set hero_ids_agi[35]='N0MK'
 set hero_id_count_agi=35
-// 智力英雄
-set hero_ids_int[1]='Npbm'
-set hero_ids_int[2]='Hlgr'
-set hero_ids_int[3]='Harf'
-set hero_ids_int[4]='H000'
-set hero_ids_int[5]='H001'
-set hero_ids_int[6]='Hamg'
-set hero_ids_int[7]='H008'
-set hero_ids_int[8]='Ucrl'
-set hero_ids_int[9]='Otch'
-set hero_ids_int[10]='NC00'
-set hero_ids_int[11]='Udre'
-set hero_ids_int[12]='UC11'
-set hero_ids_int[13]='Ofar'
-set hero_ids_int[14]='U00F'
-set hero_ids_int[15]='U00K'
-set hero_ids_int[16]='O00J'
-set hero_ids_int[17]='Udea'
-set hero_ids_int[18]='Opgh'
-set hero_ids_int[19]='U00A'
-set hero_ids_int[20]='U00C'
-set hero_ids_int[21]='UC91'
-set hero_ids_int[22]='UC42'
-set hero_ids_int[23]='U008'
-set hero_ids_int[24]='H00D'
-set hero_ids_int[25]='N01I'
-set hero_ids_int[26]='H00Q'
-set hero_ids_int[27]='N00R'
-set hero_ids_int[28]='H00T'
-set hero_ids_int[29]='H06S'
-set hero_ids_int[30]='H00R'
-set hero_ids_int[31]='O015'
-set hero_ids_int[32]='E02I'
-set hero_ids_int[33]='E02F'
-set hero_ids_int[34]='O01F'
-set hero_ids_int[35]='E032'
-set hero_ids_int[36]='E02K'
-set hero_ids_int[37]='N0MU'
-set hero_id_count_int=37
 // 力量英雄
-set hero_ids_str[1]='Orkn'
-set hero_ids_str[2]='Emoo'
-set hero_ids_str[3]='Emns'
-set hero_ids_str[4]='H004'
-set hero_ids_str[5]='Hjai'
-set hero_ids_str[6]='Uktl'
-set hero_ids_str[7]='Hmbr'
-set hero_ids_str[8]='H00K'
-set hero_ids_str[9]='Ntin'
-set hero_ids_str[10]='Hmkg'
-set hero_ids_str[11]='Hblm'
-set hero_ids_str[12]='N01A'
-set hero_ids_str[13]='H00A'
-set hero_ids_str[14]='Ulic'
-set hero_ids_str[15]='Ekee'
-set hero_ids_str[16]='UC76'
-set hero_ids_str[17]='UC18'
-set hero_ids_str[18]='UC01'
-set hero_ids_str[19]='UC60'
-set hero_ids_str[20]='H00H'
-set hero_ids_str[21]='Oshd'
-set hero_ids_str[22]='U00E'
-set hero_ids_str[23]='E01A'
-set hero_ids_str[24]='U00P'
-set hero_ids_str[25]='E00P'
-set hero_ids_str[26]='E01C'
-set hero_ids_str[27]='N01W'
-set hero_ids_str[28]='H00N'
-set hero_ids_str[29]='N0EG'
-set hero_ids_str[30]='H00S'
-set hero_ids_str[31]='N00B'
-set hero_ids_str[32]='H00U'
-set hero_ids_str[33]='O016'
-set hero_ids_str[34]=DC0[97]
-set hero_ids_str[35]='E02H'
-set hero_ids_str[36]='E02J'
-set hero_ids_str[37]='E02X'
-set hero_ids_str[38]='H0DO'
-set hero_ids_str[39]='N0M7'
-set hero_ids_str[40]='N0MD'
-set hero_id_count_str=40
+set hero_ids_str[1]='Npbm'
+set hero_ids_str[2]='Hlgr'
+set hero_ids_str[3]='Harf'
+set hero_ids_str[4]='H000'
+set hero_ids_str[5]='H001'
+set hero_ids_str[6]='Hamg'
+set hero_ids_str[7]='H008'
+set hero_ids_str[8]='Ucrl'
+set hero_ids_str[9]='Otch'
+set hero_ids_str[10]='NC00'
+set hero_ids_str[11]='Udre'
+set hero_ids_str[12]='UC11'
+set hero_ids_str[13]='Ofar'
+set hero_ids_str[14]='U00F'
+set hero_ids_str[15]='U00K'
+set hero_ids_str[16]='O00J'
+set hero_ids_str[17]='Udea'
+set hero_ids_str[18]='Opgh'
+set hero_ids_str[19]='U00A'
+set hero_ids_str[20]='U00C'
+set hero_ids_str[21]='UC91'
+set hero_ids_str[22]='UC42'
+set hero_ids_str[23]='U008'
+set hero_ids_str[24]='H00D'
+set hero_ids_str[25]='N01I'
+set hero_ids_str[26]='H00Q'
+set hero_ids_str[27]='N00R'
+set hero_ids_str[28]='H00T'
+set hero_ids_str[29]='H06S'
+set hero_ids_str[30]='H00R'
+set hero_ids_str[31]='O015'
+set hero_ids_str[32]='E02I'
+set hero_ids_str[33]='E02F'
+set hero_ids_str[34]='O01F'
+set hero_ids_str[35]='E032'
+set hero_ids_str[36]='E02K'
+set hero_ids_str[37]='N0MU'
+set hero_id_count_str=37
+// 智力英雄
+set hero_ids_int[1]='Orkn'
+set hero_ids_int[2]='Emoo'
+set hero_ids_int[3]='Emns'
+set hero_ids_int[4]='H004'
+set hero_ids_int[5]='Hjai'
+set hero_ids_int[6]='Uktl'
+set hero_ids_int[7]='Hmbr'
+set hero_ids_int[8]='H00K'
+set hero_ids_int[9]='Ntin'
+set hero_ids_int[10]='Hmkg'
+set hero_ids_int[11]='Hblm'
+set hero_ids_int[12]='N01A'
+set hero_ids_int[13]='H00A'
+set hero_ids_int[14]='Ulic'
+set hero_ids_int[15]='Ekee'
+set hero_ids_int[16]='UC76'
+set hero_ids_int[17]='UC18'
+set hero_ids_int[18]='UC01'
+set hero_ids_int[19]='UC60'
+set hero_ids_int[20]='H00H'
+set hero_ids_int[21]='Oshd'
+set hero_ids_int[22]='U00E'
+set hero_ids_int[23]='E01A'
+set hero_ids_int[24]='U00P'
+set hero_ids_int[25]='E00P'
+set hero_ids_int[26]='E01C'
+set hero_ids_int[27]='N01W'
+set hero_ids_int[28]='H00N'
+set hero_ids_int[29]='N0EG'
+set hero_ids_int[30]='H00S'
+set hero_ids_int[31]='N00B'
+set hero_ids_int[32]='H00U'
+set hero_ids_int[33]='O016'
+set hero_ids_int[34]=DC0[97]
+set hero_ids_int[35]='E02H'
+set hero_ids_int[36]='E02J'
+set hero_ids_int[37]='E02X'
+set hero_ids_int[38]='H0DO'
+set hero_ids_int[39]='N0M7'
+set hero_ids_int[40]='N0MD'
+set hero_id_count_int=40
 set DK0[1]='Orkn'
 set DK0[2]='Emoo'
 set DK0[3]='Emns'
@@ -36816,20 +36816,20 @@ function MUPickHeroes_JSU2_Show takes nothing returns nothing
     local string int = "Doodads\\Cinematic\\GlowingRunes\\GlowingRunes4.mdl"
     local string agi = "Doodads\\Cinematic\\GlowingRunes\\GlowingRunes6.mdl"
 
-    call MUPickHeroes_JSU2_Line(30, 280, 550, 90, int)
-    call MUPickHeroes_JSU2_Circle(30, 150, 280, 20, int)
-    call MUPickHeroes_JSU2_Circle(30, 150, 550, 10, int)
-    call MUPickHeroes_JSU2_Line(150, 280, 550, 90, int)
+    call MUPickHeroes_JSU2_Line(30, 280, 550, 90, str)
+    call MUPickHeroes_JSU2_Circle(30, 150, 280, 20, str)
+    call MUPickHeroes_JSU2_Circle(30, 150, 550, 10, str)
+    call MUPickHeroes_JSU2_Line(150, 280, 550, 90, str)
 
     call MUPickHeroes_JSU2_Line(150, 280, 550, 90, agi)
     call MUPickHeroes_JSU2_Circle(150, 270, 280, 20, agi)
     call MUPickHeroes_JSU2_Circle(150, 270, 550, 10, agi)
     call MUPickHeroes_JSU2_Line(270, 280, 550, 90, agi)
 
-    call MUPickHeroes_JSU2_Line(270, 280, 550, 90, str)
-    call MUPickHeroes_JSU2_Circle(270, 30, 280, 20, str)
-    call MUPickHeroes_JSU2_Circle(270, 30, 550, 10, str)
-    call MUPickHeroes_JSU2_Line(30, 280, 550, 90, str)
+    call MUPickHeroes_JSU2_Line(270, 280, 550, 90, int)
+    call MUPickHeroes_JSU2_Circle(270, 30, 280, 20, int)
+    call MUPickHeroes_JSU2_Circle(270, 30, 550, 10, int)
+    call MUPickHeroes_JSU2_Line(30, 280, 550, 90, int)
 
 endfunction
 
