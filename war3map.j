@@ -3769,7 +3769,7 @@ endfunction
 function T2I takes player p returns boolean
 return p==BO[1]or p==BO[2]or p==BO[3]or p==BO[4]or p==BO[5]or p==CO[1]or p==CO[2]or p==CO[3]or p==CO[4]or p==CO[5]
 endfunction
-function T3I takes player T4I returns boolean
+function is_player takes player T4I returns boolean
 if(GetPlayerSlotState(T4I)==PLAYER_SLOT_STATE_PLAYING)then
 if(GetPlayerController(T4I)==MAP_CONTROL_USER)then
 return true
@@ -3794,7 +3794,7 @@ endif
 return false
 endfunction
 function T7I takes nothing returns nothing
-if(T3I(GetEnumPlayer())==true)then
+if(is_player(GetEnumPlayer())==true)then
 set bj_forceCountPlayers=bj_forceCountPlayers+1
 endif
 endfunction
@@ -4369,15 +4369,15 @@ function RTI takes nothing returns nothing
 local integer loop_start=1
 set WO=BO[1]
 loop
-exitwhen T3I(WO)or loop_start>5
+exitwhen is_player(WO)or loop_start>5
 set loop_start=loop_start+1
 set WO=BO[loop_start]
 endloop
-if T3I(WO)==false then
+if is_player(WO)==false then
 set WO=CO[1]
 set loop_start=1
 loop
-exitwhen T3I(WO)or loop_start>5
+exitwhen is_player(WO)or loop_start>5
 set loop_start=loop_start+1
 set WO=CO[loop_start]
 endloop
@@ -7470,7 +7470,7 @@ endfunction
 function FJ1 takes player p,string FK1,integer U0I returns nothing
 local string id=I2S(GetPlayerId(p))
 call StoreInteger(OS,id,FK1,U0I)
-if T3I(WO)==false then
+if is_player(WO)==false then
 call RTI()
 endif
 if GetLocalPlayer()==WO then
@@ -7479,7 +7479,7 @@ endif
 endfunction
 function FL1 takes string FM1,integer U0I returns nothing
 call StoreInteger(OS,"Data",FM1,U0I)
-if T3I(WO)==false then
+if is_player(WO)==false then
 call RTI()
 endif
 if GetLocalPlayer()==WO then
@@ -9064,11 +9064,11 @@ set loop_start=1
 set loop_end=5
 loop
 exitwhen loop_start>loop_end
-if(T3I(BO[loop_start]))then
+if(is_player(BO[loop_start]))then
 call SetPlayerState(BO[loop_start],PLAYER_STATE_RESOURCE_GOLD,(4375/ZB1))
 call SetPlayerState(BO[loop_start],PLAYER_STATE_RESOURCE_LUMBER,0)
 endif
-if(T3I(CO[loop_start]))then
+if(is_player(CO[loop_start]))then
 call SetPlayerState(CO[loop_start],PLAYER_STATE_RESOURCE_GOLD,(4375/ZA1))
 call SetPlayerState(CO[loop_start],PLAYER_STATE_RESOURCE_LUMBER,0)
 endif
@@ -9111,10 +9111,10 @@ call Z61(CO[5])
 set x=1
 loop
 exitwhen x>5
-if T3I(BO[x])then
+if is_player(BO[x])then
 call CreateUnitAtLoc(BO[x],'n00C',ZC1,bj_UNIT_FACING)
 endif
-if T3I(CO[x])then
+if is_player(CO[x])then
 call CreateUnitAtLoc(CO[x],'n00C',ZD1,bj_UNIT_FACING)
 endif
 set x=x+1
@@ -11205,7 +11205,7 @@ endif
 if IsPlayerTeam1(VV1)then
 loop
 exitwhen loop_start>5
-if T3I(BO[loop_start])then
+if is_player(BO[loop_start])then
 call SetPlayerState(BO[loop_start],PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(BO[loop_start],PLAYER_STATE_RESOURCE_GOLD)+ROI/VW1)
 endif
 set loop_start=loop_start+1
@@ -11213,7 +11213,7 @@ endloop
 else
 loop
 exitwhen loop_start>5
-if T3I(CO[loop_start])then
+if is_player(CO[loop_start])then
 call SetPlayerState(CO[loop_start],PLAYER_STATE_RESOURCE_GOLD,GetPlayerState(CO[loop_start],PLAYER_STATE_RESOURCE_GOLD)+ROI/VW1)
 endif
 set loop_start=loop_start+1
@@ -11262,7 +11262,7 @@ set loop_end=5
 loop
 exitwhen loop_start>loop_end
 if(BO[loop_start]!=GetTriggerPlayer())then
-if(T3I(BO[loop_start])==true)then
+if(is_player(BO[loop_start])==true)then
 call SetPlayerAllianceStateBJ(GetTriggerPlayer(),BO[loop_start],4)
 endif
 endif
@@ -11274,7 +11274,7 @@ set loop_end=5
 loop
 exitwhen loop_start>loop_end
 if(CO[loop_start]!=GetTriggerPlayer())then
-if(T3I(CO[loop_start])==true)then
+if(is_player(CO[loop_start])==true)then
 call SetPlayerAllianceStateBJ(GetTriggerPlayer(),CO[loop_start],4)
 endif
 endif
@@ -13645,7 +13645,7 @@ endif
 if IsPlayerTeam1(AB1)then
 loop
 exitwhen loop_start>5
-if T3I(BO[loop_start])then
+if is_player(BO[loop_start])then
 set EL0[GetPlayerId(BO[loop_start])]=EL0[GetPlayerId(BO[loop_start])]+AC1/VW1
 set EK0[GetPlayerId(BO[loop_start])]=EK0[GetPlayerId(BO[loop_start])]+AC1/VW1
 call AA1(BO[loop_start],AC1/VW1,K1[GetPlayerId(BO[loop_start])])
@@ -13655,7 +13655,7 @@ endloop
 else
 loop
 exitwhen loop_start>5
-if T3I(CO[loop_start])then
+if is_player(CO[loop_start])then
 set EL0[GetPlayerId(CO[loop_start])]=EL0[GetPlayerId(CO[loop_start])]+AC1/VW1
 set EK0[GetPlayerId(CO[loop_start])]=EK0[GetPlayerId(CO[loop_start])]+AC1/VW1
 call AA1(CO[loop_start],AC1/VW1,K1[GetPlayerId(CO[loop_start])])
@@ -24939,7 +24939,7 @@ call NEI(M0,7,loop_start+2,255,204,0,0)
 set S40[GetPlayerId(N1[loop_start])]=1-1
 set S50[GetPlayerId(N1[loop_start])]=loop_start+2-1
 call N5I(M0,1,loop_start+2,(D80[GetPlayerId((N1[loop_start]))]))
-if T3I(N1[loop_start])then
+if is_player(N1[loop_start])then
 call NEI(M0,1,loop_start+2,(TSI(SubString(C0[GetPlayerId((N1[loop_start]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((N1[loop_start]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((N1[loop_start]))],8,10)))/255.0*100,0)
 call NEI(M0,2,loop_start+2,(TSI(SubString(C0[GetPlayerId((N1[loop_start]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((N1[loop_start]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((N1[loop_start]))],8,10)))/255.0*100,0)
 else
@@ -24959,7 +24959,7 @@ call NEI(M0,7,loop_start+3+S90,255,204,0,0)
 set S40[GetPlayerId(S1[loop_start])]=1-1
 set S50[GetPlayerId(S1[loop_start])]=loop_start+3+S90-1
 call N5I(M0,1,loop_start+3+S90,(D80[GetPlayerId((S1[loop_start]))]))
-if T3I(S1[loop_start])then
+if is_player(S1[loop_start])then
 call NEI(M0,1,loop_start+3+S90,(TSI(SubString(C0[GetPlayerId((S1[loop_start]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((S1[loop_start]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((S1[loop_start]))],8,10)))/255.0*100,0)
 call NEI(M0,2,loop_start+3+S90,(TSI(SubString(C0[GetPlayerId((S1[loop_start]))],4,6)))/255.0*100,(TSI(SubString(C0[GetPlayerId((S1[loop_start]))],6,8)))/255.0*100,(TSI(SubString(C0[GetPlayerId((S1[loop_start]))],8,10)))/255.0*100,0)
 else
@@ -25658,7 +25658,7 @@ set x=1
 set i=1
 loop
 exitwhen i>5
-if T3I(BO[i])or GetPlayerSlotState(BO[i])==PLAYER_SLOT_STATE_LEFT then
+if is_player(BO[i])or GetPlayerSlotState(BO[i])==PLAYER_SLOT_STATE_LEFT then
 set QTO[x]=BO[i]
 set x=x+1
 endif
@@ -25668,7 +25668,7 @@ set x=1
 set i=1
 loop
 exitwhen i>5
-if T3I(CO[i])or GetPlayerSlotState(CO[i])==PLAYER_SLOT_STATE_LEFT then
+if is_player(CO[i])or GetPlayerSlotState(CO[i])==PLAYER_SLOT_STATE_LEFT then
 set QRO[x]=CO[i]
 set x=x+1
 endif
@@ -26587,7 +26587,7 @@ set x=1
 set i=1
 loop
 exitwhen i>5
-if T3I(BO[i])or GetPlayerSlotState(BO[i])==PLAYER_SLOT_STATE_LEFT then
+if is_player(BO[i])or GetPlayerSlotState(BO[i])==PLAYER_SLOT_STATE_LEFT then
 set QTO[x]=BO[i]
 set x=x+1
 endif
@@ -26597,7 +26597,7 @@ set x=1
 set i=1
 loop
 exitwhen i>5
-if T3I(CO[i])or GetPlayerSlotState(CO[i])==PLAYER_SLOT_STATE_LEFT then
+if is_player(CO[i])or GetPlayerSlotState(CO[i])==PLAYER_SLOT_STATE_LEFT then
 set QRO[x]=CO[i]
 set x=x+1
 endif
@@ -31769,14 +31769,14 @@ set i=0
 loop
 exitwhen i>15
 if IsPlayerTeam1(GetTriggerPlayer())then
-if IsPlayerTeam1(Player(i))and T3I(Player(i))then
+if IsPlayerTeam1(Player(i))and is_player(Player(i))then
 set HV2=HV2+1
 if RJ0[i]then
 set NPI=NPI+1
 endif
 endif
 else
-if IsPlayerTeam2(Player(i))and T3I(Player(i))then
+if IsPlayerTeam2(Player(i))and is_player(Player(i))then
 set HV2=HV2+1
 if RJ0[i]then
 set NPI=NPI+1
@@ -32136,12 +32136,12 @@ local real Z12
 loop
 exitwhen i>5
 set p=BO[i]
-if T3I(p)then
+if is_player(p)then
 set Z12=K[GetPlayerId(p)]/(TimerGetElapsed(M))*60
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"的APM为"+" "+R2S(Z12))
 endif
 set p=CO[i]
-if T3I(p)then
+if is_player(p)then
 set Z12=K[GetPlayerId(p)]/(TimerGetElapsed(M))*60
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"的APM为"+" "+R2S(Z12))
 endif
@@ -32194,14 +32194,14 @@ if MLI<1 or P00[MLI]==false then
 loop
 exitwhen i>5
 set p=BO[i]
-if T3I(p)and((TimerGetElapsed(M))-L[GetPlayerId(p)])>300.0 and P00[GetPlayerId(p)]==false then
+if is_player(p)and((TimerGetElapsed(M))-L[GetPlayerId(p)])>300.0 and P00[GetPlayerId(p)]==false then
 set P00[GetPlayerId(p)]=true
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"已经离开游戏超过"+" "+R2S(((TimerGetElapsed(M))-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,"你可以使用"+" |cff99ccff-kickafk "+I2S(GetPlayerId(p))+" |r "+"将这位玩家踢出游戏")
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00," ")
 endif
 set p=CO[i]
-if T3I(p)and((TimerGetElapsed(M))-L[GetPlayerId(p)])>300.0 and P00[GetPlayerId(p)]==false then
+if is_player(p)and((TimerGetElapsed(M))-L[GetPlayerId(p)])>300.0 and P00[GetPlayerId(p)]==false then
 set P00[GetPlayerId(p)]=true
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"已经离开游戏超过"+" "+R2S(((TimerGetElapsed(M))-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,"你可以使用"+" |cff99ccff-kickafk "+I2S(GetPlayerId(p))+" |r "+"将这位玩家踢出游戏")
@@ -32210,7 +32210,7 @@ endif
 set i=i+1
 endloop
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00," ")
-elseif T3I(Player(MLI))==true and IsPlayerAlly(GetTriggerPlayer(),Player(MLI))==true then
+elseif is_player(Player(MLI))==true and IsPlayerAlly(GetTriggerPlayer(),Player(MLI))==true then
 call DisplayTimedTextToPlayer(Player(MLI),0,U2,3600,"|c00ff0303"+"因为暂离时间过长而被踢出游戏！"+"|r")
 call VY1(Player(MLI))
 set K3[GetPlayerId(Player(MLI))]="|c00555555"+GW1+"|r"
@@ -32233,12 +32233,12 @@ if RU0 then
 loop
 exitwhen i>5
 set p=BO[i]
-if T3I(p)and((TimerGetElapsed(M))-L[GetPlayerId(p)])/60>0.2 then
+if is_player(p)and((TimerGetElapsed(M))-L[GetPlayerId(p)])/60>0.2 then
 set x=x+1
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"已经离开游戏了"+" "+R2S(((TimerGetElapsed(M))-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
 endif
 set p=CO[i]
-if T3I(p)and((TimerGetElapsed(M))-L[GetPlayerId(p)])/60>0.2 then
+if is_player(p)and((TimerGetElapsed(M))-L[GetPlayerId(p)])/60>0.2 then
 set x=x+1
 call DisplayTimedTextToPlayer(GetTriggerPlayer(),0,U2,15.00,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"已经离开游戏了"+" "+R2S(((TimerGetElapsed(M))-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
 endif
@@ -32259,14 +32259,14 @@ if RU0 then
 loop
 exitwhen i>5
 set p=BO[i]
-if T3I(p)and(GW1-L[GetPlayerId(p)])>300.0 and P00[GetPlayerId(p)]==false then
+if is_player(p)and(GW1-L[GetPlayerId(p)])>300.0 and P00[GetPlayerId(p)]==false then
 set P00[GetPlayerId(p)]=true
 call QRI(OO,15,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"已经离开游戏超过"+" "+R2S((GW1-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
 call QRI(OO,15,"你可以使用"+" |cff99ccff-kickafk "+I2S(GetPlayerId(p))+" |r "+"将这位玩家踢出游戏")
 call QRI(OO,15," ")
 endif
 set p=CO[i]
-if T3I(p)and(GW1-L[GetPlayerId(p)])>300.0 and P00[GetPlayerId(p)]==false then
+if is_player(p)and(GW1-L[GetPlayerId(p)])>300.0 and P00[GetPlayerId(p)]==false then
 set P00[GetPlayerId(p)]=true
 call QRI(AO,15,C0[GetPlayerId(p)]+(D80[GetPlayerId((p))])+"|r"+" "+"已经离开游戏超过"+" "+R2S((GW1-L[GetPlayerId(p)])/60)+" "+GetObjectName('N05F'))
 call QRI(AO,15,"你可以使用"+" |cff99ccff-kickafk "+I2S(GetPlayerId(p))+" |r "+"将这位玩家踢出游戏")
@@ -32692,7 +32692,7 @@ set loop_end=5
 loop
 exitwhen loop_start>loop_end
 if(BO[loop_start]!=p)then
-if(T3I(BO[loop_start])==true)then
+if(is_player(BO[loop_start])==true)then
 call SetPlayerAllianceStateBJ(p,BO[loop_start],4)
 endif
 endif
@@ -32704,7 +32704,7 @@ set loop_end=5
 loop
 exitwhen loop_start>loop_end
 if(CO[loop_start]!=p)then
-if(T3I(CO[loop_start])==true)then
+if(is_player(CO[loop_start])==true)then
 call SetPlayerAllianceStateBJ(p,CO[loop_start],4)
 endif
 endif
@@ -32942,14 +32942,14 @@ set AN=0
 loop
 exitwhen i>5
 set p=BO[i]
-if T3I(p)then
+if is_player(p)then
 set AN=AN+1
 if TM[GetPlayerId(p)]==true then
 set ON=ON+1
 endif
 endif
 set p=CO[i]
-if T3I(p)then
+if is_player(p)then
 set AN=AN+1
 if TM[GetPlayerId(p)]==true then
 set ON=ON+1
@@ -32980,20 +32980,20 @@ endif
 loop
 exitwhen i>5
 set p=BO[i]
-if T3I(p)and TM[GetPlayerId(p)]==false then
+if is_player(p)and TM[GetPlayerId(p)]==false then
 set VA2=VA2+1
 set VC2=VC2+1
 endif
-if T3I(p)and TM[GetPlayerId(p)]==true then
+if is_player(p)and TM[GetPlayerId(p)]==true then
 set VB2=VB2+1
 set VC2=VC2+1
 endif
 set p=CO[i]
-if T3I(p)and TM[GetPlayerId(p)]==false then
+if is_player(p)and TM[GetPlayerId(p)]==false then
 set VA2=VA2+1
 set VC2=VC2+1
 endif
-if T3I(p)and TM[GetPlayerId(p)]==true then
+if is_player(p)and TM[GetPlayerId(p)]==true then
 set VB2=VB2+1
 set VC2=VC2+1
 endif
@@ -33883,9 +33883,9 @@ if RV and T8I(OO)!=T8I(AO)then
 call PZI(WO,"两边必须拥有相等的人数才能激活这个模式")
 return
 endif
-if LM and not(T3I(BO[1])and T3I(BO[2])and T3I(BO[3])and T3I(BO[4])and T3I(BO[5])and T3I(CO[1])and T3I(CO[2])and T3I(CO[3])and T3I(CO[4])and T3I(CO[5]))then
+if LM and not(is_player(BO[1])and is_player(BO[2])and is_player(BO[3])and is_player(BO[4])and is_player(BO[5])and is_player(CO[1])and is_player(CO[2])and is_player(CO[3])and is_player(CO[4])and is_player(CO[5]))then
 endif
-if XL and not(T3I(BO[1])and T3I(BO[2])and T3I(BO[3])and T3I(BO[4])and T3I(BO[5])and T3I(CO[1])and T3I(CO[2])and T3I(CO[3])and T3I(CO[4])and T3I(CO[5]))then
+if XL and not(is_player(BO[1])and is_player(BO[2])and is_player(BO[3])and is_player(BO[4])and is_player(BO[5])and is_player(CO[1])and is_player(CO[2])and is_player(CO[3])and is_player(CO[4])and is_player(CO[5]))then
 endif
 if TT or ZM or CP or FR or CM or AP or AR or LM or MM or TR or DM or MR or SP or AA or AI or AS or ID or NP or SC or DU or EM or SH or VR or RV or RD or CD or OM or NB or NM or NT or NS or NR or XL or SD or PM or OI or MI or MO or RO or ER or RS or SO or mode_js then
 call DisableTrigger(PF0)
@@ -34177,10 +34177,10 @@ set K0=true
 set BL=150
 loop
 exitwhen x>5
-if T3I(BO[x])then
+if is_player(BO[x])then
 call CreateUnitAtLoc(BO[x],'n00C',ZD1,bj_UNIT_FACING)
 endif
-if T3I(CO[x])then
+if is_player(CO[x])then
 call CreateUnitAtLoc(CO[x],'n00C',ZC1,bj_UNIT_FACING)
 endif
 set x=x+1
@@ -35641,10 +35641,10 @@ local integer x=1
 local player p
 loop
 exitwhen x>5
-if T3I(BO[x])then
+if is_player(BO[x])then
 call CreateUnitAtLoc(BO[x],'n00C',ZD1,bj_UNIT_FACING)
 endif
-if T3I(CO[x])then
+if is_player(CO[x])then
 call CreateUnitAtLoc(CO[x],'n00C',ZC1,bj_UNIT_FACING)
 endif
 set x=x+1
@@ -35915,7 +35915,7 @@ endfunction
 function JR2 takes player p,integer MLI,boolean randomed returns nothing
 local integer i=T0I(p)
 local real d
-if T3I(p)==false then
+if is_player(p)==false then
 return
 endif
 if IsPlayerTeam1(p)then
@@ -37825,7 +37825,7 @@ set p=BO[i]
 set LZ2=0
 set LV2=0
 set LW2=0
-if T3I(p)then
+if is_player(p)then
 //call UnitAddAbility(D30[GetPlayerId(p)],'A14F')
 call UnitAddAbility(D30[GetPlayerId(p)],'A14E')
 call UnitAddAbility(D30[GetPlayerId(p)],'A14H')
@@ -37851,7 +37851,7 @@ set p=CO[i]
 set LZ2=0
 set LV2=0
 set LW2=0
-if T3I(p)then
+if is_player(p)then
 //call UnitAddAbility(D30[GetPlayerId(p)],'A14F')
 call UnitAddAbility(D30[GetPlayerId(p)],'A14E')
 call UnitAddAbility(D30[GetPlayerId(p)],'A14H')
@@ -37900,7 +37900,7 @@ endif
 elseif O91<6 then
 call SaveInteger(LY,(handle_id),(55),(O91+1))
 set K1[GetPlayerId(p)]=null
-if T3I(p)then
+if is_player(p)then
 loop
 exitwhen K1[GetPlayerId(p)]!=null
 set TJI=TYI()
@@ -37915,7 +37915,7 @@ endif
 elseif O91<11 then
 call SaveInteger(LY,(handle_id),(55),(O91+1))
 set K1[GetPlayerId(p)]=null
-if T3I(p)then
+if is_player(p)then
 loop
 exitwhen K1[GetPlayerId(p)]!=null
 set TJI=TYI()
@@ -38512,7 +38512,7 @@ set i=1
 set x=1
 loop
 exitwhen i>5
-if T3I(BO[i])then
+if is_player(BO[i])then
 if TJI==1 then
 set K1[GetPlayerId(BO[i])]=CreateUnitAtLoc(BO[i],ICI[x],ZC1,bj_UNIT_FACING)
 else
@@ -38526,7 +38526,7 @@ set i=1
 set x=1
 loop
 exitwhen i>5
-if T3I(CO[i])then
+if is_player(CO[i])then
 if TJI==1 then
 set K1[GetPlayerId(CO[i])]=CreateUnitAtLoc(CO[i],IDI[x],ZD1,bj_UNIT_FACING)
 else
@@ -38544,7 +38544,7 @@ set i=1
 set x=1
 loop
 exitwhen i>5
-if T3I(BO[i])then
+if is_player(BO[i])then
 if TJI==1 then
 set K1[GetPlayerId(BO[i])]=CreateUnitAtLoc(BO[i],IEI[x],ZC1,bj_UNIT_FACING)
 else
@@ -38558,7 +38558,7 @@ set i=1
 set x=1
 loop
 exitwhen i>5
-if T3I(CO[i])then
+if is_player(CO[i])then
 if TJI==1 then
 set K1[GetPlayerId(CO[i])]=CreateUnitAtLoc(CO[i],IFI[x],ZD1,bj_UNIT_FACING)
 else
@@ -38576,7 +38576,7 @@ set i=1
 set x=1
 loop
 exitwhen i>5
-if T3I(BO[i])then
+if is_player(BO[i])then
 if TJI==1 then
 set K1[GetPlayerId(BO[i])]=CreateUnitAtLoc(BO[i],IGI[x],ZC1,bj_UNIT_FACING)
 else
@@ -38590,7 +38590,7 @@ set i=1
 set x=1
 loop
 exitwhen i>5
-if T3I(CO[i])then
+if is_player(CO[i])then
 if TJI==1 then
 set K1[GetPlayerId(CO[i])]=CreateUnitAtLoc(CO[i],IHI[x],ZD1,bj_UNIT_FACING)
 else
@@ -39310,10 +39310,10 @@ local location ZD1=GetRectCenter(S4)
 local integer x=1
 loop
 exitwhen x>5
-if T3I(BO[x])then
+if is_player(BO[x])then
 call CreateUnitAtLoc(BO[x],'n00C',ZD1,bj_UNIT_FACING)
 endif
-if T3I(CO[x])then
+if is_player(CO[x])then
 call CreateUnitAtLoc(CO[x],'n00C',ZC1,bj_UNIT_FACING)
 endif
 set x=x+1
@@ -39419,43 +39419,43 @@ set t=CreateTrigger()
 call TriggerAddCondition(t,Condition(function MF2))
 call TriggerRegisterTimerEvent(t,57-TimerGetElapsed(M),false)
 set t=null
-if T3I(BO[1])then
+if is_player(BO[1])then
 set x=x+1
 set LN2[x]=BO[1]
 endif
-if T3I(BO[2])then
+if is_player(BO[2])then
 set x=x+1
 set LN2[x]=BO[2]
 endif
-if T3I(BO[3])then
+if is_player(BO[3])then
 set x=x+1
 set LN2[x]=BO[3]
 endif
-if T3I(BO[4])then
+if is_player(BO[4])then
 set x=x+1
 set LN2[x]=BO[4]
 endif
-if T3I(BO[5])then
+if is_player(BO[5])then
 set x=x+1
 set LN2[x]=BO[5]
 endif
-if T3I(CO[1])then
+if is_player(CO[1])then
 set y=y+1
 set LS2[y]=CO[1]
 endif
-if T3I(CO[2])then
+if is_player(CO[2])then
 set y=y+1
 set LS2[y]=CO[2]
 endif
-if T3I(CO[3])then
+if is_player(CO[3])then
 set y=y+1
 set LS2[y]=CO[3]
 endif
-if T3I(CO[4])then
+if is_player(CO[4])then
 set y=y+1
 set LS2[y]=CO[4]
 endif
-if T3I(CO[5])then
+if is_player(CO[5])then
 set y=y+1
 set LS2[y]=CO[5]
 endif
@@ -39534,13 +39534,13 @@ set x=1
 set y=1
 loop
 exitwhen loop_start>5
-if(T3I(BO[loop_start]))then
+if(is_player(BO[loop_start]))then
 call MZ2(K1[GetPlayerId(BO[loop_start])])
 call GroupAddUnit(ML2,K1[GetPlayerId(BO[loop_start])])
 set MS2[x]=BO[loop_start]
 set x=x+1
 endif
-if(T3I(CO[loop_start]))then
+if(is_player(CO[loop_start]))then
 call MZ2(K1[GetPlayerId(CO[loop_start])])
 call GroupAddUnit(ML2,K1[GetPlayerId(CO[loop_start])])
 set MT2[y]=CO[loop_start]
@@ -39694,7 +39694,7 @@ set loop_end=5
 loop
 exitwhen loop_start>loop_end
 set K1[GetPlayerId(BO[loop_start])]=null
-if(T3I(BO[loop_start]))then
+if(is_player(BO[loop_start]))then
 loop
 set TJI=GetRandomInt(DE0,DF0)
 if(R[TJI]==false)then
@@ -39713,7 +39713,7 @@ set loop_end=5
 loop
 exitwhen loop_start>loop_end
 set K1[GetPlayerId(CO[loop_start])]=null
-if(T3I(CO[loop_start]))then
+if(is_player(CO[loop_start]))then
 loop
 set TJI=GetRandomInt(DG0,DH0)
 if(R[TJI]==false)then
@@ -39824,7 +39824,7 @@ call SetPlayerState(Player(NA2),PLAYER_STATE_RESOURCE_GOLD,250)
 endif
 elseif(T1[O91]<YL)then
 set K1[NA2]=null
-if T3I(Player(NA2))then
+if is_player(Player(NA2))then
 loop
 set TJI=TYI()
 if R[TJI]==false then
@@ -39941,11 +39941,11 @@ call QK1(CO[5])
 set x=1
 loop
 exitwhen x>5
-if T3I(BO[x])then
+if is_player(BO[x])then
 call CreateUnitAtLoc(BO[x],'n00C',ZC1,bj_UNIT_FACING)
 call CreateUnitAtLoc(BO[x],'n00C',ZD1,bj_UNIT_FACING)
 endif
-if T3I(CO[x])then
+if is_player(CO[x])then
 call CreateUnitAtLoc(CO[x],'n00C',ZC1,bj_UNIT_FACING)
 call CreateUnitAtLoc(CO[x],'n00C',ZD1,bj_UNIT_FACING)
 endif
@@ -39970,7 +39970,7 @@ set w=1
 set loop_start=1
 loop
 exitwhen loop_start>5
-if(T3I(BO[loop_start]))then
+if(is_player(BO[loop_start]))then
 set NG2[w]=BO[loop_start]
 set w=w+1
 else
@@ -39982,7 +39982,7 @@ endloop
 set loop_start=1
 loop
 exitwhen loop_start>5
-if(T3I(CO[loop_start]))then
+if(is_player(CO[loop_start]))then
 set NG2[w]=CO[loop_start]
 set w=w+1
 else
@@ -40092,11 +40092,11 @@ set ZA1=T8I(AO)
 set loop_start=1
 loop
 exitwhen loop_start>5
-if(T3I(BO[loop_start]))then
+if(is_player(BO[loop_start]))then
 call SetPlayerStateBJ(BO[loop_start],PLAYER_STATE_RESOURCE_GOLD,(4375/ZB1))
 call SetPlayerStateBJ(BO[loop_start],PLAYER_STATE_RESOURCE_LUMBER,0)
 endif
-if(T3I(CO[loop_start]))then
+if(is_player(CO[loop_start]))then
 call SetPlayerStateBJ(CO[loop_start],PLAYER_STATE_RESOURCE_GOLD,(4375/ZA1))
 call SetPlayerStateBJ(CO[loop_start],PLAYER_STATE_RESOURCE_LUMBER,0)
 endif
@@ -40161,11 +40161,11 @@ call QK1(CO[5])
 set x=1
 loop
 exitwhen x>5
-if T3I(BO[x])then
+if is_player(BO[x])then
 call CreateUnitAtLoc(BO[x],'n00C',ZC1,bj_UNIT_FACING)
 call CreateUnitAtLoc(BO[x],'n00C',ZD1,bj_UNIT_FACING)
 endif
-if T3I(CO[x])then
+if is_player(CO[x])then
 call CreateUnitAtLoc(CO[x],'n00C',ZC1,bj_UNIT_FACING)
 call CreateUnitAtLoc(CO[x],'n00C',ZD1,bj_UNIT_FACING)
 endif
@@ -40243,11 +40243,11 @@ set ZA1=T8I(AO)
 set loop_start=1
 loop
 exitwhen loop_start>5
-if(T3I(BO[loop_start]))then
+if(is_player(BO[loop_start]))then
 call SetPlayerStateBJ(BO[loop_start],PLAYER_STATE_RESOURCE_GOLD,(4375/ZB1))
 call SetPlayerStateBJ(BO[loop_start],PLAYER_STATE_RESOURCE_LUMBER,0)
 endif
-if(T3I(CO[loop_start]))then
+if(is_player(CO[loop_start]))then
 call SetPlayerStateBJ(CO[loop_start],PLAYER_STATE_RESOURCE_GOLD,(4375/ZA1))
 call SetPlayerStateBJ(CO[loop_start],PLAYER_STATE_RESOURCE_LUMBER,0)
 endif
@@ -40319,11 +40319,11 @@ local integer x=1
 loop
 exitwhen x>5
 set T4I=BO[x]
-if T3I(T4I)and T4I!=WO then
+if is_player(T4I)and T4I!=WO then
 set K1[GetPlayerId(T4I)]=CreateUnit(T4I,SZI,GetRectCenterX(O4),GetRectCenterY(O4),270)
 endif
 set T4I=CO[x]
-if T3I(T4I)and T4I!=WO then
+if is_player(T4I)and T4I!=WO then
 set K1[GetPlayerId(T4I)]=CreateUnit(T4I,SZI,GetRectCenterX(S3),GetRectCenterY(S3),270)
 endif
 set x=x+1
@@ -41134,7 +41134,7 @@ call TriggerAddCondition(A0I,Condition(function TA2))
 elseif O91<6 then
 call SaveInteger(LY,(handle_id),(55),(O91+1))
 set K1[GetPlayerId(p)]=null
-if T3I(p)then
+if is_player(p)then
 loop
 exitwhen K1[GetPlayerId(p)]!=null
 set TJI=TYI()
@@ -41151,7 +41151,7 @@ endif
 elseif O91<11 then
 call SaveInteger(LY,(handle_id),(55),(O91+1))
 set K1[GetPlayerId(p)]=null
-if T3I(p)then
+if is_player(p)then
 loop
 exitwhen K1[id]!=null
 set TJI=TYI()
@@ -41174,7 +41174,7 @@ endif
 if O91<6 then
 call SaveInteger(LY,(handle_id),(55),(O91+1))
 set K1[GetPlayerId(p)]=null
-if T3I(p)then
+if is_player(p)then
 loop
 exitwhen K1[id]!=null
 set TJI=TYI()
@@ -41194,7 +41194,7 @@ endif
 elseif O91<11 then
 call SaveInteger(LY,(handle_id),(55),(O91+1))
 set K1[id]=null
-if T3I(p)then
+if is_player(p)then
 loop
 exitwhen K1[id]!=null
 set TJI=TYI()
