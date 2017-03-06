@@ -35945,7 +35945,7 @@ endfunction
 function JP2 takes nothing returns integer
 local integer i=1
 loop
-exitwhen i>40
+exitwhen QA0[i] == null
 if Q90[i]==false then
 return i
 endif
@@ -36224,7 +36224,7 @@ if KO2==8 then
 call JB2()
 set i=1
 loop
-exitwhen i>40
+exitwhen QA0[i] == null
 call RemoveUnit(QA0[i])
 set i=i+1
 endloop
@@ -36259,7 +36259,7 @@ endfunction
 function K42 takes unit SFI returns integer
 local integer i=1
 loop
-exitwhen i>40
+exitwhen QA0[i] == null
 if QA0[i]==SFI then
 return i
 endif
@@ -36930,6 +36930,7 @@ function MUCreateHeroes takes nothing returns nothing
         endif
         if Q80[i] == -1 then
             set QA0[i] = CreateUnit(BO[0], 'e00E', x, y, UEI(x, y, select_x, select_y))
+            set Q90[i] = true
         else
             set KZ2 = not KZ2
             set QA0[i] = CreateUnit(BO[0], DT0[Q80[i]], x, y, UEI(x, y, select_x, select_y))
