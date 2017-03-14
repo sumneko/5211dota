@@ -33961,7 +33961,7 @@ if mode_up then
 call W12("魔改|r(|cffff0303UP|r)")
 endif
 if mode_u2 then
-call W12("改二|r(|cffff0303U2|r)")
+call W12("平衡模式|r(|cffff0303 11|r)")
 endif
 if CD then
 call W12("随机队长模式|r(|cffff0303CD|r)")
