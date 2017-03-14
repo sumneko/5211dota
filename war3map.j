@@ -33711,8 +33711,8 @@ set WA2[44] = "js"
 set WB2[44] = "js"
 set WA2[45] = "up"
 set WB2[45] = "up"
-set WA2[46] = "u2"
-set WB2[46] = "u2"
+set WA2[46] = "11"
+set WB2[46] = "11"
 set WD2=46
 set x=-1
 loop
@@ -36816,19 +36816,19 @@ function MUPickHeroes_JSU2_Show takes nothing returns nothing
     local string int = "Doodads\\Cinematic\\GlowingRunes\\GlowingRunes4.mdl"
     local string agi = "Doodads\\Cinematic\\GlowingRunes\\GlowingRunes6.mdl"
 
-    call MUPickHeroes_JSU2_Line(30, 280, 550, 90, str)
-    call MUPickHeroes_JSU2_Circle(30, 150, 280, 20, str)
-    call MUPickHeroes_JSU2_Circle(30, 150, 550, 10, str)
+    //call MUPickHeroes_JSU2_Line(30, 280, 550, 90, str)
+    //call MUPickHeroes_JSU2_Circle(30, 150, 280, 20, str)
+    //call MUPickHeroes_JSU2_Circle(30, 150, 550, 10, str)
     call MUPickHeroes_JSU2_Line(150, 280, 550, 90, str)
 
-    call MUPickHeroes_JSU2_Line(150, 280, 550, 90, agi)
-    call MUPickHeroes_JSU2_Circle(150, 270, 280, 20, agi)
-    call MUPickHeroes_JSU2_Circle(150, 270, 550, 10, agi)
+   // call MUPickHeroes_JSU2_Line(150, 280, 550, 90, agi)
+    //call MUPickHeroes_JSU2_Circle(150, 270, 280, 20, agi)
+   // call MUPickHeroes_JSU2_Circle(150, 270, 550, 10, agi)
     call MUPickHeroes_JSU2_Line(270, 280, 550, 90, agi)
 
-    call MUPickHeroes_JSU2_Line(270, 280, 550, 90, int)
-    call MUPickHeroes_JSU2_Circle(270, 30, 280, 20, int)
-    call MUPickHeroes_JSU2_Circle(270, 30, 550, 10, int)
+   // call MUPickHeroes_JSU2_Line(270, 280, 550, 90, int)
+   // call MUPickHeroes_JSU2_Circle(270, 30, 280, 20, int)
+    //call MUPickHeroes_JSU2_Circle(270, 30, 550, 10, int)
     call MUPickHeroes_JSU2_Line(30, 280, 550, 90, int)
 
 endfunction
