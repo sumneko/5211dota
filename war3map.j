@@ -2494,6 +2494,10 @@ boolexpr M2I=null
 	boolean array mu_hero_picked_str
 	boolean array mu_hero_picked_int
 	boolean array mu_hero_picked_agi
+
+	//显示玩家想要选择的英雄
+	unit array mu_select_hero
+	boolean array mu_select_bool
 endglobals
 
 function MUCall takes string script, string void returns nothing
@@ -36293,6 +36297,10 @@ call JR2(p,K42(GetSellingUnit()),false)
 call KillUnit(U30[GetPlayerId(p)])
 call KillUnit(U40[GetPlayerId(p)])
 endif
+		//预览幻影置空
+		set mu_select_bool[GetPlayerId(p)] = false
+		//call BJDebugMsg("这里执行到了")
+		call RemoveUnit(mu_select_hero[GetPlayerId(p)])
 set YC2=null
 set p=null
 return false
@@ -36626,9 +36634,95 @@ function MUModeJS_AllPick takes nothing returns nothing
 	set temp_image[4] = null
 endfunction
 
+//玩家选择单位后，创建模子，并添加蝗虫Aloc，对敌人隐藏，设置为玩家颜色
+function MUAddUnitMod takes nothing returns boolean
+	local integer pid = GetPlayerId(GetTriggerPlayer())
+    local integer i
+    local real x
+    local real y
+    local real d
+    local integer a
+    local boolean KZ2 = false
+    local integer max
+    local integer count1
+    local integer count2
+    local real fix = 30
+	local boolean bl = (((IsUnitType(GetTriggerUnit(), UNIT_TYPE_STRUCTURE) == false) and (IsUnitInRangeXY(GetTriggerUnit(), select_x, select_y, 1000) == true)))
+    if (not mu_select_bool[pid]) then
+	 //call BJDebugMsg("已经选过人了")
+    return false
+    endif
+    if (not bl) then
+    return false
+    endif
+    if ((mu_select_hero[pid] == null)) then
+    set mu_select_hero[pid] = CreateUnit( GetTriggerPlayer(), GetUnitTypeId(GetTriggerUnit()), select_x, select_y, 0.00 )
+    call UnitAddAbility( mu_select_hero[pid], 'Aloc' )
+
+    else
+    call RemoveUnit(mu_select_hero[pid])
+    set mu_select_hero[pid] = CreateUnit( GetTriggerPlayer(), GetUnitTypeId(GetTriggerUnit()), select_x, select_y, 0.00 )
+    call UnitAddAbility( mu_select_hero[pid], 'Aloc' )
+
+    endif
+    if ((IsPlayerEnemy(GetTriggerPlayer(), GetLocalPlayer()) == true)) then
+	    call ShowUnit(  mu_select_hero[pid], false )
+    else
+        call ShowUnit(  mu_select_hero[pid], true  )
+    endif
+    call SetUnitScale( mu_select_hero[pid], 0.65, 0.65, 0.65 )
+    call SetUnitVertexColor(  mu_select_hero[pid], 255, 255, 255, 150 )
+    set i = 1
+    loop
+	    exitwhen i > 5
+        if(GetPlayerId(BO[i]) == pid)  then
+            set a = i
+            set KZ2 = false
+	    endif
+	    if(GetPlayerId(CO[i]) == pid)  then
+            set a = i
+            set KZ2 = true
+	    endif
+	    set i = i + 1
+	endloop
+	//若是天灾的玩家
+    if KZ2 then
+        //set x = select_x - ((3+a) * 30)
+        //set y = select_y - 100
+        set d = 90
+        call SetUnitPosition(mu_select_hero[pid],QD0[a],QE0[a])
+    else
+       // set x = select_x - ((3+a) * 30)
+       // set y = select_y + 100
+       set d =  270
+       call SetUnitPosition(mu_select_hero[pid],QB0[a],QC0[a])
+	endif
+
+            call SetUnitFacing(mu_select_hero[pid], d)
+            call MUDisableMove(mu_select_hero[pid])
+            call MUShareVision(mu_select_hero[pid])
+            call SetUnitColor(mu_select_hero[pid], GetPlayerColor(GetTriggerPlayer()))
+return false
+endfunction
+//开始选人时新建触发器，检查玩家选择事件
+function MUPlayerSelectHero takes nothing returns nothing
+	local trigger t= CreateTrigger()
+	local integer i = 0
+	loop
+		exitwhen i > 11
+		call TriggerRegisterPlayerUnitEvent(t, Player(i), EVENT_PLAYER_UNIT_SELECTED, null)
+		set mu_select_bool[i] = true
+		set i = i + 1
+	endloop
+     call TriggerAddCondition(t, Condition(function MUAddUnitMod))
+endfunction
+
 function MUModeJS_AllPickReady takes nothing returns nothing
     call QRI(bj_FORCE_ALL_PLAYERS,15.00, "每个玩家都将有60秒的时间选择一个英雄")
     call TimerStart(CreateTimer(), 5, false, function MUModeJS_AllPick)
+
+    //开启盟友选英雄预览
+    call MUPlayerSelectHero()
 endfunction
 
 function MUModeJS_BanCountDown takes nothing returns nothing
@@ -37114,6 +37208,7 @@ function KV2 takes nothing returns boolean
 		set a=GetUnitFacing(GetSellingUnit())
 		call RemoveUnit(GetSellingUnit())
 		call CreateUnit(p,i,x,y,a) //todo: 没有立刻记下来,导致可能会选出2个英雄
+
 	endif
 	if GetUnitTypeId(YC2)=='h06N' then
 		call KillUnit(YC2)
